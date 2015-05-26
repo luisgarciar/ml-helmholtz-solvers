@@ -1,0 +1,44 @@
+%% script for testing the function helmholtz.m
+
+%% Parameters
+nd   = 101;    %number of interior discretization points in 1D
+k    = 50;     %wavenumber
+flag = 1;  
+dim  = 2;      %dimension    
+bc   = 'som';  %type of problem
+f    = @rhs;   %right hand side
+
+%% Solution of the Helmholtz equation and postprocessing the solution
+[A, sol] = helmholtz(f,k,nd,bc,dim,flag);
+
+[x,y] = meshgrid(h:h:1-h)
+
+u     = reshape(sol',[nd,nd]);
+gridf = reshape(f',[nd,nd]);
+
+Reu  = real(u);
+Imu  = imag(u);
+
+figure
+surf(x,y,Imu)
+%surf(x,y,gridf)
+%contour(x,y,Reu)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
