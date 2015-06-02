@@ -1,10 +1,11 @@
-function [A, sol] = helmholtz(f,k,nd,bc,dim,flag)
-%% HELMHOLTZ: Direct solver for the Helmholtz equation.
-%Solves -u''+k^2*u=f with various boundary conditions
+function [A, sol,b] = shift_laplace(f,k,b1,b2,nd,bc,dim,flag)
+%% SHIFT_LAPLACE: Direct solver for the shifted Laplace equation.
+%Solves -u''+k^2(b1+ib2)u=f with various boundary conditions
 
 %INPUT: 
 %  f:      right-hand side function
-%  k:      wavenumber of Helmholtz equation
+%  k:      wavenumber 
+%  b1, b2: real and imaginary parts of shift
 %  nd:     number of interior discretization points
 %  bc:     type of boundary conditions:      
 %          'dir' for homogeneous dirichlet bc's
@@ -14,26 +15,30 @@ function [A, sol] = helmholtz(f,k,nd,bc,dim,flag)
 
 
 %OUTPUT:
-%  A:      Discrete Helmholtz operator with homogeneous Dirichlet boundary conditions after elimination of boundary conditions
-%  sol:    Solution without boundary conditions
+%  A:      Discrete shifted Laplace operator with Dirichlet or
+%          Sommerfeld boundary conditions (without boundary points)
+%  sol:    Solution without boundary points)
 
 %% Construction of 1D matrices
 h  = 1/(nd+1);         %gridsize
 l  = ones(nd,1)*(-1/h^2); %upper diagonal
-d  = ones(nd,1)*(2/h^2-k^2); 
 
 % Dirichlet 1D matrix (only interior points)
 d      = ones(nd,1)*(2/h^2); 
 Ad_1   = spdiags([l d l],[-1 0 1],nd,nd)- k^2*speye(nd); 
 
-% Sommerfeld 1D matrix (after elimination of bc's, see Elman, O'Leary, Numer. Math. 1999)
+% Sommerfeld 1D matrix (after elimination of bc's%
+%See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
+
 d      = ones(nd,1)*(2/h^2-k^2); 
 gamma  = 2/h^2-k^2-(1+1i*k*h)/(h^2*(1+k^2*h^2));
 d(1)   = gamma;
 d(nd)  = gamma;
 
 As_1   = spdiags([l d l],[-1 0 1],nd,nd); 
+
 %% Construction of 2D matrices
+%(See Elman, O'Leary, Numer. Math., 1999)
 
 % Homogeneous Dirichlet bc's
 d    = ones(nd,1)*(2/h^2); 
@@ -46,19 +51,21 @@ A0     = As_1 + k^2*speye(nd);
 As_2   = kron(speye(nd),A0)   + kron(As_1,speye(nd));
 
 %% Solution of the linear system
-% Construction of mesh and right hand side b for 1D
+% Construction of mesh and right hand side b (point source)for 1D
  if dim==1
  x = h:h:1-h;
  b = feval(f,x);
  end
 
-% Construction of mesh and right hand side b for 2D
+% Construction of mesh and right hand side b (point source) for 2D
+ if dim==2
 [x,y] = meshgrid(h:h:1-h);
  b    = feval(f,x,y);
  b    = reshape(b',[nd^2,1]);
+ end
 
-
-% Set the matrix of the linear system according to bc's and dim
+% Set the matrix of the linear system according to boundary conditions
+% and dimension of the problem
 switch bc
     case 'dir'
         if dim==1
