@@ -1,20 +1,26 @@
-%% Script for testing the function helmholtz.m
+%% Script for testing the function helmholtzbc.m
 
 %% Parameters
-nd   = 101;      %number of interior discretization points in 1D
+np   = 101;      %number of interior discretization points in 1D
 k    = 50;       %wavenumber
 flag = 1;  
 dim  = 2;        %dimension    
 bc   = 'dir';    %type of problem
 f    = @rhs;     %right hand side
-h    = 1/(nd+1); %gridsize
+h    = 1/(np+1); %gridsize
+
+%% Exact solution of Dirichlet problem
+
+
+
+
 
 %% Solution of the Helmholtz equation and postprocessing the solution
-[A, sol,b] = helmholtz(f,k,nd,bc,dim,flag);
+[A, sol,b] = helmholtz(f,k,np,bc,dim,flag);
 
 [x,y] = meshgrid(h:h:1-h)
 
-u     = reshape(sol',[nd,nd]);
+u     = reshape(sol',[np,np]);
 %gridf = reshape(f',[nd,nd]);
 
 Reu  = real(u);

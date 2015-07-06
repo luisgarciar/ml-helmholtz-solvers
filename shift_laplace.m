@@ -20,17 +20,17 @@ function [A, sol,b] = shift_laplace(f,k,b1,b2,nd,bc,dim,flag)
 %  sol:    Solution without boundary points)
 
 %% Construction of 1D matrices
-h  = 1/(nd+1);         %gridsize
-l  = ones(nd,1)*(-1/h^2); %upper diagonal
+h  = 1/(nd+1);            %gridsize
+l  = ones(nd,1)*(-1/h^2); %lower diagonal
 
 % Dirichlet 1D matrix (only interior points)
 d      = ones(nd,1)*(2/h^2); 
-Ad_1   = spdiags([l d l],[-1 0 1],nd,nd)- k^2*speye(nd); 
+Ad_1   = spdiags([l d l],[-1 0 1],nd,nd)- k^2*(b1+1i*b2)*speye(nd); 
 
 % Sommerfeld 1D matrix (after elimination of bc's%
 %See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
 
-d      = ones(nd,1)*(2/h^2-k^2); 
+d      = ones(nd,1)*(2/h^2-k^2*(b1+1i*b2)); 
 gamma  = 2/h^2-k^2-(1+1i*k*h)/(h^2*(1+k^2*h^2));
 d(1)   = gamma;
 d(nd)  = gamma;
@@ -44,10 +44,10 @@ As_1   = spdiags([l d l],[-1 0 1],nd,nd);
 d    = ones(nd,1)*(2/h^2); 
 l    = ones(nd,1)*(-1/h^2); %upper diagonal
 B    = spdiags([l d l],[-1 0 1],nd,nd);
-Ad_2 = kron(B, speye(nd)) + kron(speye(nd), B) - k^2*speye(nd^2) ;
+Ad_2 = kron(B, speye(nd)) + kron(speye(nd), B) - k^2*(b1+1i*b2)*speye(nd^2) ;
 
 % Sommerfeld bc's
-A0     = As_1 + k^2*speye(nd);
+A0     = As_1 + k^2*(b1+1i*b2)*speye(nd);
 As_2   = kron(speye(nd),A0)   + kron(As_1,speye(nd));
 
 %% Solution of the linear system
