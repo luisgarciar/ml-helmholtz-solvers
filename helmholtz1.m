@@ -1,11 +1,11 @@
-function [A, sol,b] = helmholtz1(f,k,nd,bc,dim,flag)
-%% HELMHOLTZ: Direct solver for the Helmholtz equation.
-%Solves -u''+k^2*u=f with various boundary conditions
+function [A, sol,b] = helmholtz1(f,k,np,bc,dim,flag)
+%% HELMHOLTZ1: Direct solver for the Helmholtz equation.
+%Solves -u''-k^2*u=f with various boundary conditions
 
 %INPUT: 
-%  f:      right-hand side function
+%  f:      right-hand side (function handle)
 %  k:      wavenumber of Helmholtz equation
-%  nd:     number of interior discretization points
+%  np:     number of interior discretization points
 %  bc:     type of boundary conditions:      
 %          'dir' for homogeneous dirichlet bc's
 %          'som' for sommerfeld bc's 
@@ -17,36 +17,48 @@ function [A, sol,b] = helmholtz1(f,k,nd,bc,dim,flag)
 %  A:      Discrete Helmholtz operator with homogeneous Dirichlet boundary conditions after elimination of boundary conditions
 %  sol:    Solution without boundary conditions
 
+%AUTHOR: Luis Garcia Ramos, 
+%        Institut fur Mathematik, TU Berlin
+%Version 0.1 - June 2015
+
 %% Construction of 1D matrices
-h  = 1/(nd+1);         %gridsize
-l  = ones(nd,1)*(-1/h^2); %upper diagonal
+h  = 1/(np+1);            %gridsize
+l  = ones(np,1)*(-1/h^2); %upper diagonal
 
-% Dirichlet 1D matrix (only interior points)
-d      = ones(nd,1)*(2/h^2); 
-Ad_1   = -spdiags([l d l],[-1 0 1],nd,nd)- k^2*speye(nd); 
+% Homogeneous Dirichlet boundary conditions
+nv      = np;
+d       = -2*ones(nv,1); 
+l       = ones(nv,1); %upper diagonal
 
-% Sommerfeld 1D matrix (after elimination of bc's%
-%See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
+Lapl1d  = spdiags([l d l],[-1 0 1],nv,nv); %1D Discrete Laplacian 
+Ad_1   = -(1/h^2)*Lapl1d - k^2*speye(nv);   %1D Discrete Helmholtz Operator
 
-d      = ones(nd,1)*(2/h^2-k^2); 
+%CHECK SOMMERFELD MATRIX!
+%Sommerfeld boundary conditions
+%(See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
+d      = ones(np,1)*(2/h^2-k^2); 
 gamma  = 2/h^2-k^2-(1+1i*k*h)/(h^2*(1+k^2*h^2));
 d(1)   = gamma;
-d(nd)  = gamma;
+d(np)  = gamma;
 
-As_1   = spdiags([l d l],[-1 0 1],nd,nd); 
+As_1   = spdiags([l d l],[-1 0 1],np,np); 
+
 
 %% Construction of 2D matrices
 %(See Elman, O'Leary, Numer. Math., 1999)
+nv = np^2;
 
-% Homogeneous Dirichlet bc's
-d    = ones(nd,1)*(2/h^2); 
-l    = ones(nd,1)*(-1/h^2); %upper diagonal
-B    = spdiags([l d l],[-1 0 1],nd,nd);
-Ad_2 = -(kron(B, speye(nd)) + kron(speye(nd), B)) - k^2*speye(nd^2) ;
+% Homogeneous Dirichlet boundary conditions
+Lapl2d =  kron(Lapl1d, speye(np)) + kron(speye(np), Lapl1d);
+hLapl2d = (1/h^2)*Lapl2d; 
 
+Ad_2   =  -Lapl2d - k^2*h^2*speye(nv);  %2D Discrete Helmholtz Operator
+
+
+%CHECK SOMMERFELD MATRIX!
 % Sommerfeld bc's
-A0     = As_1 + k^2*speye(nd);
-As_2   = kron(speye(nd),A0)   + kron(As_1,speye(nd));
+A0     = As_1 + k^2*speye(np);
+As_2   = kron(speye(np),A0)   + kron(As_1,speye(np));
 
 %% Solution of the linear system
 % Construction of mesh and right hand side b (point source)for 1D
@@ -57,9 +69,9 @@ As_2   = kron(speye(nd),A0)   + kron(As_1,speye(nd));
 
 % Construction of mesh and right hand side b (point source) for 2D
  if dim==2
-[x,y] = meshgrid(h:h:1-h);
- b    = feval(f,x,y);
- b    = reshape(b',[nd^2,1]);
+ [x,y] = meshgrid(h:h:1-h);
+ b    = h^2*feval(f,x,y);
+ b    = reshape(b',[np^2,1]);
  end
 
 % Set the matrix of the linear system according to boundary conditions
@@ -91,7 +103,7 @@ A   = sparse(A);
 % solve directly the linear system
 sol = zeros(size(b));
 if flag == 1
-    sol = A\b;  % Solution without boundary conditions    
+    sol = A\b;  % Solution 
 end
 
 end

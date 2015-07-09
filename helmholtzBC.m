@@ -22,16 +22,15 @@ function [A,sol,b] = helmholtzBC(f,k,np,bc,dim,flag)
 % For Sommerfeld problems, the boundary points are not eliminated.
 
 
-
 %% Construction of 1D matrices
 n  = np + 1; 
-h  = 1/n;         %gridsize
+h  = 1/n;       %gridsize
 nv = np;       %size of the linear system
 
 % Dirichlet 1D matrix (no boundary points)
 l  = ones(nv,1)*(-1/h^2); %lower(=upper) diagonal
-d  = ones(np,1)*(2/h^2-k^2);
-Ad_1 = spdiags([l d l],[-1 0 1],nv,nv);
+d      = ones(nv,1)*(2/h^2); 
+Ad_1   = spdiags([l d l],[-1 0 1],nv,nv)- k^2*speye(nv); 
 
 
 %Sommerfeld 1D matrix with boundary points
