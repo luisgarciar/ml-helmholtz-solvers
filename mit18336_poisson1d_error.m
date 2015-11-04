@@ -20,10 +20,10 @@ for i = 1:length(n)
     u = K1D\f;                                      % solve linear system
     u_diff = u-u_corr(x);                          % calculate difference
     u_diff = u_diff/norm(u_diff,inf);
-    %subplot(1,2,1), plot(x,u_corr(x),'b-',x,u,'r-',x,u_diff,'k-')
-    %legend('true solution','numerical approximation','scaled difference')
-    %title('1d poisson equation')
-    %subplot(1,2,2)
+    subplot(1,2,1), plot(x,u_corr(x),'b-',x,u,'r-',x,u_diff,'k-')
+    legend('true solution','numerical approximation','scaled difference')
+    title('1d poisson equation')
+    subplot(1,2,2)
     err2(i) = norm(u-u_corr(x),inf);  % calculate error in max norm
     figure(111)
     loglog(10.^[-4 0 -4],10.^[-4 0 -8],'k-',h,err2,'b.-')

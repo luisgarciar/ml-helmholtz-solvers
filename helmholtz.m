@@ -25,7 +25,7 @@ l  = ones(nd,1)*(-1/h^2); %upper diagonal
 d      = ones(nd,1)*(2/h^2); 
 Ad_1   = -spdiags([l d l],[-1 0 1],nd,nd)- k^2*speye(nd); 
 
-% Sommerfeld 1D matrix (after elimination of bc's%
+%Sommerfeld 1D matrix (without elimination of bc's%
 %See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
 
 d      = ones(nd,1)*(2/h^2-k^2); 
@@ -34,6 +34,12 @@ d(1)   = gamma;
 d(nd)  = gamma;
 
 As_1   = spdiags([l d l],[-1 0 1],nd,nd); 
+
+
+
+
+
+
 
 %% Construction of 2D matrices
 %(See Elman, O'Leary, Numer. Math., 1999)

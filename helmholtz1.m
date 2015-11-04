@@ -1,8 +1,7 @@
 function [A, sol,b] = helmholtz1(f,k,np,bc,dim,flag)
 %% HELMHOLTZ1: Direct solver for the Helmholtz equation.
-%Solves -u''-k^2*u=f with various boundary conditions
-
-%INPUT: 
+%  Solves -u''-k^2*u=f with various boundary conditions
+%  INPUT: 
 %  f:      right-hand side (function handle)
 %  k:      wavenumber of Helmholtz equation
 %  np:     number of interior discretization points
@@ -11,15 +10,14 @@ function [A, sol,b] = helmholtz1(f,k,np,bc,dim,flag)
 %          'som' for sommerfeld bc's 
 %  dim:    problem dimension (1D or 2D)
 %  flag:   if flag==1 solve exactly and return solution
-
-
+%
 % OUTPUT:
 %  A:      Discrete Helmholtz operator with homogeneous Dirichlet boundary conditions after elimination of boundary conditions
 %  sol:    Solution without boundary conditions
-
-%AUTHOR: Luis Garcia Ramos, 
+%
+% AUTHOR: Luis Garcia Ramos, 
 %        Institut fur Mathematik, TU Berlin
-%Version 0.1 - June 2015
+% Version 0.1 - June 2015
 
 %% Construction of 1D matrices
 h  = 1/(np+1);            %gridsize

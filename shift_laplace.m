@@ -1,8 +1,7 @@
 function [A, sol,b] = shift_laplace(f,k,b1,b2,nd,bc,dim,flag)
-%% SHIFT_LAPLACE: Direct solver for the shifted Laplace equation.
-%Solves -u''+k^2(b1+ib2)u=f with various boundary conditions
-
-%INPUT: 
+% SHIFT_LAPLACE: Direct solver for the shifted Laplace equation.
+%  Solves -u''+k^2(b1+ib2)u=f with various boundary conditions
+%  INPUT: 
 %  f:      right-hand side function
 %  k:      wavenumber 
 %  b1, b2: real and imaginary parts of shift
@@ -12,7 +11,6 @@ function [A, sol,b] = shift_laplace(f,k,b1,b2,nd,bc,dim,flag)
 %          'som' for sommerfeld bc's 
 %  dim:    problem dimension (1D or 2D)
 %  flag:   if flag==1 solve exactly and return solution
-
 
 %OUTPUT:
 %  A:      Discrete shifted Laplace operator with Dirichlet or

@@ -1,13 +1,16 @@
 function err2= poisson_test
+%POISSON_TEST Simple test to check that I can 
+%at least solve Poisson equation  with the
+%expected rate of convergence.
 
 npt = ceil(10.^linspace(1,4,20));
 err2   = npt*0;
 h  = 1./(npt+1);
 clf
+
 for i = 1:length(npt)
     
     np = npt(i);
-    %h  = 1/(np+1);
     
     % Construction of the matrix
     d       = 2*ones(np,1); 

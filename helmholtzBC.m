@@ -35,13 +35,12 @@ Ad_1   = spdiags([l d l],[-1 0 1],nv,nv)- k^2*speye(nv);
 
 %Sommerfeld 1D matrix with boundary points
 %See Elman, O'Leary, Numer. Math. Vol. 83, Issue 2, p. 231-257, 1999)
-d     = ones(np,1)*(2/h^2-k^2); 
-gamma = (1i*k-1/h); 
-d     =  [gamma; d; gamma];  %diagonal
-u     =  ones(n,1)*(-1/h^2); 
-u     =  [1/h ; u];          %upp diag
-l     =  [u   ; 1/h];        %lower diag  
-As_1  = spdiags([l d u],[-1 0 1],nv,nv); 
+d     = ones(np,1)*(2-k^2*h^2); 
+a     = (1-(k^2*h^2)/2-1i*k*h); 
+b     = (1-(k^2*h^2)/2+1i*k*h)
+d     =  [gamma; d; gamma];   %diagonal
+u     =  -ones(n+2,1);      
+As_1  = 1/(h^2)*spdiags([l d u],[-1 0 1],nv,nv); 
 
 
 %% Construction of 2D matrices
