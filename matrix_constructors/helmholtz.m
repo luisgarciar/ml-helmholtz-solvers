@@ -36,11 +36,6 @@ d(nd)  = gamma;
 As_1   = spdiags([l d l],[-1 0 1],nd,nd); 
 
 
-
-
-
-
-
 %% Construction of 2D matrices
 %(See Elman, O'Leary, Numer. Math., 1999)
 

@@ -48,7 +48,7 @@ nv = np^2;
 
 % Homogeneous Dirichlet boundary conditions
 Lapl2d =  kron(Lapl1d, speye(np)) + kron(speye(np), Lapl1d);
-hLapl2d = (1/h^2)*Lapl2d; 
+Lapl2d = (1/h^2)*Lapl2d; 
 
 Ad_2   =  -Lapl2d - k^2*h^2*speye(nv);  %2D Discrete Helmholtz Operator
 

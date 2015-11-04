@@ -1,4 +1,4 @@
-%% Script for testing the function helmholtz1.m
+%% Script for testing the function helmholtzBC.m
 
 %% Parameters
 np   = 200;       %number of interior discretization points in 1D
