@@ -1,7 +1,8 @@
-function f = rhs2(x,y)
-% RHS2 Computes a discrete eigenfunction of the 
+function f = rhs2d(x,y)
+% RHS2D Computes a discrete eigenfunction of the 
 % Laplace operator on the square domain (0,1)^2
 % to test a script for the Helmholtz equation
+% USAGE: f = rhs2d(x,y)
 % INPUT: 
 % [x,y]: meshgrid on (0,1)^2
 % OUTPUT:

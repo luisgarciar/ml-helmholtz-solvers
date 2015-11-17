@@ -21,7 +21,7 @@ if kmax >= 2
     F{2} = W2 ; %% Fhat_1
 end
 for kk = 2:kmax
-    F{kk+1} = polyadd( conv(W2, F{kk}), -conv(V, F{kk-1}) ) ; %% Fhat_kk
+    F{kk+1} = polyadd( conv(W2, F{kk}), -conv(V, F{kk-1}) ) ; %% Fhat_kk=W2*F{kk}-V*F{kk-1}
 end
 
 % Compute the Faber polynomials

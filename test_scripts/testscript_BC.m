@@ -2,13 +2,12 @@
 
 %% Parameters
 np   = 200;       %number of interior discretization points in 1D
-k    = 0;         %wavenumber
+k    = 50;        %wavenumber
 flag = 1;  
 dim  = 2;         %dimension    
 bc   = 'dir';     %type of problem
 f    = @rhs2;     %right hand side
 h    = 1/(np+1);  %gridsize
-
 
 %% Exact solution of Dirichlet problem
 % Let u(x,y)=sin(n*pi*x)*sin(m*pi*y)
