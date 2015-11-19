@@ -4,7 +4,7 @@ close all
 %% Parameter definition
 n     = 2^10;    %number of interior gridpoints
 w     = 2/3;    %damping parameter for weighted Jacobi smoothing
-sigma = 0;      %wavenumber
+k     = 0;      %wavenumber
 maxit = 200;    %maximum number of Jacobi iterations
 nu    = 2;      %number of presmoothing steps
 mu    = 2;      %number of postsmoothing steps
@@ -17,7 +17,7 @@ f        = zeros(size(x));%rhs function
 f(1,(n/2)+1) = 10; 
 f        = f(2:length(f)-1);       %rhs function restricted to inner grid points
 
-[A, sol] = helmholtz_1D(f,sigma,1); %discretization matrix without boundary conditions and exact solution
+[A, sol] = helmholtz_1D(f,k,1); %discretization matrix without boundary conditions and exact solution
 sol      = [0 sol' 0]';            %exact solution with boundary conditions
 
 v = zeros(length(f),1);

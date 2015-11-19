@@ -1,4 +1,4 @@
-%% Script for testing the function helmholtz1d.m
+%% Script for testing the functions helmholtz1d.m  
 
 %% Parameters
 np   = 200;       %number of interior discretization points in 1D
@@ -16,8 +16,12 @@ h    = 1/(np+1);  %gridsize
 % Sommerfeld boundary conditions
  x  = 0:h:1;
  plot(x,Reu)
-
  plot(eig(full(A)),'+r')
+ 
+ 
+ 
+ 
+ 
 
 
 

@@ -3,7 +3,7 @@
 %% Parameters
 np   = 200;       %number of interior discretization points in 1D
 k    = 50;        %wavenumber
-flag = 1;  
+flag = 1;
 bc   = 'som';     %type of problem
 f    = @dirac1d;  %right hand side
 h    = 1/(np+1);  %gridsize

@@ -1,5 +1,5 @@
 function [A, sol,b] = helmholtz1d(f,k,np,bc,flag)
-%% HELMHOLTZ1D: Direct solver for 1-D the Helmholtz equation.
+%% HELMHOLTZ1D: Direct solver for the 1-D  Helmholtz equation.
 %  Solves -u''-k^2*u=f with various boundary conditions
 %  INPUT: 
 %  f:      right-hand side (function handle)

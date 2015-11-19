@@ -15,10 +15,11 @@ function [A, sol,b] = shift_laplace1d(f,k,b1,b2,np,bc,flag)
 %  flag:   if flag==1 solve exactly and return solution
 %
 %
-%OUTPUT:
-%  A:      Discrete shifted Laplace operator with Dirichlet or
-%          Sommerfeld boundary conditions (without boundary points)
-%  sol:    Solution without boundary points)
+%  OUTPUT:
+%  A:      discrete shifted Laplace operator
+%  b:      right hand side vector
+%  sol:    solution of the linear system
+%
 %
 %% Construction of 1D matrices
 h  = 1/(np+1);            %gridsize
@@ -55,9 +56,5 @@ sol = zeros(size(b));
 if flag == 1
     sol = A\b;  % Solution 
 end
-
-
-
-
 
 end
