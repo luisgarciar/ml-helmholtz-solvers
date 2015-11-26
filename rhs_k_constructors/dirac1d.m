@@ -1,8 +1,8 @@
 function f = dirac1d(x)
-% DIRAC1D Computes a right hand side vector with a 
+%% dirac1d Computes a right hand side vector with a 
 % Dirac delta function in 1D
 %
-%  USAGE: f = rhs2d(x,h)
+%  USAGE: f = rhs2d(x)
 %
 %  INPUT: 
 %  x: grid on (0,1)

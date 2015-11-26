@@ -1,7 +1,11 @@
 function [A, sol,b] = helmholtz1d(f,k,np,bc,flag)
 %% HELMHOLTZ1D: Direct solver for the 1-D  Helmholtz equation.
 %  Solves -u''-k^2*u=f with various boundary conditions
-%  INPUT: 
+%
+%  Usage:
+%  [A, sol,b] = helmholtz1d(f,k,np,bc,flag)
+%
+%  Input: 
 %  f:      right-hand side (function handle)
 %  k:      wavenumber of Helmholtz equation
 %  np:     number of interior discretization points
@@ -10,7 +14,7 @@ function [A, sol,b] = helmholtz1d(f,k,np,bc,flag)
 %          'som' for sommerfeld bc's 
 %  flag:   if flag==1 solve exactly and return solution
 %
-%  OUTPUT:
+%  Output:
 %  A:      discrete Helmholtz operator
 %  b:      right hand side vector
 %  sol:    solution of the linear system
@@ -27,12 +31,12 @@ switch bc
     case 'dir'
         % Dirichlet 1D matrix (no boundary points)
         nv = np;                  %size of the linear system
-        l  = ones(nv,1)*(-1/h^2); %lower(=upper) diagonal
-        d  = ones(nv,1)*(2/h^2); 
-        A  = spdiags([l d l],[-1 0 1],nv,nv)- k^2*speye(nv); %Helmholtz matrix
-        size(A)
+        l  = -ones(nv,1); %lower (=upper) diagonal
+        d  = 2*ones(nv,1); 
+        A  = spdiags([l d l],[-1 0 1],nv,nv)- k^2*h^2*speye(nv); %Helmholtz matrix
+        
         x  = h:h:1-h;
-        b  = feval(f,x)'; %right hand side
+        b  = h^2*feval(f,x)'; %right hand side
         
     case 'som'
         %Sommerfeld 1D matrix (with boundary points)
