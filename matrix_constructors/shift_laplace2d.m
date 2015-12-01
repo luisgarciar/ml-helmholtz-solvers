@@ -1,12 +1,13 @@
-function [A, sol,b] = helmholtz2d(f,kvar,npx,npy,bc,flag)
-%% HELMHOLTZ2D: Direct solver for the 2-D  Helmholtz equation.
-%  Solves -div(grad u)-k^2*u=f with various boundary conditions
+function [A, sol,b] = shift_laplace2d(f,kvar,b1,b2,npx,npy,bc,flag)
+%% SHIFT_LAPLACE2D: Direct solver for the 2-D  shifted Laplace problem.
+%  Solves -div(grad u)-k^2*(b1-i*b2)*u=f with various boundary conditions
 %
-%  Use: [A, sol,b] = helmholtz2d(f,k,npx,npy,bc,flag)
+%  Use: [A, sol,b] =  shift_laplace2d(f,kvar,b1,b2,npx,npy,bc,flag)
 %
 %  Input: 
 %  f:      right-hand side (function handle)
 %  k:      wavenumber  of Helmholtz equation (function handle, k depends on (x,y))
+%  b1,b2:  real and imaginary shifts 
 %  npx:    number of interior discretization points in the x-direction
 %  npy:    number of interior discretization points in the y-direction
 %  bc:     type of boundary conditions:      
@@ -15,7 +16,7 @@ function [A, sol,b] = helmholtz2d(f,kvar,npx,npy,bc,flag)
 %  flag:   if flag==1 solve exactly and return solution
 %
 %  Output:
-%  A:      discrete Helmholtz operator
+%  A:      discrete shifted Laplace operator
 %  b:      right hand side vector
 %  sol:    solution of the linear system
 %
@@ -42,12 +43,12 @@ switch bc
         
         %Create vector of wavenumbers
         [x,y] = meshgrid(hx:hx:1-hx,hy:hy:1-hy);
-         kk   = feval(kvar,x,y);
-         kk   = reshape(kk',[nv,1]);
+        kk    = feval(kvar,x,y);
+        kk    = reshape(kk',[nv,1]);
         
         %A: 2D Helmholtz matrix
         A = spdiags([S W C E N],[-npx -1 0 1 npx], nv, nv);
-        A = A-(spdiags(kk,0,nv,nv).*spdiags(kk,0,nv,nv));
+        A = A-(b1-1i*b2)*spdiags(kk,0,nv,nv).*spdiags(kk,0,nv,nv);
          
         %b: right hand side constructed with function f 
         b = feval(f,x,y);
@@ -149,10 +150,10 @@ switch bc
           [x,y] = meshgrid(0:hx:1,0:hy:1);
           kk   = feval(kvar,x,y);
           kk   = reshape(kk',[nv,1]);
-          Ksq  = spdiags(kk,0,nv,nv).*spdiags(kk,0,nv,nv);
+          bKsq  = (b1-1i*b2)*spdiags(kk,0,nv,nv).*spdiags(kk,0,nv,nv);
           
           %A: 2D Helmholtz matrix
-          A = A - Ksq;
+          A = A - bKsq;
           
           %b: right hand side constructed with function f 
           b = feval(f,x,y);

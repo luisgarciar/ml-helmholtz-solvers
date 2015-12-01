@@ -8,7 +8,7 @@ hx   = 1/(npx+1); hy   = 1/(npy+1); %gridsizes
 kmax = 10; kmin = 20;
 flag = 1;  
 dim  = 2;        %dimension    
-bc   = 'som';    %type of problem        
+bc   = 'dir';    %type of problem        
 f    = @rhs2d;   %right hand side
 k    = @(x,y)(krand(x,y,kmin,kmax)); %wavenumber (nonconstant)
 
@@ -23,7 +23,14 @@ end
 
 
 %% Solution of the Helmholtz equation and postprocessing the solution
-[A, sol,b] = helmholtz2d(f,k,npx,npy,bc,flag);
+[A1, sol,b] = helmholtz2d(f,k,npx,npy,bc,flag);
+[A2]        = helmholtz2(kref,npx,npy,bc);
+
+b=ones(size(b));
+
+x1=A1\b;
+x2=A2\b;
+
 
 if strcmp(bc,'dir')
     [x,y] = meshgrid(hx:hx:(1-hx),hy:hy:(1-hy));
@@ -40,23 +47,6 @@ Reu  = real(u);
 Imu  = imag(u);
 
 figure
-surf(x,y,Reu)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%surf(x,y,Reu)
+surf(x,y,feval(k,x,y))
 
