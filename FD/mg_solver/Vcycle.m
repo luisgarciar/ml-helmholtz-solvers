@@ -1,13 +1,13 @@
-function [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+function [x_sol] = Vcycle(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %% VCYCLE Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
 %
 %   Use: Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %
 %   Input:
 %       Output from the function mgsmsetup: 
-%         - grid_matrices:   cell array with Helmholtz matrices on all
-%                            levels
-%         - grid_smooth:     cell array with matrix splittings for smoothers
+%         - galerkin_matrices:   cell array with Helmholtz matrices on all
+%                                levels
+%         - galerkin_split:     cell array with matrix splittings for smoothers
 %         - restrict_op:     cell array with restriction operators
 %         - interp_op:       cell array with interpolation operators
 %
@@ -15,8 +15,7 @@ function [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,n
 %       x0:              Initial guess
 %       f:               right-hand side
 %       smo:             smoother ('gs' for Gauss-Seidel, 'wjac' for w-Jacobi,'rbgs' for red-black Gauss Seidel in 2D)
-%       nu:              number of presmoothing steps
-%       mu:              number of postsmoothing steps
+%       npre, npos:      number of pre, post smoothing steps
 %       w:               parameter for Jacobi iteration (set w=1 when using Gauss-Seidel)
 %       numcycles:       number of V-cycles
 %
@@ -29,8 +28,8 @@ function [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,n
 %
         
 %%    
-    if length(grid_matrices) == 1 %If on coarse level, solve exactly
-        x_sol = grid_matrices{1,1}\b;
+    if length(galerkin_matrices) == 1 %If on coarse level, solve exactly
+        x_sol = galerkin_matrices{1,1}\b;
         return;
         
     else
@@ -40,22 +39,22 @@ function [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,n
             %Presmoothing and computation of the residual
             %fprintf('Presmoothing with matrix of size %d\n',length(grid_matrices{1,1}));
             
-            x_sol = smoother(grid_smooth{1}.U, grid_smooth{1}.L,...
-                             grid_smooth{1}.D, grid_smooth{1}.P,b,x_sol,w,npre,smo);
-            res   = b-grid_matrices{1}*x_sol;
+            x_sol = smoother(galerkin_split{1}.U, galerkin_split{1}.L,...
+                             galerkin_split{1}.D, galerkin_split{1}.P,b,x_sol,w,npre,smo);
+            res   = b-galerkin_matrices{1}*x_sol;
 
             %Restriction of the residual to coarse grid
             fc   = restrict_op{1}*res; 
             nc   = length(fc); vc = zeros(nc,1);
-            levs = length(grid_matrices);
+            levs = length(galerkin_matrices);
         
             %Calling Vcycle to solve the error equation
             if(levs >2)
-                vc  = Vcycle(grid_matrices(2:levs),grid_smooth(2:levs),restrict_op(2:levs-1),interp_op(2:levs-1),vc,fc,npre,npos,w,smo,1);
+                vc  = Vcycle(galerkin_matrices(2:levs),galerkin_split(2:levs),restrict_op(2:levs-1),interp_op(2:levs-1),vc,fc,npre,npos,w,smo,1);
                 %size(fc)
                 
             elseif(levs==2)
-                vc = Vcycle(grid_matrices(2:2),grid_smooth(2:2),restrict_op(1:1),interp_op(1:1),vc,fc,npre,npos,w,smo,1);
+                vc = Vcycle(galerkin_matrices(2:2),galerkin_split(2:2),restrict_op(1:1),interp_op(1:1),vc,fc,npre,npos,w,smo,1);
                 %size(fc)
             end
         
@@ -63,8 +62,8 @@ function [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,n
             x_sol = x_sol + interp_op{1}*vc;
         
             %Postsmoothing
-            x_sol = smoother(grid_smooth{1}.U,grid_smooth{1}.L,...
-                             grid_smooth{1}.D,grid_smooth{1}.P,b,x_sol,w,npos,smo);           
+            x_sol = smoother(galerkin_split{1}.U,galerkin_split{1}.L,...
+                             galerkin_split{1}.D,galerkin_split{1}.P,b,x_sol,w,npos,smo);           
         end
     end   
 

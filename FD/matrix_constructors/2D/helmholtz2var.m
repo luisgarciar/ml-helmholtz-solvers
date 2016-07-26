@@ -56,14 +56,14 @@ switch bc
         v  = ones(nv,1);
         N  = -1/hy^2*v; S=N;
         W  = -1/hx^2*v; E=W;
-        C  = (2/hy^2+2/hy^2)*v;
+        C  = (2/hx^2+2/hy^2)*v;
         
         %Create vector of wavenumbers
         [x,y] = meshgrid(hx:hx:1-hx,hy:hy:1-hy);
          kk   = feval(kvar,x,y);
          kk   = reshape(kk',[nv,1]);
          eps  = feval(epsvar,x,y);
-         eps  = reshape(epsvar',[nv,1]);
+         eps  = reshape(eps',[nv,1]);
         
         %A: 2D Helmholtz matrix
         A = spdiags([S W C E N],[-npx -1 0 1 npx], nv, nv);
@@ -175,8 +175,8 @@ switch bc
           Ksq   = spdiags(kk,0,nv,nv).*spdiags(kk,0,nv,nv);
           
           %Imaginary shift I*eps
-          eps   = feval(epsvar,x,y); size(eps)
-          eps= reshape(eps',[nv,1]);
+          eps   = feval(epsvar,x,y); size(eps);
+          eps   = reshape(eps',[nv,1]);
           Ieps  = 1i*spdiags(eps,0,nv,nv);
           
           %A: 2D Helmholtz matrix
