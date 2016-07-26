@@ -1,7 +1,9 @@
-function [A] = helmholtz(k,np,bc)
+function [A] = helmholtz(k,eps,np,bc)
 %% HELMHOLTZ: Constructs matrices for the 1D Helmholtz problem.
 %  Constructs the finite difference matrix corresponding
-%  to the 1D Helmholtz problem discretization of -u''- k^2u = f
+%  to the discretization of the 1D Helmholtz/shifted Laplace problem  
+%       -u''- k^2u = f in (0,1)
+%        u(0)=0; u(1)=0
 %  
 %  When homogeneous Dirichlet boundary conditions are used, 
 %  the boundary points are eliminated of the linear system.
@@ -9,23 +11,30 @@ function [A] = helmholtz(k,np,bc)
 %  are included.
 %
 %  Use: [A] = helmholtz(k,np,bc)
+
+% Note (For shifted Laplacian problems): 
+% The imaginary shift is not multiplied by the term k^2
+% as in the original publications of Erlangga et. al.
+% For a convergent multigrid solver one needs eps~k^2 (eps=0.5k^2)
+% For wave-independent GMRES convergence one needs eps~k 
+% (but the MG solver will not converge)
+%
 %
 %  Input: 
 %  k:      wavenumber
+%  eps:    imaginary part of shifted Laplacian
 %  np:     number of interior discretization points
 %  bc:     type of boundary conditions:      
 %          'dir' for homogeneous dirichlet bc's
 %          'som' for sommerfeld bc's 
 %
 %  Output:
-%  A:      discretization matrix of Helmholtz problem
+%  A:      discretization matrix of Helmholtz/shifted Laplace problem
 %
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin
-%  Version 0.1 - Nov 2015
+%  Version 1.0 - Jul 2016
 %
-%  TO DO: Add 2D case
-%         Include option for right hand side
 %%%%%
 
 %% Construction of 1D matrices
@@ -37,8 +46,7 @@ switch bc
         nv = np;                   %size of the linear system
         l  = ones(nv,1)*(-1/h^2);  %lower(=upper) diagonal
         d  = ones(nv,1)*(2/h^2); 
-        A  = spdiags([l d l],[-1 0 1],nv,nv)- k^2*speye(nv); %Helmholtz matrix
-        
+        A  = spdiags([l d l],[-1 0 1],nv,nv)- (k^2+1i*eps)*speye(nv); %Helmholtz matrix
         
     case 'som'
         %Sommerfeld 1D matrix (with boundary points)

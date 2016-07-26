@@ -2,13 +2,10 @@
 
 kmax  = 20; kmin = 30;  %For problem with random wavenumbers
 kref  = 40;             %For wedge problem
-
-np = ceil(15*kref/pi);  % number of grid points
+np    = ceil(15*kref/pi);  % number of grid points
 npx   = np;
 npy   = np;
 hx    = 1/(npx+1); hy = 1/(npy+1); %gridsizes
-b1    = 1;
-b2    = 0.5;
 bc    = 'som';
 flag  = 1;
 
@@ -17,14 +14,17 @@ flag  = 1;
  k    = klay(x,y,kref);   
 figure(1);
 surf(x,y,k);
-%break
+%return
 
 %% Test of the function helmholtz2var.m 
 
 % Wedge problem
 kvar  = @(x,y) klay(x,y,kref);
-[A]   = helmholtz2var(kvar,npx,npy,bc);
-[M]   = shift_laplace2var(kvar,b1,b2,npx,npy,bc);
+eps  =  @(x,y) 0.5*(klay(x,y,kref).^2); 
+zero  = @(x,y) 0*x;
+
+[A]   = helmholtz2var(kvar,zero,npx,npy,bc);
+[M]   = helmholtz2var(kvar,eps,npx,npy,bc);
 
 % Random problem
 %kvar  = @(x,y) krandn(x,y,kref);
@@ -38,7 +38,7 @@ if strcmp(bc,'dir')
     [x,y]  = meshgrid(hx:hx:(1-hx),hy:hy:(1-hy));
     %right hand side: point source in the center of the domain
     b = zeros(length(A),1);
-    b(npx*(npy-1)/2)= 1; 
+    b(npx*(npy-1)/2)= 1/(hx*hy);
     sol = A\b ;
     u   = reshape(sol',[npy,npx]);
    
@@ -48,7 +48,7 @@ else if strcmp(bc,'som')
     %right hand side: point source
     b = zeros(length(A),1);
     index = ceil((npx+1)*(npy/2+1)+npy/2);
-    b(index)= 1;
+    b(index)= 1/(hx*hy);
      
     sol = A\b ;
     u = reshape(sol,[npy+2,npx+2]);

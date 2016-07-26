@@ -3,17 +3,17 @@ clear all;
 close all;
 clc;
 
-k    = 0;          %wavenumber
+k    = 0;           %wavenumber
 ppw  = 10;          %min points per wavelength%
-npcc = 3;          %number of points in coarsest grid
+npc  = 3;            %number of points in coarsest grid
 bc   = 'dir';       %boundary conditions
 dim  =  2;          %dimension
-b1   = 1; b2 = 0.5; %parameters of shifted Laplacian
+eps  = 0.5*k^2 ;  %imaginary shift of shifted Laplacian
 
 %number of fine points and levels
 %computed from number of points in 
 %coarsest grid and wavenumber
-[npf,lev] = npcc2npf(npcc,k,ppw);  
+[npf,lev] = fd_npc_to_npf(npc,k,ppw);  
 
 switch dim
     case 1
@@ -28,7 +28,7 @@ end
 % Test of V-cycle on a Helmholtz or Poisson problem
 
 % Construct matrices on all grids and interpolation operators
-[grid_matrices,grid_smooth,restrict,interp] = mgsm_setup(A,lev,bc,dim);
+[grid_matrices,grid_smooth,restrict,interp] = mg_setup(A,lev,bc,dim);
  b  = zeros(length(A),1);
  x0 = randn(length(A),1);
 
@@ -49,7 +49,7 @@ r1 = norm(b-A*x_sol)/norm(b-A*x0) %Multigrid diverges on Helmholtz problems!
 pause;
 
 %% Test of multigrid on shifted Laplacian problem
-[grid_matrices,grid_smooth,restrict,interp] = mgsm_setup(M,lev,bc,dim);
+[grid_matrices,grid_smooth,restrict,interp] = mg_setup(M,lev,bc,dim);
 
 profile on
 [x_sol] = Vcycle(grid_matrices,grid_smooth,restrict,interp,x0,b,npre,npos,w,smo,numcycles);

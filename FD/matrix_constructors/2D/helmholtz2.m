@@ -1,5 +1,5 @@
 function [A] = helmholtz2(k,eps,npx,npy,bc)
-%  HELMHOLTZ2: Constructs matrices for the 2D Helmholtz
+%% HELMHOLTZ2: Constructs matrices for the 2D Helmholtz
 %  and shifted Laplace problems.
 %  Constructs the finite difference matrix corresponding
 %  to the discretization of div(grad u)- (k^2+i*eps)u = f in (0,1)x(0,1)
@@ -47,15 +47,28 @@ hy  = 1/(npy+1);  %gridsize in y-direction
 
 switch bc
     case 'dir'        
-        l    = ones(npx,1)*(-1/hx^2); 
-        d    = ones(npx,1)*(2/hx^2); 
-        Dx   = spdiags([l d l],[-1 0 1],npx,npx); %1D Neg Laplacian, x direction
-        l    = ones(npy,1)*(-1/hy^2);
-        d    = ones(npy,1)*(2/hy^2);
-        Dy   = spdiags([l d l],[-1 0 1],npy,npy); %1D Neg Laplacian, y direction
-        NLap = kron(Dx,speye(npy))+kron(speye(npx),Dy); %2D Negative Laplacian
-        A    = NLap - (k^2+1i*eps)*speye(length(NLap));
+%         l    = ones(npx,1)*(-1/hx^2); 
+%         d    = ones(npx,1)*(2/hx^2); 
+%         Dx   = spdiags([l d l],[-1 0 1],npx,npx); %1D Neg Laplacian, x direction
+%         l    = ones(npy,1)*(-1/hy^2);
+%         d    = ones(npy,1)*(2/hy^2);
+%         Dy   = spdiags([l d l],[-1 0 1],npy,npy); %1D Neg Laplacian, y direction
+%         NLap = kron(Dx,speye(npy))+kron(speye(npx),Dy); %2D Negative Laplacian
+%         A    = NLap - (k^2+1i*eps)*speye(length(NLap));
         
+          np = npx*npy;
+          W = -ones(np,1)/hx^2;  E=W; %Dxx
+          N = -ones(np,1)/hy^2; S=N; %Dyy
+          C = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
+          A = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
+          
+          for i=1:(npy-1)       %Modify points closest to east and west boundaries
+              ii=npx*(i-1)+npx;
+              A(ii,ii+1) = 0;
+              A(ii+1,ii) = 0;
+          end
+          
+          
     case 'som'
         %2D matrix with Sommerfeld bc's (with boundary points)
         nx = npx+2;

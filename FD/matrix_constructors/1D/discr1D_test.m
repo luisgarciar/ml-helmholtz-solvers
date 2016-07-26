@@ -15,9 +15,12 @@ for i=1:length(npp)
     u_d  = A\b; 
     err(i) = norm(u_d-u_ex,Inf);
     relerr(i) = norm(u_d-u_ex,Inf)/norm(u_ex,Inf);
-    plot(grid,u_d,'r');
-    hold on
-    plot(grid,u_ex,'b');
-    pause(1)
-    close all
+%     plot(grid,u_d,'r');
+%     hold on
+%     plot(grid,u_ex,'b');
+%     pause(1)
+%     close all
 end
+
+semilogy(relerr)
+title('log relative error vs log gridsize')

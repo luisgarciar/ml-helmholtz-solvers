@@ -13,6 +13,8 @@ u = Symbol("\tilde{u}",complex=True)
 k = Symbol("k",real=True,positive=True)
 x = Symbol("x",real=True)
 y = Symbol("y",real=True)
+m = Symbol("m",real=True)
+n = Symbol("n",real=True)
 
 # <markdowncell>
 
@@ -22,17 +24,13 @@ y = Symbol("y",real=True)
 # u &=0 \text{ on } \partial\Omega \\
 # \end{align}
 # 
-# Let $u=\sin(2\pi  x)sin(3\pi y)$, then $f=-\partial_{xx}u-\partial_{yy}u-k^2u$ is given by
+# Let $u=\sin(m\pi  x)\sin(n\pi y)$, then $f=-\partial_{xx}u-\partial_{yy}u-k^2u$ is given by
 
 # <codecell>
 
-u = sin(2*pi*x)*sin(3*pi*y)
+u = sin(m*pi*x)*sin(n*pi*y)
 f = simplify(-diff(u,x,x)-diff(u,y,y)-k**2*u)
 f
-
-# <codecell>
-
--diff(u,x,x)-diff(u,y,y)-k**2*u
 
 # <codecell>
 

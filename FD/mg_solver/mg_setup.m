@@ -1,8 +1,8 @@
-function [galerkin_matrices,grid_split,restrict,interp] = mgsm_setup(A,numlev,bc,dim)
-%% MGSM_SETUP: Constructs a hierarchy of Galerkin coarse grid matrices,
-%            smoother splittings and interpolation operators for a Helmholtz/Laplace PDE problem   
+function [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,numlev,bc,dim)
+%% MG_SETUP: Constructs a hierarchy of Galerkin coarse grid matrices,
+%            splitting of the Galerkin matrices, and interpolation operators for a Helmholtz/Laplace PDE problem   
 %  Use:
-% [galerkin_matrices,grid_split,restrict,interp] = mgsm_setup(A,numlev,bc,dim)
+% [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,numlev,bc,dim)
 %
 %  Input: 
 %  A:         Matrix on finest grid
@@ -41,17 +41,17 @@ s  = length(A);
 restrict      = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
 interp        = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
 galerkin_matrices = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
-grid_split    = cell(numlev,1);        %grid_split{i}: matrix splittings needed for smoothers i
+galerkin_split    = cell(numlev,1);        %grid_split{i}: matrix splittings needed for smoothers i
 
 %Level 1 
 i=1;
 galerkin_matrices{i} = A;
 restrict{i}      = fwrestriction(npf,dim);    %fw restriction, grid 1 to grid 2 
 interp{i}        = lininterpol(npc,dim);      %lin interp, grid 2 to grid 1
-grid_split{i}.U = sparse(triu(A,1));         %matrix splitting of A
-grid_split{i}.L = sparse(tril(A,-1));
-grid_split{i}.D = spdiags(diag(A),0,length(A),length(A));
-grid_split{i}.P = speye(length(galerkin_matrices{i}));
+galerkin_split{i}.U = sparse(triu(A,1));         %matrix splitting of A
+galerkin_split{i}.L = sparse(tril(A,-1));
+galerkin_split{i}.D = spdiags(diag(A),0,length(A),length(A));
+galerkin_split{i}.P = speye(length(galerkin_matrices{i}));
 
 % [s1,s2] = size(grid_matrices{i});
 % [r1,r2] = size(restrict{i});
@@ -77,10 +77,10 @@ switch bc
             %pause
             npf = npc;  npc = round((npf-1)/2);         
             galerkin_matrices{i} = sparse(restrict{i-1}*galerkin_matrices{i-1}*interp{i-1}); %Coarse grid Galerkin matrix
-            grid_split{i}.U=sparse(triu(galerkin_matrices{i},1));
-            grid_split{i}.L=sparse(tril(galerkin_matrices{i},-1));
-            grid_split{i}.D=spdiags(diag(galerkin_matrices{i}),0,length(galerkin_matrices{i}),length(galerkin_matrices{i}));
-            grid_split{i}.P=speye(length(galerkin_matrices{i}));
+            galerkin_split{i}.U=sparse(triu(galerkin_matrices{i},1));
+            galerkin_split{i}.L=sparse(tril(galerkin_matrices{i},-1));
+            galerkin_split{i}.D=spdiags(diag(galerkin_matrices{i}),0,length(galerkin_matrices{i}),length(galerkin_matrices{i}));
+            galerkin_split{i}.P=speye(length(galerkin_matrices{i}));
 
             if i<numlev
                 restrict{i}  = fwrestriction(npf,dim); %fw restriction, grid i to grid i+1 
@@ -100,10 +100,10 @@ switch bc
         end
         npf = npc;  npc = round((npf-1)/2); 
         galerkin_matrices{numlev} = sparse(restrict{numlev-1}*galerkin_matrices{numlev-1}*interp{numlev-1});
-        grid_split{numlev}.U = sparse(triu(galerkin_matrices{numlev},1));
-        grid_split{numlev}.L = sparse(tril(galerkin_matrices{numlev},-1));
-        grid_split{numlev}.D = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
-        grid_split{numlev}.P = speye(length(galerkin_matrices{numlev}));
+        galerkin_split{numlev}.U = sparse(triu(galerkin_matrices{numlev},1));
+        galerkin_split{numlev}.L = sparse(tril(galerkin_matrices{numlev},-1));
+        galerkin_split{numlev}.D = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
+        galerkin_split{numlev}.P = speye(length(galerkin_matrices{numlev}));
 
 %         if dim==2 %Red black permutation matrix
 %             grid_smooth{numlev}.P=rb_reorder(npf);
