@@ -10,7 +10,7 @@ function [A] = helmholtz(k,eps,np,bc)
 %  In case of Sommerfeld boundary conditions the boundary points
 %  are included.
 %
-%  Use: [A] = helmholtz(k,np,bc)
+%  Use: [A] = helmholtz(k,eps,np,bc)
 
 % Note (For shifted Laplacian problems): 
 % The imaginary shift is not multiplied by the term k^2

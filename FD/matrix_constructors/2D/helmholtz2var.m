@@ -23,7 +23,6 @@ function [A] = helmholtz2var(kvar,epsvar,npx,npy,bc)
 %
 %  The discretization of Sommerfeld BC's is of second order
 %
-%
 %  Use: [A] = helmholtz2(kvar,epsvar,npx,npy,bc)
 %
 %  Input: 
@@ -54,8 +53,8 @@ switch bc
         % Dirichlet 2D matrix (no boundary points)        
         nv = npx*npy;
         v  = ones(nv,1);
-        N  = -1/hy^2*v; S=N;
-        W  = -1/hx^2*v; E=W;
+        N  = (-1/hy^2)*v; S=N;
+        W  = (-1/hx^2)*v; E=W;
         C  = (2/hx^2+2/hy^2)*v;
         
         %Create vector of wavenumbers
