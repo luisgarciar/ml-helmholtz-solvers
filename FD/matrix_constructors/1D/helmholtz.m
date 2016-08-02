@@ -1,15 +1,12 @@
 function [A] = helmholtz(k,eps,np,bc)
 %% HELMHOLTZ: Constructs matrices for the 1D Helmholtz problem.
 %  Constructs the finite difference matrix corresponding
-%  to the discretization of the 1D Helmholtz/shifted Laplace problem  
-%       -u''- k^2u = f in (0,1)
-%        u(0)=0; u(1)=0
-%  
-%  When homogeneous Dirichlet boundary conditions are used, 
-%  the boundary points are eliminated of the linear system.
-%  In case of Sommerfeld boundary conditions the boundary points
-%  are included.
+%  to the discretization of the 1D Helmholtz/shifted Laplace problem
 %
+%       -u''- k^2u = f in (0,1)
+%        u(0)=0, u(1)=0, or
+%        u'(0)-iku(0)=0, u'(1)+iku(1)=1
+%  
 %  Use: [A] = helmholtz(k,eps,np,bc)
 
 % Note (For shifted Laplacian problems): 
@@ -51,9 +48,9 @@ switch bc
     case 'som'
         %Sommerfeld 1D matrix (with boundary points)
         nv = np+2;
-        d  = ones(np,1)*(2-k^2*h^2);    
-        a  = (1-(k^2*h^2)/2+1i*k*h); % boundary conditions (second order)
-        b  = (1-(k^2*h^2)/2-1i*k*h); 
+        d  = ones(np,1)*(2-(k^2+1i*eps)*h^2);    
+        a  = (1-(k^2+1i*eps)*h^2/2+1i*k*h); % boundary conditions (second order)
+        b  = (1-(k^2+1i*eps)*h^2/2-1i*k*h); 
         d  = [a; d; b];   
         u  = -ones(nv,1);      
         A  = 1/(h^2)*spdiags([u d u],[-1 0 1],np+2,np+2); %Helmholtz matrix
