@@ -52,7 +52,7 @@ switch bc
         a  = (1-(k^2+1i*eps)*h^2/2+1i*k*h); % boundary conditions (second order)
         b  = (1-(k^2+1i*eps)*h^2/2-1i*k*h); 
         d  = [a; d; b];   
-        u  = -ones(nv,1);      
+        u  = -ones(nv,1);     
         A  = 1/(h^2)*spdiags([u d u],[-1 0 1],np+2,np+2); %Helmholtz matrix
         
         %x  = 0:h:1;

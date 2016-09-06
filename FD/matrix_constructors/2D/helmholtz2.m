@@ -104,7 +104,7 @@ switch bc
               A(n,:)       = zeros(nv,1)';
               A(n,n)       = -k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2;
               A(n,n+1)     = -1/hx^2;
-              A(n,n-1)     =  -1/hx^2;
+              A(n,n-1)     = -1/hx^2;
               A(n,n+npx+2) = -1/hy^2;  
          end
          

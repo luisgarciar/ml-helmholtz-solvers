@@ -1,8 +1,8 @@
 %% Script for testing the functions /helmholtz2var.m and shift_laplace2var.m
 
-kmax  = 20; kmin = 30;  %For problem with random wavenumbers
-kref  = 40;             %For wedge problem
-np    = ceil(15*kref/pi);  % number of grid points
+kmax  = 20; kmin = 30;    %For problem with random wavenumbers
+kref  = 40;               %For wedge problem
+np    = ceil(15*kref/pi); % number of grid points
 npx   = np;
 npy   = np;
 hx    = 1/(npx+1); hy = 1/(npy+1); %gridsizes

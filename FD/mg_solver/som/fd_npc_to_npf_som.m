@@ -1,5 +1,5 @@
-function [npf,lev] = fd_npc_to_npf(npc,k,par)
-%% FD_NPC_TO_NPF Computes the number of points on the finest grid given the
+function [npf,lev] = fd_npc_to_npf_som(npc,k,par)
+%% FD_NPC_TO_NPF_SOM Computes the number of points on the finest grid given the
 %         number of points on the coarsest grid and discretization
 %         requirements
 %
@@ -12,7 +12,7 @@ function [npf,lev] = fd_npc_to_npf(npc,k,par)
 %
 % Output
 %       npf : number of points on the finest grid
-%       lev  : number of levels (grids) from coarsest to finest
+%       lev : number of levels (grids) from coarsest to finest
 %
 %  Author:      Luis Garcia Ramos, 
 %               Institut fur Mathematik, TU Berlin
@@ -39,7 +39,6 @@ else
     lev = 1+ceil(log2(m));
     lev = max(lev,1);   %at least 1 level
     npf = 2^(lev-1)*(npc+1)-1;
-
 
 end
 

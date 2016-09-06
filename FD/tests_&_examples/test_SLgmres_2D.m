@@ -1,5 +1,6 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
 % 2-D Example, Dirichlet boundary conditions
+clc
 clear all; close all;
 
 npc = 3;    %number of interior points in coarsest grid in one dim 
@@ -70,3 +71,10 @@ semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
 %relative error with respect to exact solution
 relerr  = norm(x2-u_ex)/norm(u_ex)
 relerr2 = norm(A\b-u_ex)/norm(u_ex)
+
+%%print results
+fprintf('Number of GMRES iterations (no preconditioning) %i\n',iter1(2));
+fprintf('Number of GMRES iterations (+MG left  V-cycle preconditioning) %i\n',iter2(2));
+fprintf('Number of GMRES iterations (+MG right V-cycle preconditioning) %i\n',iter3(2));
+
+
