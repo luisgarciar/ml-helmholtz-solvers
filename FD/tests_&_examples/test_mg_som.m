@@ -1,4 +1,9 @@
 %Test multigrid Sommerfeld BC's
 
 clc;
-R = full(fwrestriction(3, 2))
+bc  = 'som'
+dim = 2
+npi = 3
+R = full(fwrestriction_som(npi,dim,bc))
+size(R)
+
