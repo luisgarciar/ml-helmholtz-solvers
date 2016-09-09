@@ -42,10 +42,11 @@ switch dim
                 
                 R   = sparse(npcc^2,npff^2)';
 
-                %We fill the matrix by rows (change this later!)
-                %indc and indf are the index of in coarse and fine grid
-                %resp.
-                
+                %The restriction matrix is filled by rows 
+                %(change this later!)
+                %indc: row index (coarse grid)
+                %indf: column index (fine grid)
+
                 %(0,0)- South-West Corner
                 indc=1; indf=1; 
                 R(indc,indf)=4; R(indc,indf+1)=4;
@@ -67,19 +68,38 @@ switch dim
                 R(indc,indf-npff)=4; R(indc,indf-npff-1)=4;
 
                 %South boundary y=0
-                for indc=2:npc-1
+                for indc=2:(npcc-1)
                     indf=2*indc-1;
-                    R(indc,indf)=4; R(indc,indf+1)=2; R(indc,indf-1)=2;
-                    R(indc,indf+npff)=4; R(indc,indf+npff+1)=2;
-                    R(indc,indf+npff-1)=2;
+                    R(indc,indf)=4; R(indc,indf+npff)=4;
+                    R(indc,indf+1)=2; R(indc,indf-1)=2;
+                    R(indc,indf+npff+1)=2; R(indc,indf+npff-1)=2;
+                  
                 end
                 
                 %East boundary x=1
+                for i=2:(npcc-1)
+                    indc=i*npcc; indf=(2*i-1)*npff;
+                    R(indc,indf)=4; R(indc,indf-1)=4;
+                    R(indc,indf-1+npff)=2; R(indc,indf-1-npff)=2;
+                    R(indc,indf-npff)=2; R(indc,indf+npff)=2;
+                end
                 
-                for i=2:npc-1
-                    indc=i*npcc; indf=(2*i-1)
+                %North boundary y=1
+                for i=2:(npcc-1)
+                   indc=(npcc-1)*npc+i;indf=(npff-1)*npff+(2*i-1);
+                   R(indc,indf)=4; R(indc,indf-npf)=4; 
+                   R(indc,indf+1)=2; R(indc,indf-1)=2; 
+                   R(indc,indf-npff+1)=2; R(indc,indf+npff-1)=2;
+                end
                 
-                
+                %West boundary x=0
+                for i=2:(npcc-1)
+                   indc=npcc*(i-1)+1; indf=npff*2*(i-1)+1;
+                   R(indc,indf)=4; R(indc,indf+1)=4;
+                   R(indc,indf+npff)=2:  R(indc,indf-npff)=2;
+                   R(indc,indf+1+npff)=2:  R(indc,indf+1-npff)=2;        
+                end
+                    
                 
         end      
       
