@@ -2,8 +2,11 @@
 
 clc;
 bc  = 'som'
-dim = 2
-npi = 3
-R = full(fwrestriction_som(npi,dim,bc))
-size(R)
+dim = 2;
+npf = 5;
 
+R = fwrestriction_som(npf,dim,bc);
+
+R=16*full(R);
+          
+R(1,:)
