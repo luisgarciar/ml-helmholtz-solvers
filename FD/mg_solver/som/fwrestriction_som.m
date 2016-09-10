@@ -40,9 +40,7 @@ switch dim
                 npff  = npf+2; % total number of points with endpoints
                 npcc  = npc+2;
                 
-                npff
-                npcc
-                
+   
                 R     = sparse(npcc^2,npff^2);
                 size(R)
 
@@ -91,7 +89,7 @@ switch dim
                 
                 %North boundary y=1
                 for i=2:(npcc-1)
-                   indc=(npcc-1)*npcc+i-1;indf=(npff-1)*npff+(2*i-1);
+                   indc=(npcc-1)*npcc+i; indf=(npff-1)*npff+(2*i-1);
                    R(indc,indf)=4; R(indc,indf-npf)=4; 
                    R(indc,indf+1)=2; R(indc,indf-1)=2; 
                    R(indc,indf-npff+1)=2; R(indc,indf-npff-1)=2;
