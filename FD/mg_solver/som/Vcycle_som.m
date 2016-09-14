@@ -1,16 +1,15 @@
-function [x_sol] = Vcycle(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
-%% VCYCLE Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
+function [x_sol] = Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+%% VCYCLE_SOM Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
 %
-%   Use: Vcycle(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+%   Use: Vcycle_som(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %
 %   Input:
 %       Output from the function mgsmsetup: 
-%         - galerkin_matrices:   cell array with Helmholtz matrices on all
-%                                levels
-%         - galerkin_split:     cell array with matrix splittings for smoothers
-%         - restrict_op:     cell array with restriction operators
-%         - interp_op:       cell array with interpolation operators
-%
+%         - galerkin_matrices: cell array with Helmholtz matrices on all
+%                              levels
+%         - galerkin_split:    cell array with matrix splittings for smoothers
+%         - restrict_op:       cell array with restriction operators
+%         - interp_op:         cell array with interpolation operators
 %
 %       x0:              Initial guess
 %       f:               right-hand side

@@ -1,12 +1,9 @@
-function [x_sol,relres] = twogrid(A,restr,interp,f,x_init,dim,nu,mu,w,smo,numcycles)
+function [x_sol,relres] = twogrid_som(A,restr,interp,f,x_init,npre,npos,numcycles)
 
-switch smo
-     case 'gs'
-         smoother = @(M,b,xinit,w,numit) gaussseidel(M,b,w*xinit,numit);
-     case 'wjac'
-         smoother = @(M,b,xinit,w,numit) wJacobi(M,b,xinit,w,numit);
-     %case  'rbgs'                           
- end
+L=sparse(tril(A));
+U=sparse(triu(A)); 
+D=sparse(diag(diag(A))); 
+M = D+L; N = -U;
 
 %Construct Galerkin coarse matrix
 Ac        =  restr*A*interp;
@@ -16,7 +13,10 @@ relres(1) = norm(f-A*x_sol);
 
 for i=1:numcycles
     %Presmoothing
-    x_sol = smoother(A,f,x_sol,w,nu);
+    for j=1:npre            
+        x_sol = M\(N*x_sol+f);
+    end   
+    
     res     = f-A*x_sol; 
 
     %Restrict to coarse grid and solve coarse error equation exactly
@@ -28,7 +28,10 @@ for i=1:numcycles
     x_sol  = x_sol + ef; 
     
     %Post-smoothing
-    x_sol   = smoother(A,f,x_sol,mu,w);
+    for j=1:npos            
+        x_sol = M\(N*x_sol+f);
+    end   
+    
     relres(i+1) = norm(f-A*x_sol);
 
 end %end of cycle

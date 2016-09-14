@@ -26,9 +26,10 @@ if par>1
 %The number of grid levels lev and points of the fine grid npf is
 %chosen according to the rule (2*pi/k*npc) approx par=ppw
 
-    m   = par*k/(2*pi*(npc+1));
+    m   = (ppw*k)/(pi*(npc+1));
     lev = ceil(log2(m));
     npf = 2^(lev-1)*(npc+1)-1;
+    
     
 else
 %Case 2: The number of fine grid points grows 

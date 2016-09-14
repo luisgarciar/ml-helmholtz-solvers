@@ -1,7 +1,7 @@
 %Test multigrid Poisson
 clear all;
 npc = 5;  %number of points in coarsest grid (1D) 
-par = 12; %discretization parameter (type help fd_npc_to_npf for more info)
+par = 12; %discretization parameter (type 'help fd_npc_to_npf' for more info)
 k   = 40;
 eps = 0.5*k^2;
 dim = 2;

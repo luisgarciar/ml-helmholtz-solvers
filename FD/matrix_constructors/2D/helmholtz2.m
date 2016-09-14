@@ -62,17 +62,17 @@ switch bc
           C = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
           A = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
           
-          for i=1:(npy-1)       %Modify points closest to east and west boundaries
+          for i=1:(npy-1)      %Modify points closest to east and west boundaries
               ii=npx*(i-1)+npx;
               A(ii,ii+1) = 0;
               A(ii+1,ii) = 0;
           end
-          
-          
+                    
     case 'som'
         %2D matrix with Sommerfeld bc's (with boundary points)
         nx = npx+2;
         ny = npy+2;
+        np = nx*ny;
         
         %Interior points (i*hx,j*hy)
         l    = ones(nx,1)*(-1/hx^2); 
@@ -84,36 +84,59 @@ switch bc
         NLap = kron(Dx,speye(ny))+kron(speye(nx),Dy); %2D Negative Laplacian
         A    = NLap - (k^2+1i*eps)*speye(nx*ny);
         
+        %Corner points
+        %SW Corner: (0,0)
+        A(1,:)       = zeros(np,1)';
+        A(1,1)     = (-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2);
+        A(1,2)     = -2/hx^2;
+        A(1,npx+3) = -2/hy^2;
+
+        %SE Corner: (1,0)
+        n = npx+2;
+        A(n,:)    = zeros(np,1)';
+        A(n,n)    = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
+        A(n,n-1)  = -2/hx^2;
+        A(n,2*n)  = -2/hy^2;
+
+        %NW Corner: (0,1)
+        n = (npx+2)*(npy+1)+1;
+        A(n,:)         = zeros(np,1)';
+        A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
+        A(n,n+1)       = -2/hx^2;
+        A(n,n-(npx+2)) = -2/hy^2;
+
+        %NE Corner: (1,1)
+        n = (npx+2)*(npy+2);
+        A(n,:)         = zeros(np,1)';
+        A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
+        A(n,n-1)       = -2/hx^2;
+        A(n,n-(npx+2)) = -2/hy^2;
+     
         %Noncorner boundary points
-        
         %West boundary: (0,j*hy)
          for j = 1:npy
               n = j*(npx+2)+1; %changing from (0,j) to global index
-              A(n,:)       = zeros(nv,1)'; %clear row
+              A(n,:)       = zeros(np,1)'; %clear row
               A(n,n)       = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
               A(n,n+1)     = -2/hx^2;
               A(n,n+npx+2) = -1/hy^2;
               A(n,n-npx-2) = -1/hy^2;   
          end
          
-             
-         %South boundary: (ihx,0)
+         %South boundary: (i*hx,0)
          for i=1:npx
-              %k=k;
-              n=i+1; %changing from (i,0) to global index
-              A(n,:)       = zeros(nv,1)';
-              A(n,n)       = -k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2;
-              A(n,n+1)     = -1/hx^2;
-              A(n,n-1)     = -1/hx^2;
-              A(n,n+npx+2) = -1/hy^2;  
+             n=i+1; %changing from (i,0) to global index
+             A(n,:)       = zeros(np,1)';
+             A(n,n)       = -k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2;
+             A(n,n+1)     = -1/hx^2;
+             A(n,n-1)     = -1/hx^2;
+             A(n,n+npx+2) = -1/hy^2;  
          end
-         
-          
+       
          %East boundary: (1,j*hy)
          for j=1:npy
-           % k = k;
              n = (npx+2)*(j+1); %changing from (npx+1,j) to global index
-             A(n,:)       = zeros(nv,1)';
+             A(n,:)       = zeros(np,1)';
              A(n,n)       = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
              A(n,n-1)     = -1/hx^2;
              A(n,n-npx-2) = -1/hy^2;  
@@ -123,47 +146,15 @@ switch bc
          %North boundary: (i*hx,1)
          for i=1:npx
              n = (npx+2)*(npy+1)+(i+1);
-             A(n,:)       = zeros(nv,1)';
+             A(n,:)       = zeros(np,1)';
              A(n,n)       = (-k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2);
              A(n,n-1)     =  -1/hx^2;
              A(n,n+1)     =  -1/hx^2;  
              A(n,n-npx-2) = -2/hy^2;
          end
-         
-          %SW Corner: (0,0)
-          %k = k;
-          A(1,:)       = zeros(nv,1)';
-          A(1,1)     = (-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2);
-          A(1,2)     = -2/hx^2;
-          A(1,npx+3) = -2/hy^2;
-          
-          %SE Corner: (1,0)
-          %k = k;
-          n = npx+2;
-          A(n,:)    = zeros(nv,1)';
-          A(n,n)    = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-          A(n,n-1)  = -2/hx^2;
-          A(n,2*n)  = -2/hy^2;
-          
-          %NW Corner: (0,1)
-          %k = k;
-          n = (npx+2)*(npy+1)+1;
-          A(n,:)         = zeros(nv,1)';
-          A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-          A(n,n+1)       = -2/hx^2;
-          A(n,n-(npx+2)) = -2/hy^2;
-
-          
-          %NE Corner: (1,1)
-          %k = k;
-          n = (npx+2)*(npy+2);
-          A(n,:)         = zeros(nv,1)';
-          A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-          A(n,n-1)       = -2/hx^2;
-          A(n,n-(npx+2)) = -2/hy^2;
-
-        otherwise
-            error('invalid boundary conditions')
+   
+    otherwise
+        error('invalid boundary conditions')
 end
 
 end

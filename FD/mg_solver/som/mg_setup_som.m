@@ -1,20 +1,20 @@
-function [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,numlev,bc,dim)
-%% MG_SETUP: Constructs a hierarchy of Galerkin coarse grid matrices,
+function [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup_som(A,numlev,bc,dim)
+%% MG_SETUP_SOM: Constructs a hierarchy of Galerkin coarse grid matrices,
 %            splitting of the Galerkin matrices, and interpolation operators for a Helmholtz/Laplace PDE problem   
 %  Use:
-% [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,numlev,bc,dim)
+% [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup_som(A,numlev,bc,dim)
 %
 %  Input: 
 %  A:         Matrix on finest grid
 %  numlev:    Total number of levels (number of coarse grids)
-%  bc:       Type of boundary conditions:      
-%            'dir' for homogeneous dirichlet bc's
-%            'som' for sommerfeld bc's 
+%  bc:        Type of boundary conditions:      
+%             'dir' for homogeneous dirichlet bc's
+%             'som' for sommerfeld bc's 
 %  dim:        Dimension (1 or 2)
 %
 %  Output:
 %  grid_matrices: Cell array with Galerkin matrices 
-%                 (grid_matrices{i}: Galerkin matrix level i)   
+%                 (grid_matrices{i}: Galerkin matrix at level i)   
 %
 %  grid_split: Cell array with splitting of Galerkin matrices
 %              (upper, lower and diagonal part) to be applied in
@@ -29,25 +29,26 @@ function [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,numlev,
 %
 %  Author:      Luis Garcia Ramos, 
 %               Institut fur Mathematik, TU Berlin
-%               Version 1.0, Jun 2016
-%   To Do:      Add Sommerfeld boundary conditions
 %
-%%  Construction of restriction and interpolation matrices
+%  Version 2.0, Sep 2016
+%  Works with Sommerfeld boundary conditions
+%
+%%  Construction of restriction, interpolation and Galerkin matrices
 
 s  = length(A);
-[npc,npf] = size2npc(s,dim);
+[npc,npf] = size2npc_som(s,dim,bc);
 %numlev
 
-restrict      = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
-interp        = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
+restrict          = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
+interp            = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
 galerkin_matrices = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
-galerkin_split    = cell(numlev,1);        %grid_split{i}: matrix splittings needed for smoothers i
+galerkin_split    = cell(numlev,1);      %grid_split{i}: matrix splittings needed for smoothers i
 
 %Level 1 
 i=1;
 galerkin_matrices{i} = A;
-restrict{i}      = fwrestriction(npf,dim);    %fw restriction, grid 1 to grid 2 
-interp{i}        = lininterpol(npc,dim);      %lin interp, grid 2 to grid 1
+restrict{i}         = fwrestriction_som(npf,dim,bc);    %fw restriction, grid 1 to grid 2 
+interp{i}           = lininterpol_som(npc,dim,bc);      %lin interp, grid 2 to grid 1
 galerkin_split{i}.U = sparse(triu(A,1));         %matrix splitting of A
 galerkin_split{i}.L = sparse(tril(A,-1));
 galerkin_split{i}.D = spdiags(diag(A),0,length(A),length(A));
@@ -83,8 +84,8 @@ switch bc
             galerkin_split{i}.P=speye(length(galerkin_matrices{i}));
 
             if i<numlev
-                restrict{i}  = fwrestriction(npf,dim); %fw restriction, grid i to grid i+1 
-                interp{i}    = lininterpol(npc,dim);   %lin interp, grid i+1 to grid i
+                restrict{i}  = fwrestriction_som(npf,dim,bc); %fw restriction, grid i to grid i+1 
+                interp{i}    = lininterpol_som(npc,dim,bc);   %lin interp, grid i+1 to grid i
                 
                 %[s1,s2] = size(grid_matrices{i});
                 %[r1,r2] = size(restrict{i});
@@ -105,9 +106,9 @@ switch bc
         galerkin_split{numlev}.D = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
         galerkin_split{numlev}.P = speye(length(galerkin_matrices{numlev}));
 
-%         if dim==2 %Red black permutation matrix
-%             grid_smooth{numlev}.P=rb_reorder(npf);
-%         end
+%       if dim==2 %Red black permutation matrix
+%           grid_smooth{numlev}.P=rb_reorder(npf);
+%       end
 end       
 end
 

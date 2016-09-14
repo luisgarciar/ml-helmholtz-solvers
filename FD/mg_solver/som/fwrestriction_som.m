@@ -1,22 +1,25 @@
 function R = fwrestriction_som(npf,dim,bc)
-%% FWRESTRICTION_SOM Constructs the matrix corresponding to the full weight restriction
-%   operator from a fine grid with npf interior points.
+%% FWRESTRICTION_SOM Constructs the matrix corresponding to the full weight 
+%  restriction operator from a fine grid with npf interior points.
 %  
 %   Use:    R = fwrestriction(npf,dim,bc)  
 %
 %   Input: 
-%       npf:    number of interior points in 1-D fine grid (must be odd)
-%       dim:    dimension (1 or 2)
+%       npf:  number of interior points in 1-D fine grid (must be odd)
+%       dim:  dimension (1 or 2)
+%       bc:   'dir' for homogeneous Dirichlet boundary conditions
+%             'som' for 1st order Sommerfeld boundary conditions 
 %       
 %   Output:
-%       R:      restriction matrix of size npc x npf
-%
+%       R:    restriction matrix, size npc x npf (1D Dirichlet)
+%                                      npc^2 x npf^2 (2D Dirichlet)
+%                                     (npc+2)^2 x (npf+2)^2 (2D Sommerfeld)
 %   Author: Luis Garcia Ramos, 
 %           Institut fur Mathematik, TU Berlin
-%  
-%  Version 1.0, Jun 2016
-%  Works on 1-D, 2-D Dirichlet boundary conditions
-%               
+%   Version 2.0, Sep 2016
+%  Dirichlet and Sommerfeld boundary conditions
+%  Works only on uniform grids
+%
 %%
 switch dim
     case 1
@@ -35,12 +38,11 @@ switch dim
                 R   = kron(R,R)';  %2D operator  
                 
             case 'som'
-                assert(mod(npf,2)==1,'number of interior points must be even')
+                assert(mod(npf,2)==1,'number of interior points must be odd')
                 npc = round((npf+1)/2)-1;
                 npff  = npf+2; % total number of points with endpoints
                 npcc  = npc+2;
-                
-   
+         
                 R     = sparse(npcc^2,npff^2);
                 size(R)
 
@@ -68,8 +70,7 @@ switch dim
                 indc=npcc^2; indf=npff^2;
                 R(indc,indf)=4; R(indc,indf-1)=4;
                 R(indc,indf-npff)=4; R(indc,indf-npff-1)=4;
-                
-                
+                             
                 %South boundary y=0
                 for indc=2:(npcc-1)
                     indf=2*indc-1;

@@ -10,10 +10,11 @@ restr  =  fwrestriction_som(npf,dim,bc); %size(restr)
 interp =  4*restr';
 
 %Two-grid cycle
-npre = 2; npost = 2; smo = 'gs'; w = 2/3; numcycles = 11;
+npre = 2; npost = 2; numcycles = 11;
 
 b       = zeros(length(A),1); %b(ceil(length(A)/2),1)=1;
 x_init  = randn(length(A),1);
 
-[x_sol,relres] = twogrid(A,restr,interp,b,x_init,dim,npre,npost,w,smo,numcycles);
+%gauss-seidel smoothing by default
+[x_sol,relres] = twogrid_som(A,restr,interp,b,x_init,npre,npos,numcycles)
 
