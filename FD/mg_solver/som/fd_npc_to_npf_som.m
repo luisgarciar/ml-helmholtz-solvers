@@ -30,6 +30,7 @@ if par>1
 
     m   = (par*k)/(pi*(npc+1));
     lev = ceil(log2(m));
+    lev = max(lev,1);
     npf = 2^(lev-1)*(npc+1)-1;
     
 else

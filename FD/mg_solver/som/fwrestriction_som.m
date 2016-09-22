@@ -44,7 +44,6 @@ switch dim
                 npcc  = npc+2;
          
                 R     = sparse(npcc^2,npff^2);
-                size(R)
 
                 %The restriction matrix is filled by rows 
                 %(change this later!)

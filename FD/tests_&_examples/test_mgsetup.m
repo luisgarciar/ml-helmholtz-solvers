@@ -18,11 +18,11 @@ eps  = 0.5*k^2 ;  %imaginary shift of shifted Laplacian
 switch dim
     case 1
         A = helmholtz(k,npf,bc);
-        M = shift_laplace(k,b1,b2,npf,bc);
+        M = helmholtz(k,eps,npf,bc);
 
     case 2
         A = helmholtz2(k,npf,npf,bc);
-        M = shift_laplace2(k,b1,b2,npf,npf,bc);
+        M = helmholtz2(k,eps,npf,npf,bc);
 end
 
 % Test of V-cycle on a Helmholtz or Poisson problem

@@ -1,18 +1,18 @@
 function [x_sol] = Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %% VCYCLE_SOM Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
 %
-%   Use: Vcycle_som(grid_matrices,grid_smooth,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+%   Use: Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %
 %   Input:
-%       Output from the function mgsmsetup: 
+%       Output from the function mg_setup_som: 
 %         - galerkin_matrices: cell array with Helmholtz matrices on all
 %                              levels
-%         - galerkin_split:    cell array with matrix splittings for smoothers
+%         - galerkin_split:    cell array with matrix splittings (for smoothers)
 %         - restrict_op:       cell array with restriction operators
 %         - interp_op:         cell array with interpolation operators
 %
-%       x0:              Initial guess
-%       f:               right-hand side
+%       x0:              initial guess
+%       b:               right-hand side
 %       smo:             smoother ('gs' for Gauss-Seidel, 'wjac' for w-Jacobi,'rbgs' for red-black Gauss Seidel in 2D)
 %       npre, npos:      number of pre, post smoothing steps
 %       w:               parameter for Jacobi iteration (set w=1 when using Gauss-Seidel)
@@ -24,10 +24,9 @@ function [x_sol] = Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,inter
 %   Author: Luis Garcia Ramos,          
 %           Institut fur Mathematik, TU Berlin
 %           Version 1.0, Jun 2016
-%
         
 %%    
-    if length(galerkin_matrices) == 1 %If on coarse level, solve exactly
+    if length(galerkin_matrices) == 1 %If on coarsest level, solve exactly
         x_sol = galerkin_matrices{1,1}\b;
         return;
         

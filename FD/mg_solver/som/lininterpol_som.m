@@ -35,16 +35,16 @@ switch dim
         Z   = 0.5*sparse(Z(:,1:2:(npf-2)));
         
     case 2
+        npf = 2*(npc)+1; %number of interior points in fine grid (1D)
         switch bc
-            case 'dir'
-                npf = 2*(npc)+1; %length of fine grid vectors (1D)
+            case 'dir'                
                 z   = zeros(npf,1); z(1:3,1) = [1;2;1];
                 Z   = gallery('circul',z)';
                 Z   = 0.5*sparse(Z(:,1:2:(npf-2))); %1D operator
                 Z   = kron(Z,Z);  %2D operator 
                 
             case 'som'
-               Z=4*fwrestriction_som(npf,dim,bc)';
+               Z=4*sparse(fwrestriction_som(npf,dim,bc)');
         end
         
         

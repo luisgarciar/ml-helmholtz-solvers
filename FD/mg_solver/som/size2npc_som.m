@@ -11,7 +11,6 @@ function [npc,npf] = size2npc_som(s,dim,bc)
 %        npf, npc: number of points on fine and coarse grids
 %
 %% 
-
 assert(mod(s,2)==1,'size must be odd');
 
 switch dim
@@ -21,8 +20,8 @@ switch dim
          npf = sqrt(s);
          assert(floor(npf) == npf,'grid of dim 2 must be square');
 
-         if bc = 'som'
-             npf = npf-2; 
+         if strcmp(bc,'som')==1
+            npf = npf-2; 
          end
 end
 

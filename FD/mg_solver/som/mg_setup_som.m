@@ -34,10 +34,8 @@ function [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup_som(A,num
 %  Works with Sommerfeld boundary conditions
 %
 %%  Construction of restriction, interpolation and Galerkin matrices
-
 s  = length(A);
 [npc,npf] = size2npc_som(s,dim,bc);
-%numlev
 
 restrict          = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
 interp            = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
@@ -47,7 +45,7 @@ galerkin_split    = cell(numlev,1);      %grid_split{i}: matrix splittings neede
 %Level 1 
 i=1;
 galerkin_matrices{i} = A;
-restrict{i}         = fwrestriction_som(npf,dim,bc);    %fw restriction, grid 1 to grid 2 
+restrict{i}         = fwrestriction_som(npf,dim,bc); %fw restriction, grid 1 to grid 2 
 interp{i}           = lininterpol_som(npc,dim,bc);      %lin interp, grid 2 to grid 1
 galerkin_split{i}.U = sparse(triu(A,1));         %matrix splitting of A
 galerkin_split{i}.L = sparse(tril(A,-1));
@@ -72,43 +70,36 @@ if numlev==1
     return;
 end
 
-switch bc
-    case 'dir'
-        for i=2:numlev-1
-            %pause
-            npf = npc;  npc = round((npf-1)/2);         
-            galerkin_matrices{i} = sparse(restrict{i-1}*galerkin_matrices{i-1}*interp{i-1}); %Coarse grid Galerkin matrix
-            galerkin_split{i}.U=sparse(triu(galerkin_matrices{i},1));
-            galerkin_split{i}.L=sparse(tril(galerkin_matrices{i},-1));
-            galerkin_split{i}.D=spdiags(diag(galerkin_matrices{i}),0,length(galerkin_matrices{i}),length(galerkin_matrices{i}));
-            galerkin_split{i}.P=speye(length(galerkin_matrices{i}));
 
-            if i<numlev
-                restrict{i}  = fwrestriction_som(npf,dim,bc); %fw restriction, grid i to grid i+1 
-                interp{i}    = lininterpol_som(npc,dim,bc);   %lin interp, grid i+1 to grid i
-                
-                %[s1,s2] = size(grid_matrices{i});
-                %[r1,r2] = size(restrict{i});
-                %[i1,i2] = size(interp{i});
-%                sprintf(formatText1,i,npf,npc)
-%                sprintf(formatText2,i,s1,s2,r1,r2,i1,i2)
-            end
-            
+for i=2:numlev-1
+    npf = npc;  npc = round((npf-1)/2);  
+    galerkin_matrices{i} = sparse(restrict{i-1}*galerkin_matrices{i-1}*interp{i-1}); %Coarse grid Galerkin matrix
+    galerkin_split{i}.U=sparse(triu(galerkin_matrices{i},1));
+    galerkin_split{i}.L=sparse(tril(galerkin_matrices{i},-1));
+    galerkin_split{i}.D=spdiags(diag(galerkin_matrices{i}),0,length(galerkin_matrices{i}),length(galerkin_matrices{i}));
+    galerkin_split{i}.P=speye(length(galerkin_matrices{i}));
+
+    if i<numlev
+        restrict{i}  = fwrestriction_som(npf,dim,bc); %fw restriction, grid i to grid i+1 
+        interp{i}    = lininterpol_som(npc,dim,bc);   %lin interp, grid i+1 to grid i
+    end
+
 %             if dim==2
 %                 grid_smooth{i}.P=sparse(rb_reorder(npf));
 %             end
 
-        end
-        npf = npc;  npc = round((npf-1)/2); 
-        galerkin_matrices{numlev} = sparse(restrict{numlev-1}*galerkin_matrices{numlev-1}*interp{numlev-1});
-        galerkin_split{numlev}.U = sparse(triu(galerkin_matrices{numlev},1));
-        galerkin_split{numlev}.L = sparse(tril(galerkin_matrices{numlev},-1));
-        galerkin_split{numlev}.D = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
-        galerkin_split{numlev}.P = speye(length(galerkin_matrices{numlev}));
+end
+
+npf = npc;  
+galerkin_matrices{numlev} = sparse(restrict{numlev-1}*galerkin_matrices{numlev-1}*interp{numlev-1});
+galerkin_split{numlev}.U  = sparse(triu(galerkin_matrices{numlev},1));
+galerkin_split{numlev}.L  = sparse(tril(galerkin_matrices{numlev},-1));
+galerkin_split{numlev}.D  = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
+galerkin_split{numlev}.P  = speye(length(galerkin_matrices{numlev}));
 
 %       if dim==2 %Red black permutation matrix
 %           grid_smooth{numlev}.P=rb_reorder(npf);
 %       end
 end       
-end
+
 

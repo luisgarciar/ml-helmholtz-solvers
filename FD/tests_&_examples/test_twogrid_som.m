@@ -2,19 +2,25 @@
 clc;
 bc  = 'som';
 dim = 2;
-k   = 5;
-npc = 50; npf = 2*(npc)+1;
+k   = 50;
+npc = 50; npf = 2*(npc)+1; eps=0.5*k^2;
 
-A = helmholtz2(k,0,npf,npf,bc);
+A = helmholtz2(k,eps,npf,npf,bc);
+tic
 restr  =  fwrestriction_som(npf,dim,bc); %size(restr)
 interp =  4*restr';
+time1  = toc;
 
 %Two-grid cycle
-npre = 2; npost = 2; numcycles = 11;
-
+npre = 2; npos = 2; numcycles = 10;
 b       = zeros(length(A),1); %b(ceil(length(A)/2),1)=1;
 x_init  = randn(length(A),1);
 
-%gauss-seidel smoothing by default
-[x_sol,relres] = twogrid_som(A,restr,interp,b,x_init,npre,npos,numcycles)
+L=sparse(tril(A));
+U=sparse(triu(A)); 
+D=sparse(diag(diag(A)));
 
+%gauss-seidel smoothing by default
+tic
+[x_sol,relres] = twogrid_som(A,L,U,D,restr,interp,b,x_init,npre,npos,numcycles);
+time2=toc;

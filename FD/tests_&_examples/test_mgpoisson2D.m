@@ -1,8 +1,8 @@
 %Test multigrid Poisson
 clear all;
 npc = 5;  %number of points in coarsest grid (1D) 
-par = 12; %discretization parameter (type 'help fd_npc_to_npf' for more info)
-k   = 40;
+par = 0.3; %discretization parameter (type 'help fd_npc_to_npf' for more info)
+k   = 100;
 eps = 0.5*k^2;
 dim = 2;
 bc  = 'dir';
@@ -10,10 +10,10 @@ bc  = 'dir';
 [npf,lev]  = fd_npc_to_npf(npc,k,par);  %number of interior points in finest grid (1D)
 
 %% Poisson matrix and right hand side
-k =  0;
+%k =  0;
 npx = npf; npy = npf;  
 npt = npx*npy;
-A   = helmholtz2(k,0,npx,npy,bc);
+A   = helmholtz2(k,eps,npx,npy,bc);
 
 % If u(x,y)=sin(m*pi*x)*sin(n*pi*y) then
 % f =(-k^2+m^2*pi^2+pi^2*n^2)*sin(m*pi*x).*sin(n*pi*y)
@@ -53,7 +53,7 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
   setuptime = toc;
  
 % Parameters of V-cycle and Jacobi iteration
- npre = 2; npos = 2; w = 2/3; smo = 'gs'; numcycles = 10;
+ npre = 1; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 10;
  x0       = zeros(size(b));
  normr0   = norm(b-A*x0);
 
@@ -64,12 +64,12 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
  profile off
  
  r1     = b-A*u_mg;
- normr1 = norm(r1)
+ normr1 = norm(r1);
  relres = normr1/normr0
  
  %plot of solution computed with multigrid
  U_mg  = reshape(u_mg,[npx,npy]); 
- figure(4); surf(x,y,U_mg);  title('Multigrid Solution')
+ figure(4); surf(x,y,real(U_mg));  title('Multigrid Solution')
 
  
  

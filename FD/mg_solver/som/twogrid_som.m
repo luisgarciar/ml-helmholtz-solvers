@@ -1,8 +1,8 @@
-function [x_sol,relres] = twogrid_som(A,restr,interp,f,x_init,npre,npos,numcycles)
+function [x_sol,relres] = twogrid_som(A,L,U,D,restr,interp,f,x_init,npre,npos,numcycles)
 
-L=sparse(tril(A));
-U=sparse(triu(A)); 
-D=sparse(diag(diag(A))); 
+% L=sparse(tril(A));
+% U=sparse(triu(A)); 
+% D=sparse(diag(diag(A))); 
 M = D+L; N = -U;
 
 %Construct Galerkin coarse matrix
@@ -18,7 +18,7 @@ for i=1:numcycles
     end   
     
     res     = f-A*x_sol; 
-
+    
     %Restrict to coarse grid and solve coarse error equation exactly
     rc   = restr*res; 
     ec   = Ac\rc;

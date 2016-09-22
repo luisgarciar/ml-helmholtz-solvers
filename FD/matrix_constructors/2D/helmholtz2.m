@@ -1,6 +1,5 @@
 function [A] = helmholtz2(k,eps,npx,npy,bc)
-%% HELMHOLTZ2: Constructs matrices for the 2D Helmholtz
-%  and shifted Laplace problems.
+%% HELMHOLTZ2: Constructs matrices for the 2D Helmholtz and shifted Laplace problems.
 %  Constructs the finite difference matrix corresponding
 %  to the discretization of div(grad u)- (k^2+i*eps)u = f in (0,1)x(0,1)
 %
@@ -37,7 +36,7 @@ function [A] = helmholtz2(k,eps,npx,npy,bc)
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin
 %
-%Version 1.0 - Jul 2016
+%Version 2.0 - Jul 2016
 %%%%%
 
 %% Construction of 2D matrix
@@ -47,14 +46,6 @@ hy  = 1/(npy+1);  %gridsize in y-direction
 
 switch bc
     case 'dir'        
-%         l    = ones(npx,1)*(-1/hx^2); 
-%         d    = ones(npx,1)*(2/hx^2); 
-%         Dx   = spdiags([l d l],[-1 0 1],npx,npx); %1D Neg Laplacian, x direction
-%         l    = ones(npy,1)*(-1/hy^2);
-%         d    = ones(npy,1)*(2/hy^2);
-%         Dy   = spdiags([l d l],[-1 0 1],npy,npy); %1D Neg Laplacian, y direction
-%         NLap = kron(Dx,speye(npy))+kron(speye(npx),Dy); %2D Negative Laplacian
-%         A    = NLap - (k^2+1i*eps)*speye(length(NLap));
         
           np = npx*npy;
           W = -ones(np,1)/hx^2;  E=W; %Dxx
@@ -74,83 +65,79 @@ switch bc
         ny = npy+2;
         np = nx*ny;
         
-        %Interior points (i*hx,j*hy)
-        l    = ones(nx,1)*(-1/hx^2); 
-        d    = ones(nx,1)*(2/hx^2); 
-        Dx   = spdiags([l d l],[-1 0 1],nx,nx); %1D Laplacian, x direction
-        l    = ones(ny,1)*(-1/hy^2);
-        d    = ones(ny,1)*(2/hy^2);
-        Dy   = spdiags([l d l],[-1 0 1],ny,ny); %1D Laplacian, y direction
-        NLap = kron(Dx,speye(ny))+kron(speye(nx),Dy); %2D Negative Laplacian
-        A    = NLap - (k^2+1i*eps)*speye(nx*ny);
-        
+        %Interior points
+        W = -ones(np,1)/hx^2;  E=W; %Dxx
+        N = -ones(np,1)/hy^2;  S=N; %Dyy
+        C = ((2/hx^2) + (2/hy^2)-(k^2+1i*eps))*ones(np,1);
+        A = spdiags([S W C E N],[-nx -1 0 1 nx],np, np);
+          
         %Corner points
         %SW Corner: (0,0)
-        A(1,:)       = zeros(np,1)';
-        A(1,1)     = (-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2);
+        A(1,:)     = zeros(np,1)';
+        A(1,1)     = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx;
         A(1,2)     = -2/hx^2;
-        A(1,npx+3) = -2/hy^2;
-
+        A(1,1+nx)  = -2/hy^2;
+      
         %SE Corner: (1,0)
-        n = npx+2;
+        n=nx;
         A(n,:)    = zeros(np,1)';
-        A(n,n)    = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-        A(n,n-1)  = -2/hx^2;
-        A(n,2*n)  = -2/hy^2;
+        A(n,n)   =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx;
+        A(n,n-1) = -2/hx^2;
+        A(n,2*n) = -2/hy^2;
 
         %NW Corner: (0,1)
-        n = (npx+2)*(npy+1)+1;
-        A(n,:)         = zeros(np,1)';
-        A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-        A(n,n+1)       = -2/hx^2;
-        A(n,n-(npx+2)) = -2/hy^2;
+        n = (nx)*(ny-1)+1;
+        A(n,:)    = zeros(np,1)';
+        A(n,n)    = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx;
+        A(n,n+1)  = -2/hx^2;
+        A(n,n-nx) = -2/hy^2;
 
         %NE Corner: (1,1)
-        n = (npx+2)*(npy+2);
-        A(n,:)         = zeros(np,1)';
-        A(n,n)         = -k^2-1i*eps-2*1i*k/hy-2*1i*k/hx+2/hx^2+2/hy^2;
-        A(n,n-1)       = -2/hx^2;
-        A(n,n-(npx+2)) = -2/hy^2;
+        n = nx*ny;
+        A(n,:)     =  zeros(np,1)';
+        A(n,n)     =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy-2*1i*k/hx;
+        A(n,n-1)   = -2/hx^2;
+        A(n,n-nx)  = -2/hy^2;
      
         %Noncorner boundary points
         %West boundary: (0,j*hy)
-         for j = 1:npy
-              n = j*(npx+2)+1; %changing from (0,j) to global index
-              A(n,:)       = zeros(np,1)'; %clear row
-              A(n,n)       = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
-              A(n,n+1)     = -2/hx^2;
-              A(n,n+npx+2) = -1/hy^2;
-              A(n,n-npx-2) = -1/hy^2;   
-         end
+        for j = 1:npy
+            n = j*nx+1; %changing from (0,j) to global index n
+            A(n,:)    =  zeros(np,1)'; %clear row
+            A(n,n)    =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
+            A(n,n+1)  = -2/hx^2;
+            A(n,n+nx) = -1/hy^2;
+            A(n,n-nx) = -1/hy^2;   
+        end
          
          %South boundary: (i*hx,0)
-         for i=1:npx
-             n=i+1; %changing from (i,0) to global index
-             A(n,:)       = zeros(np,1)';
-             A(n,n)       = -k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2;
-             A(n,n+1)     = -1/hx^2;
-             A(n,n-1)     = -1/hx^2;
-             A(n,n+npx+2) = -1/hy^2;  
-         end
+        for i=1:npx
+            n=i+1; %changing from (i,0) to global index n
+            A(n,:)     = zeros(np,1)';
+            A(n,n)     = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+            A(n,n+1)   = -1/hx^2;
+            A(n,n-1)   = -1/hx^2;
+            A(n,n+nx)  = -2/hy^2;  
+        end
        
          %East boundary: (1,j*hy)
          for j=1:npy
-             n = (npx+2)*(j+1); %changing from (npx+1,j) to global index
-             A(n,:)       = zeros(np,1)';
-             A(n,n)       = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
-             A(n,n-1)     = -1/hx^2;
-             A(n,n-npx-2) = -1/hy^2;  
-             A(n,n+npx+2) = -1/hy^2;
+            n = (nx)*(j+1); %changing from (nx,j) to global index
+            A(n,:)    = zeros(np,1)';
+            A(n,n)    = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
+            A(n,n-1)  = -2/hx^2;
+            A(n,n-nx) = -1/hy^2;  
+            A(n,n+nx) = -1/hy^2;
          end
 
          %North boundary: (i*hx,1)
          for i=1:npx
-             n = (npx+2)*(npy+1)+(i+1);
-             A(n,:)       = zeros(np,1)';
-             A(n,n)       = (-k^2-1i*eps-2*1i*k/hy+2/hx^2+2/hy^2);
-             A(n,n-1)     =  -1/hx^2;
-             A(n,n+1)     =  -1/hx^2;  
-             A(n,n-npx-2) = -2/hy^2;
+             n = (nx)*(npy+1)+(i+1);
+             A(n,:)    = zeros(np,1)';
+             A(n,n)    = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+             A(n,n-1)  = -1/hx^2;
+             A(n,n+1)  = -1/hx^2;  
+             A(n,n-nx) = -2/hy^2;
          end
    
     otherwise
