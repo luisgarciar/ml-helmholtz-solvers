@@ -50,7 +50,7 @@ interp{i}           = lininterpol_som(npc,dim,bc);      %lin interp, grid 2 to g
 galerkin_split{i}.U = sparse(triu(A,1));         %matrix splitting of A
 galerkin_split{i}.L = sparse(tril(A,-1));
 galerkin_split{i}.D = spdiags(diag(A),0,length(A),length(A));
-galerkin_split{i}.P = speye(length(galerkin_matrices{i}));
+galerkin_split{i}.P = perm_rb_som(length(galerkin_matrices{i}));
 
 % [s1,s2] = size(grid_matrices{i});
 % [r1,r2] = size(restrict{i});
@@ -77,7 +77,7 @@ for i=2:numlev-1
     galerkin_split{i}.U=sparse(triu(galerkin_matrices{i},1));
     galerkin_split{i}.L=sparse(tril(galerkin_matrices{i},-1));
     galerkin_split{i}.D=spdiags(diag(galerkin_matrices{i}),0,length(galerkin_matrices{i}),length(galerkin_matrices{i}));
-    galerkin_split{i}.P=speye(length(galerkin_matrices{i}));
+    galerkin_split{i}.P=perm_rb_som(length(galerkin_matrices{i}));
 
     if i<numlev
         restrict{i}  = fwrestriction_som(npf,dim,bc); %fw restriction, grid i to grid i+1 
@@ -95,7 +95,7 @@ galerkin_matrices{numlev} = sparse(restrict{numlev-1}*galerkin_matrices{numlev-1
 galerkin_split{numlev}.U  = sparse(triu(galerkin_matrices{numlev},1));
 galerkin_split{numlev}.L  = sparse(tril(galerkin_matrices{numlev},-1));
 galerkin_split{numlev}.D  = spdiags(diag(galerkin_matrices{numlev}),0,length(galerkin_matrices{numlev}),length(galerkin_matrices{numlev}));
-galerkin_split{numlev}.P  = speye(length(galerkin_matrices{numlev}));
+galerkin_split{numlev}.P  = perm_rb_som(length(galerkin_matrices{numlev}));
 
 %       if dim==2 %Red black permutation matrix
 %           grid_smooth{numlev}.P=rb_reorder(npf);

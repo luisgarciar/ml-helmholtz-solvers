@@ -71,8 +71,3 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
  U_mg  = reshape(u_mg,[npx,npy]); 
  figure(4); surf(x,y,real(U_mg));  title('Multigrid Solution')
 
- 
- 
- 
- 
- 
