@@ -2,15 +2,16 @@
 clc; clear all; close all;
 bc  = 'dir';
 dim = 2;
-k   = 100;
-eps = 0;
+k   = 80;
+eps = 0.8*k^2;
 npc = 3; 
 ppw = 20;
 
 [npf,lev] = fd_npc_to_npf_som(npc,k,ppw); 
 
+%npf=7;
 %Constructing the matrices and multigrid operators
-k=0;
+%k=0;
 A = helmholtz2(k,eps,npf,npf,bc);
 [galerkin_matrices,galerkin_splitting,restrict,interp] = mg_setup_som(A,lev,bc,dim);
 
@@ -21,15 +22,19 @@ figure(2)
 spy(galerkin_matrices{2})
 
 %%
+
 %right hand side and initial guess
-b   = zeros(length(A),1); 
+b   = rand(length(A),1);  b=b/norm(b);
 ex_sol = A\b;
 
-x0  = rand(length(A),1); 
+x0  = zeros(length(A),1);
 %x0  = ex_sol; 
 
 %Parameters of multigrid solver
-npre = 1; npos = 1; w = 0.6; smo = 'gs'; numcycles = 20;
+npre = 2; npos = 1; w = 0.8; smo = 'gs'; numcycles = 20;
+
+
+
 
 %Running multigrid cycle for shifted Laplacian
 relres = zeros(numcycles+1,1); relres(1)=norm(b-A*x0);

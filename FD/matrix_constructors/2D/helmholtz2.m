@@ -44,6 +44,8 @@ function [A] = helmholtz2(k,eps,npx,npy,bc)
 hx  = 1/(npx+1);  %gridsize in x-direction
 hy  = 1/(npy+1);  %gridsize in y-direction
 
+
+
 switch bc
     case 'dir'        
         

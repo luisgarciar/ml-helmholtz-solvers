@@ -17,15 +17,14 @@ f = @(x) ((m*pi)^2-k^2)*sin(m*pi*x);
 h = 1/(npf+1);  grid = h*(1:1:npf)';
 b = f(grid);    u_ex = u(grid);
 
-
 %% Helmholtz and Shifted Laplacian Matrices and rhs
 dim = 1;
 A   = helmholtz(k,eps,npf,bc);
-
  
 %% Multigrid Setup
 % Construct matrices on all grids and interpolation operators
-[grid_matrices,grid_smooth,restrict,interp] = mg_setup(A,lev,bc,dim);
+op_type = 'gal'
+[mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,lev,bc,dim);
 x0 = zeros(length(A),1);
 
 % Parameters of V-cycle and Jacobi iteration
@@ -35,14 +34,14 @@ r0   = norm(b-A*x0);
 % Test of multigrid on 1D Poisson problem
 % Use the profiler to evaluate performance of code
 % profile on
- [xsol] = Vcycle(grid_matrices,grid_smooth,restrict,interp,x0,b,npre,npos,w,smo,numcycles);
+ [xsol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles);
 % profile off
 % 
 r1  = b-A*xsol;
 relres = norm(r1)/norm(r0);
 % 
 for i=1:numcycles
-[xsol] = Vcycle(grid_matrices,grid_smooth,restrict,interp,x0,b,npre,npos,w,smo,1);
+[xsol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,1);
 r1     = b-A*xsol;
 normres(i,1) = norm(r1);
 res_rat(i,1) = norm(r1)/norm(r0);

@@ -8,6 +8,6 @@ dim = 1;
 
 npc = 1; npf = 2*(npc)+1;
 interp   = fwrestriction(npf,dim); size(interp)
-restr   = lininterpol(npc, dim);   size(restr)
+restr    = lininterpol(npc, dim);   size(restr)
 
 %[SLgrid_matrices,restrict,interp] = mg_setup(M,lev,bc,dim);

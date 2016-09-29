@@ -1,5 +1,5 @@
-function R = fwrestriction_som(npf,dim,bc)
-%% FWRESTRICTION_SOM Constructs the matrix corresponding to the full weight 
+function R = fwrestriction(npf,dim,bc)
+%% FWRESTRICTION Constructs the matrix corresponding to the full weight 
 %  restriction operator from a fine grid with npf interior points.
 %  
 %   Use:    R = fwrestriction(npf,dim,bc)  
@@ -18,7 +18,7 @@ function R = fwrestriction_som(npf,dim,bc)
 %           Institut fur Mathematik, TU Berlin
 %   Version 2.0, Sep 2016
 %  Dirichlet and Sommerfeld boundary conditions
-%  Works only on uniform grids
+%  Works only on uniform grids: Modify this
 %
 %%
 switch dim

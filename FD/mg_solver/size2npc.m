@@ -1,5 +1,5 @@
-function [npc,npf] = size2npc_som(s,dim,bc)
-%SIZE2NPC_SOM Finds the number of points on a coarse grid after standard
+function [npc,npf] = size2npc(s,dim,bc)
+%SIZE2NPC Finds the number of points on a coarse grid after standard
 %             coarsening given the size of a fine matrix (1D or 2D)
 %
 % Input: 

@@ -1,4 +1,4 @@
-function [x_sol,relres] = twogrid_som(A,L,U,D,restr,interp,f,x_init,npre,npos,numcycles)
+function [x_sol,relres] = twogrid(A,L,U,D,restr,interp,f,x_init,npre,npos,numcycles)
 
 % L=sparse(tril(A));
 % U=sparse(triu(A)); 

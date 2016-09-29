@@ -1,8 +1,8 @@
 %Test multigrid Poisson
 clear all;
 npc = 5;  %number of points in coarsest grid (1D) 
-par = 0.3; %discretization parameter (type 'help fd_npc_to_npf' for more info)
-k   = 100;
+par = 20; %discretization parameter (type 'help fd_npc_to_npf' for more info)
+k   = 10;
 eps = 0.5*k^2;
 dim = 2;
 bc  = 'dir';
@@ -49,7 +49,8 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
  
 %% Multigrid Setup
   tic
-  [galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(A,lev,bc,dim);
+  op_type = 'gal'
+  [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,0,op_type,lev,bc,dim);
   setuptime = toc;
  
 % Parameters of V-cycle and Jacobi iteration
@@ -60,7 +61,7 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
 % Test of multigrid on 2D Poisson problem
 % Use the profiler to evaluate performance of code
  profile on
- [u_mg] = Vcycle(galerkin_matrices,galerkin_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles);
+ [u_mg] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles);
  profile off
  
  r1     = b-A*u_mg;

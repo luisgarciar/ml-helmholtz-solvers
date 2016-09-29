@@ -31,14 +31,15 @@ M  = helmholtz(k,eps,npf,bc); %shifted Laplacian
  
 %% Multigrid Setup
 % Construct matrices on all grids and interpolation operators
-[galerkin_matrices,galerkin_split,restrict,interp] = mg_setup(M,lev,bc,dim);
+op_type = 'gal';
+[mg_mat,mg_split,restrict,interp] = mg_setup(M,k,eps,op_type,lev,bc,dim);
 x0 = zeros(length(M),1);
  
 %% Test of Preconditioned GMRES
 %Setting the MG preconditioner Minv
 %Parameters of V-cycle and Jacobi iteration
 npre = 2; npos = 2; w = 2/3; smo = 'wjac'; numcycles = 1;
-Minv = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,interp,x0,v,npre,npos,w,smo,1);
+Minv = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,1);
 
 %Parameters of GMRES iteration
 tol   = 1e-10;

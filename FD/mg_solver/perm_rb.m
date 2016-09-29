@@ -1,4 +1,4 @@
-function [ P ] = perm_rb_som(s)
+function [ P ] = perm_rb(s)
 %% PERM_RB Constructs a permutation matrix for the red black ordering
 %        on a square domain
 %
@@ -18,7 +18,6 @@ assert(sqrt(s)==round(sqrt(s)),'input must be a square number');
 %n: number of points in one dimension
 n = sqrt(s);
 I = speye(s);
-
 %We construct the permutation matrix for the red-black ordering
 if(mod(n,2)==1);
      k=round((s-1)/2);       
@@ -37,8 +36,8 @@ else
         %black variables
         perm(2*k^2+n*(i-1)+1:2*k^2+n*i,1) = [v1+1;v2-1];       
     end    
-    P = I(perm,:);      
-end%
+    P = I(perm,:)      
+end
 
 end
 
