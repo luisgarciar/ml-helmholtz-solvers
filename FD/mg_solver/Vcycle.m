@@ -25,6 +25,7 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
         
 %%    
     if length(mg_mat) == 1 %If on coarsest level, solve exactly
+        %size(b)
         x_sol = mg_mat{1,1}\b;
         return;
         

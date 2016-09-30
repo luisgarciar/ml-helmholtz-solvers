@@ -39,90 +39,91 @@ switch dim
                 
             case 'som'
                 assert(mod(npf,2)==1,'number of interior points must be odd')
-                npc = round((npf+1)/2)-1;
+                npc = round((npf-1)/2);
                 npff  = npf+2; % total number of points with endpoints
                 npcc  = npc+2;
-         
-                R     = sparse(npcc^2,npff^2);
-
-                %The restriction matrix is filled by rows 
-                %(change this later!)
-                %indc: row index (coarse grid)
-                %indf: column index (fine grid)
-
-                %(0,0)- South-West Corner
-                indc=1; indf=1; 
-                R(indc,indf)=4; R(indc,indf+1)=4;
-                R(indc,indf+npff)=4; R(indc,indf+npff+1)=4;
-                
-                %(1,0)-  South-East Corner
-                indc=npcc; indf=npff;
-                R(indc,indf)=4;  R(indc,indf-1)=4;
-                R(indc,indf+npff)=4; R(indc,indf+npff-1)=4;
-                
-                %(0,1)- North-West Corner
-                indc=npcc*(npcc-1)+1; indf=npff*(npff-1)+1;
-                R(indc,indf)=4;   R(indc,indf-npf)=4;
-                R(indc,indf+1)=4; R(indc,indf-npf+1)=4;
-                
-                %(1,1)- North East Corner
-                indc=npcc^2; indf=npff^2;
-                R(indc,indf)=4; R(indc,indf-1)=4;
-                R(indc,indf-npff)=4; R(indc,indf-npff-1)=4;
-                             
-                %South boundary y=0
-                for indc=2:(npcc-1)
-                    indf=2*indc-1;
-                    R(indc,indf)=4; R(indc,indf+npff)=4;
-                    R(indc,indf+1)=2; R(indc,indf-1)=2;
-                    R(indc,indf+npff+1)=2; R(indc,indf+npff-1)=2; 
-                end
-                
-                %East boundary x=1
-                for i=2:(npcc-1)
-                    indc=i*npcc; indf=(2*i-1)*npff;
-                    R(indc,indf)=4; R(indc,indf-1)=4;
-                    R(indc,indf-1+npff)=2; R(indc,indf-1-npff)=2;
-                    R(indc,indf-npff)=2; R(indc,indf+npff)=2;
-                end
-                
-                
-                %North boundary y=1
-                for i=2:(npcc-1)
-                   indc=(npcc-1)*npcc+i; indf=(npff-1)*npff+(2*i-1);
-                   R(indc,indf)=4; R(indc,indf-npf)=4; 
-                   R(indc,indf+1)=2; R(indc,indf-1)=2; 
-                   R(indc,indf-npff+1)=2; R(indc,indf-npff-1)=2;
-                end
-                
-                %West boundary x=0
-                for i=2:(npcc-1)
-                   indc=npcc*(i-1)+1; indf=npff*2*(i-1)+1;
-                   R(indc,indf)=4; R(indc,indf+1)=4;
-                   R(indc,indf+npff)=2;  R(indc,indf-npff)=2;
-                   R(indc,indf+1+npff)=2;  R(indc,indf+1-npff)=2;        
-                end
-                             
-                %Interior points
-                for i=2:(npcc-1)
-                    for j=2:(npcc-1)
-                        indc=i+npcc*(j-1);
-                        ii=2*i-1; jj=2*j-1;
-                        indf=ii+npff*(jj-1);
-                        
-                        R(indc,indf)=4;
-                        R(indc,indf+npf)=2; R(indc,indf-npf)=2;
-                        R(indc,indf+1)=2; R(indc,indf-1)=2;
-                        R(indc,indf-1-npf)=1; R(indc,indf-1+npf)=1;
-                        R(indc,indf+1-npf)=1; R(indc,indf+1+npf)=1;
-                        
-                    end
-                end
-                R=R/16;
-                
+                R = 0.25*lininterpol(npc,dim,'som')';
+                 
         end      
       
 end
 
+
+
+
+         
+%                 R     = sparse(npcc^2,npff^2);
+% 
+%                 %The restriction matrix is filled by rows 
+%                 %(change this later!)
+%                 %indc: row index (coarse grid)
+%                 %indf: column index (fine grid)
+% 
+%                 %(0,0)- South-West Corner
+%                 indc=1; indf=1; 
+%                 R(indc,indf)=4; R(indc,indf+1)=4;
+%                 R(indc,indf+npff)=4; R(indc,indf+npff+1)=4;
+%                 
+%                 %(1,0)-  South-East Corner
+%                 indc=npcc; indf=npff;
+%                 R(indc,indf)=4;  R(indc,indf-1)=4;
+%                 R(indc,indf+npff)=4; R(indc,indf+npff-1)=4;
+%                 
+%                 %(0,1)- North-West Corner
+%                 indc=npcc*(npcc-1)+1; indf=npff*(npff-1)+1;
+%                 R(indc,indf)=4;   R(indc,indf-npf)=4;
+%                 R(indc,indf+1)=4; R(indc,indf-npf+1)=4;
+%                 
+%                 %(1,1)- North East Corner
+%                 indc=npcc^2; indf=npff^2;
+%                 R(indc,indf)=4; R(indc,indf-1)=4;
+%                 R(indc,indf-npff)=4; R(indc,indf-npff-1)=4;
+%                              
+%                 %South boundary y=0
+%                 for indc=2:(npcc-1)
+%                     indf=2*indc-1;
+%                     R(indc,indf)=4; R(indc,indf+npff)=4;
+%                     R(indc,indf+1)=2; R(indc,indf-1)=2;
+%                     R(indc,indf+npff+1)=2; R(indc,indf+npff-1)=2; 
+%                 end
+%                 
+%                 %East boundary x=1
+%                 for i=2:(npcc-1)
+%                     indc=i*npcc; indf=(2*i-1)*npff;
+%                     R(indc,indf)=4; R(indc,indf-1)=4;
+%                     R(indc,indf-1+npff)=2; R(indc,indf-1-npff)=2;
+%                     R(indc,indf-npff)=2; R(indc,indf+npff)=2;
+%                 end
+%                 
+%                 %North boundary y=1
+%                 for i=2:(npcc-1)
+%                    indc=(npcc-1)*npcc+i; indf=(npff-1)*npff+(2*i-1);
+%                    R(indc,indf)=4; R(indc,indf-npf)=4; 
+%                    R(indc,indf+1)=2; R(indc,indf-1)=2; 
+%                    R(indc,indf-npff+1)=2; R(indc,indf-npff-1)=2;
+%                 end
+%                 
+%                 %West boundary x=0
+%                 for i=2:(npcc-1)
+%                    indc=npcc*(i-1)+1; indf=npff*2*(i-1)+1;
+%                    R(indc,indf)=4; R(indc,indf+1)=4;
+%                    R(indc,indf+npff)=2;  R(indc,indf-npff)=2;
+%                    R(indc,indf+1+npff)=2;  R(indc,indf+1-npff)=2;        
+%                 end
+%                              
+%                 %Interior points
+%                 for i=2:(npcc-1)
+%                     for j=2:(npcc-1)
+%                         indc=i+npcc*(j-1);
+%                         ii=2*i-1; jj=2*j-1;
+%                         indf=ii+npff*(jj-1);
+%                         
+%                         R(indc,indf)=4;
+%                         R(indc,indf+npf)=2; R(indc,indf-npf)=2;
+%                         R(indc,indf+1)=2; R(indc,indf-1)=2;
+%                         R(indc,indf-1-npf)=1; R(indc,indf-1+npf)=1;
+%                         R(indc,indf+1-npf)=1; R(indc,indf+1+npf)=1;
+                     
 end
+
 

@@ -57,7 +57,7 @@ f = @(x,y) (-k^2+m^2*pi^2+pi^2*n^2)*sin(m*pi*x).*sin(n*pi*y); %f=-u''-k^2u;
 
 %% Refining gridsize, h->0
 
-npt = 2.^(4:1:10);
+npt = 2.^(4:1:9);
 relerr = zeros(length(npt),1);
 
 for i=1:length(npt)

@@ -29,7 +29,6 @@ function Z = lininterpol(npc,dim,bc)
 %
 %%
 
-
 switch dim
     case 1
         npf = 2*(npc)+1; %length of fine grid vectors
@@ -49,42 +48,47 @@ switch dim
             case 'som'               
                %modify this lines later to add option for
                %diff. number of points on x and y
-               npcx  = npc; npcy = npc;
-               npccx = npcx+2; npccy= npcy+2;
-               npffx = npf; npfy = npf;
-               Z=sparse(npffx*npfy,npccx*npccy);
-               intdiv= @(x,y) idivide(int32(x),int32(y),'ceil');
+               npcix  = npc; npciy = npc;
+               npcx = npcix+2; npcy= npciy+2;
+               npfx = 2*npcx-1; npfy = 2*npcy-1;
+               intdiv = @(x,y) idivide(int32(x),int32(y),'ceil');
+                             
+               M = npfx*npfy; N = npcx*npcy;
+               Z=sparse(M,N);
 
                %We fill the matrix by rows
-               for i=1:npffx
-                   for j=1:npffy
+               for j=1:npfy
+                   for i=1:npfx
                        %(i,j): lexicographic index of point (hx*(i-1),hy*(j-1))
                        %in fine grid
-                       indf = i+(j-1)*npffx; %sequential index of point
-                       
+                       indf = i+(j-1)*npfx; %sequential index of point
                        if (mod(i,2)==1 && mod(j,2)==1)
                        %if fine grid point coincides with coarse grid point
                        %transfer the function value unchanged
-                           ii = intdiv(i,2); jj = intdiv(j,2); 
-                           indc = ii+(jj-1)*npccx;
+                           ii = intdiv(i,2); jj = intdiv(j,2);
+                           ii = intdiv(i,2); jj=intdiv(j,2); 
+                           indc = ii+(jj-1)*npcx;
+                           assert(indc<=N,'index too large')
                            Z(indf,indc) = 1;
                            
                        elseif (mod(i,2)==0 && mod(j,2)==1)
                            %interpolate using east and west coarse grid
                            %neighbors 
-                           iiwest = intdiv(i+1,2); jjwest=intdiv(j,2);
+                           iiwest = intdiv(i,2); jjwest=intdiv(j,2);
                            %index of west neighbor in coarse grid
-                           indwestc = iiwest+(jjwest-1)*npccx; 
-                           Z(indf,indwestc) = 0.5; 
-                           Z(indf,indwestc+1)= 0.5;
-                           
+                           indwestc = iiwest+(jjwest-1)*npcx;
+                           ind = [indwestc indwestc+1];
+                           assert(max(ind)<=N,'index too large'); 
+                           Z(indf,ind) = 0.5; 
+         
                        elseif(mod(i,2)==1 && mod(j,2)==0)
                            %interpolate using south and north coarse grid
                            %neighbors
-                           iisouth = div(j,2); jjsouth=div(i,2);
-                           indsouthc = iisouth+(jjsouth-1)*npccx;
-                           Z(indf,indsouthc) = 0.5;
-                           Z(indf,indsouthc+npccx) = 0.5;
+                           iisouth = intdiv(i,2); jjsouth=intdiv(j,2);
+                           indsouthc = iisouth+(jjsouth-1)*npcx;
+                           ind = [indsouthc indsouthc+npcx];                       
+                           assert(max(ind)<=N,'index too large'); 
+                           Z(indf,ind) = 0.5;
                            
                        elseif(mod(i,2)==0 && mod(j,2)==0)
                            %interpolate using SW,SE,NW,NE coarse grid
@@ -95,13 +99,15 @@ switch dim
                            iiNE = iiSE;        jjNE = jjSW+1;
                            ii = [iiSW iiSE iiNW iiNE];
                            jj = [jjSW jjSE jjNW jjNE];
-                           indc = ii+(jj-1)*npccx;
-                           Z(indf,indc) = 0.25;
+
+                           ind = ii+(jj-1)*npcx;
+                           assert(max(ind)<=N,'index is too large');
+                           Z(indf,ind) = 0.25;
                        end
                    end
                end
         end
 end
-                
+        
 end
 

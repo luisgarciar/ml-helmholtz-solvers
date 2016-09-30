@@ -1,12 +1,11 @@
-function [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,numlev,bc,dim)
+function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
 %% MG_SETUP: Constructs a hierarchy of coarse grid operators,
 %            splittings and intergrid operators for a Helmholtz/Laplace PDE problem   
 %  Use:
 %
-% [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,numlev,bc,dim)
+% [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
 %
 %  Input: 
-%  A:         Matrix on finest grid
 %
 %  k,eps:     Parameters of Helmholtz problem (k=0 for Poisson) and
 %             shifted Laplacian 
@@ -15,6 +14,8 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,numlev,bc,
 %  op_type:   Type of coarse grid operators
 %             'rd'  for rediscretized operators on coarse levels
 %             'gal' for Galerkin operators on coarse levels
+%
+%  npcc:       number of interior points on coarsest grid in 1D
 %
 %  numlev:    Total number of levels (number of coarse grids + 1)
 %
@@ -49,8 +50,10 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,numlev,bc,
 %  Added option for rediscretized operators on coarse grids
 %
 %%  Construction of restriction, interpolation and Galerkin matrices
-s  = length(A);
-[npc,npf] = size2npc(s,dim,bc);
+
+%[npc,npf] = size2npc(s,dim,bc);
+%s  = length(A);
+npf = npc_numlev_to_npf(npcc,numlev);
 
 restrict  = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
 interp    = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
@@ -58,13 +61,23 @@ mg_mat    = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
 mg_split  = cell(numlev,1);      %grid_split{i}: matrix splittings needed for smoothers i
 
 %Level 1 
-mg_mat{1}     = A;
-restrict{1}   = fwrestriction(npf,dim,bc); %fw restriction, grid 1 to grid 2 
-interp{1}     = lininterpol(npc,dim,bc);   %lin interp, grid 2 to grid 1
-mg_split{1}.U = sparse(triu(A,1));         %matrix splitting of A
-mg_split{1}.L = sparse(tril(A,-1));
-mg_split{1}.D = spdiags(diag(A),0,length(A),length(A));
-mg_split{1}.P = eye(length(A));
+switch dim
+    case 1
+    mg_mat{1} = helmholtz(k,eps,npf,bc);
+    case 2
+    mg_mat{1} = helmholtz2(k,eps,npf,npf,bc);
+    otherwise
+        error('invalid dimension')
+end
+
+npc = round((npf-1)/2);
+
+restrict{1}   = fwrestriction(npf,dim,bc);  %fw restriction, grid 1 to grid 2 
+interp{1}     = lininterpol(npc,dim,bc);    %lin interp, grid 2 to grid 1
+mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of A
+mg_split{1}.L = sparse(tril(mg_mat{1},-1));
+mg_split{1}.D = spdiags(diag(mg_mat{1}),0,length(mg_mat{1}),length(mg_mat{1}));
+mg_split{1}.P = eye(length(mg_mat{1}));
 
 if dim==2
     mg_split{1}.P = perm_rb(length(mg_mat{1}));
@@ -74,23 +87,28 @@ if numlev==1
     return;
 end
 
-for i=2:numlev-1
-    npf = npc;  npc = round((npf-1)/2);     
+npf = npc; npc= round((npf-1)/2);
+
+for i=2:numlev-1   
+    if i<numlev      
+        restrict{i} = fwrestriction(npf,dim,bc); %fw restriction, grid i to grid i+1
+        interp{i}   = lininterpol(npc,dim,bc);   %lin interp, grid i+1 to grid i        
+    end
+    
     switch op_type
         case 'rd'  %Coarse matrix by rediscretization
            switch dim
                case 1
                    mg_mat{i} = helmholtz(k,eps,npf,bc);
-                   size(mg_mat{i});
                case 2
                    mg_mat{i} = helmholtz2(k,eps,npf,npf,bc); 
-                   size(mg_mat{i});
                otherwise
                    error('invalid dimension')
            end
            
         case 'gal' %Galerkin coarse matrix
-           mg_mat{i} = sparse(restrict{i-1}*mg_mat{i-1}*interp{i-1}); 
+           mg_mat{i} = sparse(restrict{i-1}*mg_mat{i-1}*interp{i-1});
+
         otherwise
         error('Invalid operator type');      
     end    
@@ -103,23 +121,17 @@ for i=2:numlev-1
         case 1
             mg_split{i}.P = eye(npf); 
         case 2
-            mg_split{i}.P = perm_rb(length(mg_mat{i}));
-    end
-            
-    if i<numlev
-        restrict{i} = fwrestriction(npf,dim,bc); %fw restriction, grid i to grid i+1 
-        interp{i}   = lininterpol(npc,dim,bc);   %lin interp, grid i+1 to grid i
-    end
-
+            mg_split{i}.P = eye(npf); 
+    end    
+    npf = npc; npc= round((npf-1)/2);
+  
 end
 
 %Coarsest Level
-npf = npc;  
-
 switch op_type
         case 'rd'  %Coarse matrix by rediscretization
             switch dim
-               case 2
+               case 2                   
                    mg_mat{numlev} = helmholtz2(k,eps,npf,npf,bc);  
                case 1
                    mg_mat{numlev} = helmholtz(k,eps,npf,bc);
@@ -127,7 +139,7 @@ switch op_type
                    error('Invalid dimension')
             end
         case 'gal' %Galerkin coarse matrix
-            mg_mat{numlev} = sparse(restrict{numlev-1}*mg_mat{numlev-1}*interp{numlev-1});
+            mg_mat{numlev} = sparse(restrict{numlev-1}*mg_mat{numlev-1}*interp{numlev-1});           
         otherwise
         error('Invalid operator type');
 end
