@@ -17,11 +17,10 @@ function [npf]= npc_numlev_to_npf(npc,numlev)
 %
 %  Version 2.0, Sep 2016
 
-%assert(npc>0,'number of coarse grid points must be positive')
-%assert(numlev>0,'number of levels must be positive')
+%assert(npc > 0,'number of coarse grid points must be positive')
+%assert(numlev >0,'number of levels must be positive')
 
 npf = 2^(numlev-1)*(npc+1)-1;
-
 
 end
 

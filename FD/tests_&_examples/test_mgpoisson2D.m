@@ -7,7 +7,7 @@ eps = 0.5*k^2;
 dim = 2;
 bc  = 'dir';
 
-[npf,lev]  = fd_npc_to_npf(npc,k,par);  %number of interior points in finest grid (1D)
+[npf,numlev]  = fd_npc_to_npf(npc,k,par);  %number of interior points in finest grid (1D)
 
 %% Poisson matrix and right hand side
 %k =  0;
@@ -49,8 +49,8 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
  
 %% Multigrid Setup
   tic
-  op_type = 'gal'
-  [mg_mat,mg_split,restrict,interp] = mg_setup(A,k,0,op_type,lev,bc,dim);
+  op_type = 'gal';
+  [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
   setuptime = toc;
  
 % Parameters of V-cycle and Jacobi iteration

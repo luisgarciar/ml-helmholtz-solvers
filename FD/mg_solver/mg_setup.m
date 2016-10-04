@@ -65,6 +65,7 @@ switch dim
     case 1
     mg_mat{1} = helmholtz(k,eps,npf,bc);
     case 2
+    %npf
     mg_mat{1} = helmholtz2(k,eps,npf,npf,bc);
     otherwise
         error('invalid dimension')

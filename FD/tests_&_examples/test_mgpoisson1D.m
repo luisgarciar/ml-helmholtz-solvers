@@ -7,7 +7,7 @@ m  = 3;
 k=10;  eps = 0; %Helmholtz problem
 ppw = 12;   %number of points per wavelength
 
-[npf,lev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
+[npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 k = 0;  eps = 0; %Poisson problem
 
@@ -23,8 +23,8 @@ A   = helmholtz(k,eps,npf,bc);
  
 %% Multigrid Setup
 % Construct matrices on all grids and interpolation operators
-op_type = 'gal'
-[mg_mat,mg_split,restrict,interp] = mg_setup(A,k,eps,op_type,lev,bc,dim);
+op_type = 'gal';
+[mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
 x0 = zeros(length(A),1);
 
 % Parameters of V-cycle and Jacobi iteration
@@ -48,5 +48,4 @@ res_rat(i,1) = norm(r1)/norm(r0);
 err_rat(i,1) = norm(xsol-x0)/norm(x0);
 x0  = xsol; r0 = b-A*x0;
 end
-
 

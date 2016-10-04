@@ -4,11 +4,10 @@
 
 npc = 3;    %number of interior points in coarsest grid in one dim 
 bc = 'dir';
-
 %wavenumber and imaginary shift of shifted Laplacian
 k   = 100;  eps = 0.5*k^2; %Helmholtz problem
 ppw = 12;   %number of points per wavelength
-[npf,lev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
+[npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 %Exact solution (test problem, not good for GMRES, eigenfunction!)
 % m = 3;
@@ -27,12 +26,13 @@ ppw = 12;   %number of points per wavelength
 %% Helmholtz and Shifted Laplacian Matrices and rhs
 dim = 1;
 A  = helmholtz(k,0,npf,bc);  %set eps=0 for Helmholtz problem
-M  = helmholtz(k,eps,npf,bc); %shifted Laplacian
+%M  = helmholtz(k,eps,npf,bc); %shifted Laplacian
  
 %% Multigrid Setup
 % Construct matrices on all grids and interpolation operators
 op_type = 'gal';
-[mg_mat,mg_split,restrict,interp] = mg_setup(M,k,eps,op_type,lev,bc,dim);
+[mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
+
 x0 = zeros(length(M),1);
  
 %% Test of Preconditioned GMRES
