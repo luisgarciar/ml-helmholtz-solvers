@@ -43,9 +43,9 @@ switch smo
         
     case  'wjac'
         for i=1:numit
-            %N = -(L+U); 
-            %x0 = w*(D\(N*x0+b))+(1-w)*x0;
-            x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;
+            N = -(L+U); 
+            x0 = w*(D\(N*x0+b))+(1-w)*x0;
+            %x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;
             
         end
         

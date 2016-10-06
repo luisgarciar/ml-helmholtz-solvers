@@ -3,19 +3,19 @@ clear all;
 close all;
 clc;
 
-k     = 100;         %wavenumber
-ppw   = 20;         %min points per wavelength%
-npcc  = 3;          %number of points in coarsest grid
+k     = 40;        %wavenumber
+ppw   = 12;         %min points per wavelength%
+npcg  = 1;          %number of points in coarsest grid
 bc    = 'som';      %boundary conditions
 dim   = 2;          %dimension
 eps   = 0.5*k^2 ;   %imaginary shift of shifted Laplacian
 
-[npf,numlev] = fd_npc_to_npf(npcc,k,ppw); 
+[npf,numlev] = fd_npc_to_npf(npcg,k,ppw);
 op_type      = 'gal';
 
 %Constructing the matrices and multigrid operators
 profile on
-[mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim);
+[mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcg,numlev,bc,dim);
 
 %%
 %right hand side and initial guess
