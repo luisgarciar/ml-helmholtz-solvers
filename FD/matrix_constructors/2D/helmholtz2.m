@@ -1,7 +1,13 @@
 function [A] = helmholtz2(k,eps,npx,npy,bc)
 %% HELMHOLTZ2: Constructs matrices for the 2D Helmholtz and shifted Laplace problems.
 %  Constructs the finite difference matrix corresponding
-%  to the discretization of div(grad u)- (k^2+i*eps)u = f in (0,1)x(0,1)
+%  to the discretization of 
+%  div(grad u)- (k^2+i*eps)u = f in (0,1)x(0,1)
+%
+% With boundary conditions
+%  u  =   0 on boundary  (Dirichlet)
+%  or
+%  du/dn-iku = 0 (Sommerfeld)
 %
 %  Use: [A] = helmholtz2(k,eps,npx,npy,bc)
 %
@@ -129,9 +135,7 @@ switch bc
         SW = sparse(ind,ind-1,Sw,np,np);
         SN = sparse(ind,ind+nx,Sn,np,np);
         S  = SC+SE+SW+SN;
-        A(ind,:)=S(ind,:);
-%         
-
+        A(ind,:)=S(ind,:);        
 %          
          %East boundary
          j=1:npy; ind = nx*(j+1);

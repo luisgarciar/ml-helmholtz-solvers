@@ -55,9 +55,7 @@ switch bc
         u  = -ones(nv,1);     
         A  = 1/(h^2)*spdiags([u d u],[-1 0 1],np+2,np+2); %Helmholtz matrix
         
-        %x  = 0:h:1;
-        %b  = feval(f,x)'; b(1)=b(1)/2; b(length(b))=b(length(b))/2; %Right hand side
-                        
+                  
         otherwise
             error('invalid boundary conditions')
 end
