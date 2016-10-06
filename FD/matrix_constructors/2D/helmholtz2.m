@@ -102,45 +102,64 @@ switch bc
         A(n,n-nx)  = -2/hy^2;
      
         %Noncorner boundary points
-        %West boundary: (0,j*hy)
-        for j = 1:npy
-            n = j*nx+1; %changing from (0,j) to global index n
-            A(n,:)    =  zeros(np,1)'; %clear row
-            A(n,n)    =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
-            A(n,n+1)  = -2/hx^2;
-            A(n,n+nx) = -1/hy^2;
-            A(n,n-nx) = -1/hy^2;   
-        end
-         
-         %South boundary: (i*hx,0)
-        for i=1:npx
-            n=i+1; %changing from (i,0) to global index n
-            A(n,:)     = zeros(np,1)';
-            A(n,n)     = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-            A(n,n+1)   = -1/hx^2;
-            A(n,n-1)   = -1/hx^2;
-            A(n,n+nx)  = -2/hy^2;  
-        end
-       
-         %East boundary: (1,j*hy)
-         for j=1:npy
-            n = (nx)*(j+1); %changing from (nx,j) to global index
-            A(n,:)    = zeros(np,1)';
-            A(n,n)    = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
-            A(n,n-1)  = -2/hx^2;
-            A(n,n-nx) = -1/hy^2;  
-            A(n,n+nx) = -1/hy^2;
-         end
+        
+        % Vectorized version
+        %West boundary
+        j   = 1:npy; 
+        ind = j*nx+1;
+        Wc  =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
+        Ws  = -1/hy^2;
+        We  = -2/hx^2;
+        Wn  = -1/hy^2;
+        WC  = sparse(ind,ind,Wc,np,np); 
+        WN  = sparse(ind,ind+nx,Wn,np,np);      
+        WS  = sparse(ind,ind-nx,Ws,np,np);
+        WE  = sparse(ind,ind+1,We,np,np);
+        W  = WC+WN+WS+WE;
+        A(ind,:)=W(ind,:);      
+      
+        %South boundary
+        ind = (1:npx)+1;
+        Sc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+        Sw = -1/hx^2;
+        Se = -1/hx^2;
+        Sn = -2/hy^2;
+        SC = sparse(ind,ind,Sc,np,np);
+        SE = sparse(ind,ind+1,Se,np,np);
+        SW = sparse(ind,ind-1,Sw,np,np);
+        SN = sparse(ind,ind+nx,Sn,np,np);
+        S  = SC+SE+SW+SN;
+        A(ind,:)=S(ind,:);
+%         
 
-         %North boundary: (i*hx,1)
-         for i=1:npx
-             n = (nx)*(npy+1)+(i+1);
-             A(n,:)    = zeros(np,1)';
-             A(n,n)    = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-             A(n,n-1)  = -1/hx^2;
-             A(n,n+1)  = -1/hx^2;  
-             A(n,n-nx) = -2/hy^2;
-         end
+%          
+         %East boundary
+         j=1:npy; ind = nx*(j+1);
+         Ec = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
+         Ew = -2/hx^2;
+         Es = -1/hy^2;
+         En = -1/hy^2;
+         EC = sparse(ind,ind,Ec,np,np);
+         EW = sparse(ind,ind-1,Ew,np,np);
+         ES = sparse(ind,ind-nx,Es,np,np);
+         EN = sparse(ind,ind+nx,En,np,np);
+         E  = EC+EW+EN+ES;
+         A(ind,:)=E(ind,:);
+                      
+         %North boundary
+         i=1:npx; ind = (nx)*(npy+1)+(i+1);
+         Nc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+         Ne = -1/hx^2;
+         Nw = -1/hx^2; 
+         Ns = -2/hy^2;
+         NC = sparse(ind,ind,Nc,np,np);
+         NW = sparse(ind,ind-1,Nw,np,np);
+         NS = sparse(ind,ind-nx,Ns,np,np);
+         NE = sparse(ind,ind+1,Ne,np,np);
+         N  = NC+NW+NS+NE;
+         A(ind,:)=N(ind,:);
+         
+         
    
     otherwise
         error('invalid boundary conditions')

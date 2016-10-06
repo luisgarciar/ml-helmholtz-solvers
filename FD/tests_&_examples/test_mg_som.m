@@ -3,11 +3,11 @@ clear all;
 close all;
 clc;
 
-k     = 80;     %wavenumber
-ppw   = 12;     %min points per wavelength%
-npcc  = 3;      %number of points in coarsest grid
-bc    = 'som';  %boundary conditions
-dim   = 2;      %dimension
+k     = 100;         %wavenumber
+ppw   = 20;         %min points per wavelength%
+npcc  = 3;          %number of points in coarsest grid
+bc    = 'som';      %boundary conditions
+dim   = 2;          %dimension
 eps   = 0.5*k^2 ;   %imaginary shift of shifted Laplacian
 
 [npf,numlev] = fd_npc_to_npf(npcc,k,ppw); 
