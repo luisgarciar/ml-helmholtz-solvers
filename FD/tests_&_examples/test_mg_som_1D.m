@@ -6,7 +6,7 @@ clc;
 k     = 80;        %wavenumber
 ppw   = 12;         %min points per wavelength%
 npcg  = 1;          %number of points in coarsest grid
-bc    = 'som';      %boundary conditions
+bc    = 'dir';      %boundary conditions
 dim   = 1;          %dimension
 eps   = 0.5*k^2 ;   %imaginary shift of shifted Laplacian
 
@@ -24,12 +24,12 @@ b  = A*ex_sol;
 x0 = rand(length(A),1); 
 
 %Parameters of multigrid solver
-npre = 2; npos = 1; w = 0.6; smo = 'wjac'; numcycles = 8;
+npre = 1; npos = 1; w = 1; smo = 'wjac'; numcycles = 8;
 
-% %Running multigrid cycle for shifted Laplacian
+%% Running multigrid cycle for shifted Laplacian
  relres = zeros(numcycles+1,1); relres(1)=norm(b-A*x0); 
  relerr = zeros(numcycles+1,1); relerr(1)=norm(ex_sol);
-% 
+
  for i=1:numcycles
      [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,1);
      relres(i+1)=norm(b-A*x_sol);
