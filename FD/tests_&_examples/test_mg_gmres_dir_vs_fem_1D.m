@@ -4,7 +4,7 @@ close all;
 clc;
 
 %% Parameters
-k     = 100;       %wavenumber
+k     = 10;       %wavenumber
 ppw   = 20;       %min points per wavelength%
 npcg  = 1;        %number of points in coarsest grid
 dim   = 1;        %dimension

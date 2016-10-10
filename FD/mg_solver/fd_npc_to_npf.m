@@ -1,9 +1,9 @@
 function [npf,lev] = fd_npc_to_npf(npc,k,par)
 %% FD_NPC_TO_NPF Computes the number of points on the finest grid given the
-%         number of points on the coarsest grid and discretization
-%         requirements
+%  number of points on the coarsest grid and discretization
+%  requirements
 %
-% Use:  [npf,lev] = npcc2npf(npcc,k,ppw)
+% Use:  [npf,lev] = npcc2npf(npcc,k,par)
 %
 % Input
 %       npc : number of points on coarsest grid

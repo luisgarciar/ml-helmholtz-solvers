@@ -1,4 +1,4 @@
-function [npf,lev] = npc_to_npf(npcc,k,ppw)
+function [npf,lev] = fem_npc_to_npf(npc,k,ppw)
 %% NPC_TO_NPF Computes the number of points on the finest grid given the
 %         number of points on the coarsest grid and discretization
 %         requirements
@@ -22,11 +22,9 @@ function [npf,lev] = npc_to_npf(npcc,k,ppw)
 
 %The number of grid levels lev and points of the fine grid npf is
 %chosen according to the rule (2*pi/k*npf) approx ppw
-
-m   = ppw*k/(2*pi*npcc);
-lev = ceil(log2(m));
-lev = max(lev,1);   %at least 1 level
-npf = npcc*(2^lev);
-
+m   = ppw*k/(2*pi*npc);
+lev = ceil(log2(m))+1;
+%lev = max(lev,1);   %at least 1 level
+npf = npc*(2^(lev-1));
 end
 
