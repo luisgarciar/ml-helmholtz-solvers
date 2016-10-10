@@ -9,8 +9,6 @@ k   = 100;  eps = 0.5*k^2; %Helmholtz problem
 ppw = 12;   %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
-
-
 %Exact solution (test problem, not good for GMRES, eigenfunction!)
 % m = 3;
 % u = @(x)  sin(m*pi*x);

@@ -36,6 +36,8 @@ function [A] = helmholtzfem(k,np,eps)
 %%%
 
 %%
+
+
 h  = 1/np;            %gridsize
 e = ones(np,1);
 A = (1/h)*spdiags([-e 2*e -e],[-1 0 1],np,np); A(np,np)=1/h; %Laplacian (Stiffness) Matrix

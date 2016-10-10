@@ -7,12 +7,15 @@ k    = 50;
 eps  = 0.5*k^2;   %Imaginary part of shift (for shifted Laplacian)
 ppw  = 12;        %number of points per wavelength (fine grid)
 npc  = 3; %number of points in the coarsest grid
-numlev  = 10;
 op_type  = 'gal';
 bc       = 'som';
 
+%Number of points according to discretization rules
 [npf,numlev] = fem_npc_to_npf(npc,k,ppw);
-[(2^(numlev-1))*npc,numlev]
+
+%Manual number of points
+%numlev  = 10;
+%[(2^(numlev-1))*npc,numlev];
 
 h = 1/npf; grid = h*(1:1:npf); 
 M = mass(npf);               %Mass matrix (for the norm)
