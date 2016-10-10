@@ -23,10 +23,11 @@ function R = fwrestriction(npf,dim,bc)
 %%
 switch dim
     case 1
-        %npc = round(npf/2)-1; %length of coarse grid vectors
-        y = zeros(npf,1); y(1:3,1) = [1;2;1];
-        R = gallery('circul',y');
-        R = 0.25*sparse(R(1:2:(npf-2),:));
+        npc = round(npf/2)-1; %number of interior points in coarse grid
+        R = 2*lininterpol(npc,1,bc)';
+    %   y = zeros(npf,1); y(1:3,1) = [1;2;1];
+    %   R = gallery('circul',y');
+    %   R = 0.25*sparse(R(1:2:(npf-2),:));
            
     case 2
         switch bc

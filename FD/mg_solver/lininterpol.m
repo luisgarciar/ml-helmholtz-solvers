@@ -29,16 +29,34 @@ function Z = lininterpol(npc,dim,bc)
 %  Computational Science and Engineering, Strang, 2007, Chap 7 
 %  Multigrid, Trottenberg, Oosterlee, Schiller, 2001, Chap 2
 %%
-
 switch dim
     case 1
-        npf = 2*(npc)+1; %length of fine grid vectors
-        z   = zeros(npf,1); z(1:3,1) = [1;2;1];
-        Z   = gallery('circul',z)';
-        Z   = 0.5*sparse(Z(:,1:2:(npf-2)));
+        switch bc
+            case 'dir'
+                npf = 2*(npc)+1; %length of fine grid vectors
+                z   = zeros(npf,1); z(1:3,1) = [1;2;1];
+                Z   = gallery('circul',z)';
+                Z   = 0.5*sparse(Z(:,1:2:(npf-2)));
+                
+            case 'som'
+                npcc = npc+2; npff = 2*npcc-1;                 
+                u = 0.5*ones(npcc,1);
+                odd = (1:2:npff);  %indices of coarse grid points
+                even= (2:2:npff-1);
+               
+                %interpolation in 1D
+                Z  = sparse(npff,npcc); 
+                Z1 = spdiags([u u],[1 0],npcc-1,npcc);
+                Z(odd,:) = speye(npcc); %points on both coarse & fine grids
+                Z(even,:) = Z1;    %remaining points
+                                
+            otherwise
+                error('invalid boundary conditions');
+        end
         
     case 2
         npf = 2*(npc)+1; %number of interior points in fine grid (1D)
+        
         switch bc
             case 'dir'                
                 z   = zeros(npf,1); z(1:3,1) = [1;2;1];
