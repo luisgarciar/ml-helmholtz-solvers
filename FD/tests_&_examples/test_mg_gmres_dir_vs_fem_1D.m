@@ -1,25 +1,33 @@
-%% Test multigrid and GMRES, 
-% 1D Problems, Dirichlet (FD) and Mixed BCs (Som)
+%% Test multigrid and GMRES for 1D Problems,
+% Comparison between Dirichlet (FD) and Mixed BCs (Som)
+%
+%Results:
+%Using a constant (equal to one) function on the right hand side, 
+%the Sommerfeld problem requires more iterations than the Dirichlet problem.
+%to reduce the relative residual below a given tolerance.
+%
+%Using a point source on the right hand side, the Sommerfeld problem
+%requires fewer iterations (as remarked by the experiments of several authors)
+
+
 clear global; 
 close all;
 clc;
 
 %% Parameters
-k     = 50;      %wavenumber
-ppw   = 20;       %min points per wavelength%
+k        = 200;      %wavenumber
+ppw      = 20;       %min points per wavelength%
 npc_int  = 3;     %number of interior points in coarsest grid
-dim   = 1;        %dimension
+dim      = 1;        %dimension
 
 % Parameters of multigrid solver
 npre = 2; npos = 1; w = 2/3; smo = 'wjac';
 
-%Number of points in fine grid
+% Number of points in fine grid
 [npf,numlev] = fd_npc_to_npf(npc_int,k,ppw);
-%Number of points in fine grid for FEM problem
+% Number of points in fine grid for FEM problem
 npc_fem = npc_int+1;
 npf_fem = npf+1;
-
-
 
 %% Mixed problem (Dirichlet + Sommerfeld), FEM
 op_type      = 'gal'; %galerkin coarse operators
@@ -35,7 +43,8 @@ eps = 0.5*k^2;
 %%
 % right hand side and initial guess
 M_fem  = mg_mat_fem{1}; 
-rhs_fem  = ones(npf_fem,1); rhs_fem(npf_fem) = 0.5; h = 1/npf_fem; rhs_fem = h*rhs_fem; %(constant function f=1)
+%rhs_fem  = ones(npf_fem,1); rhs_fem(npf_fem) = 0.5; h = 1/npf_fem; rhs_fem = h*rhs_fem; %(constant function f=1)
+rhs_fem = ones(npf_fem,1); rhs_fem(npf_fem/2)=h*1;
 x0_fem = zeros(size(rhs_fem));
 
 
@@ -66,7 +75,7 @@ bc = 'dir';
 
 %Matrix, right hand side and initial guess
 M_dir =  mg_mat_dir{1}; 
-rhs_dir =  ones(length(M_dir),1);
+rhs_dir =  zeros(length(M_dir),1);  rhs_dir(floor(npf/2))=1;
 x0 =  rand(length(M_dir),1); 
 
 %Setup of residuals and error
@@ -145,7 +154,6 @@ time_lgfem = toc;
 tic
 [x_rgfem,flag_rgfem,relres_rgfem,iter_rgfem,resvec_rgfem] = gmres(AMinv_fem,rhs_fem,[],tol,maxit);
 time_rgfem = toc;
-
  
 iter_lgfem
 iter_lgdir
@@ -156,9 +164,9 @@ iter_rgdir
 
 %% Plots of GMRES results
  figure(1)
- semilogy(0:iter_gfem(2), resvec_gfem/resvec_gfem(1), 'k-');
+ semilogy(0:iter_rgfem(2), resvec_rgfem/resvec_rgfem(1), 'k-');
  hold on
- semilogy(0:(length(resvec_gdir)-1), resvec_gdir/resvec_gdir(1), 'b-');
+ semilogy(0:(length(resvec_rgdir)-1), resvec_rgdir/resvec_rgdir(1), 'b-');
  ylabel('relative residual')
  xlabel('iteration')
  
