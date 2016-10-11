@@ -28,7 +28,7 @@ op_type = 'gal';
 x0 = zeros(length(A),1);
 
 % Parameters of V-cycle and Jacobi iteration
-npre = 1; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
+npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
 r0   = norm(b-A*x0);
 
 % Test of multigrid on 1D Poisson problem
@@ -49,3 +49,4 @@ err_rat(i,1) = norm(xsol-x0)/norm(x0);
 x0  = xsol; r0 = b-A*x0;
 end
 
+res_rat
