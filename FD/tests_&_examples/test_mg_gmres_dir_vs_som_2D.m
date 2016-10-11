@@ -4,14 +4,14 @@ close all;
 clc;
 
 %% Parameters
-k     = 100;       %wavenumber
-ppw   = 30;       %min points per wavelength%
+k     = 50;       %wavenumber
+ppw   = 20;       %min points per wavelength%
 npcg  = 1;        %number of points in coarsest grid
-dim   = 1;        %dimension
-eps   = k^2 ; %imaginary shift of shifted Laplacian
+dim   = 2;        %dimension
+eps   = 0.5*k^2 ; %imaginary shift of shifted Laplacian
 
 % Parameters of multigrid solver
-npre = 2; npos = 1; w = 0.6; smo = 'wjac';
+npre = 1; npos = 1; w = 0.2; smo = 'wjac';
 
 %% Sommerfeld problem
 bc           = 'som';      %boundary conditions
@@ -22,7 +22,6 @@ op_type      = 'gal';
 %k=0; eps=0;
 
 %Multigrid setup for shifted Laplacian
-profile on
 [mg_mat_som,mg_split_som,restrict_som,interp_som] = mg_setup(k,eps,op_type,npcg,numlev,bc,dim);
 
 %%
@@ -49,7 +48,6 @@ end
 relres_som = relres_som/relres_som(1);
 factor_som = relres_som(2:length(relres_som))./relres_som(1:length(relres_som)-1);
 
-profile off
 
 %% Dirichlet problem
 bc = 'dir';
@@ -91,23 +89,25 @@ factor_dir
 %% Test of MG + GMRES (Shifted Laplacian + Helmholtz)
 
 %% Dirichlet problem
-A_dir      = helmholtz(k,0,npf,bc);
+A_dir      = helmholtz2(k,0,npf,npf,bc);
 %ex_sol_dir = ones(length(A_dir),1);
 %b_dir      = A_dir*ex_sol_dir;
 b_dir = zeros(length(M_dir),1); 
 m = floor(length(M_dir)/2);
 b_dir(m,1) = 1;
 x0         = zeros(length(A_dir),1);
-numcycles  = 1;
+numcycles  = 2;
 Minv_dir   = @(v)feval(@Vcycle,mg_mat_dir,mg_split_dir,restrict_dir,interp_dir,x0,v,npre,npos,w,smo,numcycles);
-[L_dir, U_dir] = lu(M_dir);
+%[L_dir, U_dir] = lu(M_dir);
 %Minv_dir = @(v) U_dir\(L_dir\v);
 AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
 
+
 %GMRes parameters
-tol   = 1e-10;
+tol   = 1e-6;
 maxit = min(300,length(A_dir));
 
+profile on
 tic
 [x_lgdir,flag_lgdir,relres_lgdir,iter_lgdir,resvec_lgdir] = gmres(A_dir,b_dir,[],tol,maxit,Minv_dir);
 time_lgdir = toc;
@@ -116,25 +116,26 @@ tic
 [x_rgdir,flag_rgdir,relres_rgdir,iter_rgdir,resvec_rgdir] = gmres(AMinv_dir,b_dir,[],tol,maxit);
 time_rgdir = toc;
 
+profile off
+
 %% Sommerfeld Problem
 bc = 'som';
-A_som      = helmholtz(k,0,npf,bc);
+A_som      = helmholtz2(k,0,npf,npf,bc);
 %ex_sol_som = ones(length(A_som),1);
 %b_som      = A_som*ex_sol_som;
 
 b_som = zeros(length(A_som),1); b_som(floor(length(A_som)/2),1)=1;
 x0 = zeros(length(A_som),1); 
-numcycles = 1;
+numcycles = 2;
 Minv_som = @(v) feval(@Vcycle,mg_mat_som,mg_split_som,restrict_som,interp_som,x0,v,npre,npos,w,smo,numcycles);
-[L_som, U_som] = lu(M_som);
+%[L_som, U_som] = lu(M_som);
 %Minv_som = @(v) U_som\(L_som\v);
 AMinv_som = @(v) A_som*feval(Minv_som,v);
 
 %GMRes parameters
-tol   = 1e-10;
-maxit = min(300,size(A_som,1));
+tol   = 1e-6;
+maxit = min(200,size(A_som,1));
 
-%Left-Preconditioned GMRES
 tic
 [x_lgsom,flag_lgsom,relres_lgsom,iter_lgsom,resvec_lgsom] = gmres(A_som,b_som,[],tol,maxit,Minv_som);
 time_lgsom = toc;
@@ -143,10 +144,6 @@ time_lgsom = toc;
 tic
 [x_rgsom,flag_rgsom,relres_rgsom,iter_rgsom,resvec_rgsom] = gmres(AMinv_som,b_som,[],tol,maxit);
 time_rgsom = toc;
-
-iter_lgsom
-iter_gdir
-
 
 
 %% Plots of GMRES results
@@ -158,5 +155,28 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['1D Helmholtz with CSL-preconditioner (k=',num2str(k),')'])
+title(['1D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
+
+iter_rgsom
+iter_rgdir
+
+time_rgsom
+time_rgdir
+
+%% Plots of GMRES results
+figure(2)
+semilogy(0:iter_lgsom(2), resvec_lgsom/resvec_lgsom(1), 'k-');
+hold on
+semilogy(0:iter_lgdir(2), resvec_lgdir/resvec_lgdir(1), 'b-');
+ylabel('relative residual')
+xlabel('iteration')
+
+legend('Sommerfeld BCs', 'Dirichlet BCs')
+title(['1D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
+
+iter_lgsom
+iter_lgdir
+
+time_lgsom
+time_lgdir
 
