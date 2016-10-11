@@ -2,11 +2,11 @@
 %  1-D Example, Dirichlet boundary conditions
 %  Discretized with finite differences
 
-npc = 3;    %number of interior points in coarsest grid in one dim 
+npc = 1;    %number of interior points in coarsest grid in one dim 
 bc = 'dir';
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 100;  eps = 0.5*k^2; %Helmholtz problem
-ppw = 12;   %number of points per wavelength
+k   = 50;  eps = 0.5*k^2; %Helmholtz problem
+ppw = 20;   %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 %Exact solution (test problem, not good for GMRES, eigenfunction!)

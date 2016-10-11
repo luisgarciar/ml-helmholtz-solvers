@@ -23,7 +23,7 @@ function [npf,lev] = fem_npc_to_npf(npc,k,ppw)
 %The number of grid levels lev and points of the fine grid npf is
 %chosen according to the rule (2*pi/k*npf) approx ppw
 m   = ppw*k/(2*pi*npc);
-lev = ceil(log2(m))+1;
+lev = ceil(log2(m));
 %lev = max(lev,1);   %at least 1 level
 npf = npc*(2^(lev-1));
 end

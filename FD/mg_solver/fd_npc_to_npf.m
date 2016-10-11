@@ -19,7 +19,6 @@ function [npf,lev] = fd_npc_to_npf(npc,k,par)
 %               Version 1.0, Jun 2016
 %%%
 
-
 %% Case 1: The number of grid levels lev and points of the fine grid npf is
 %chosen according to the rule (2*pi/k*npc) approx par
 if par>1

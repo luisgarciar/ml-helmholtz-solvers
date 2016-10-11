@@ -1,32 +1,34 @@
-%Test of GMRES preconditioned by the shifted Laplacian for 
+%% Test of GMRES preconditioned by the shifted Laplacian for 
 %the 1-D Helmholtz problem
 %
 %       -u''- k^2*u = f in (0,1)
 %        u(0)       = 0   
 %        u'(1)-ku(1)= 0
 
-clear all
-close all
-clc
+clear global; 
+close all;
+clc;
 
-k    = 100;       %wavenumber
+k    = 50;       %wavenumber
 eps  = 0.5*k^2;   %imaginary shift of shifted Laplacian
-npc  = 2;         %number of points in the coarsest grid
+npcg = 2;         %number of points in the coarsest grid
 ppw  = 20;        %number of points per wavelength
 dim  = 1;
 
-[npf,numlev]    = npc_to_npf(npc,k,ppw);  %number of fine grid points and levels
-h = 1/npf; grid = h*(1:1:npf)'; 
+[npf_fem,numlev_fem] = fem_npc_to_npf(npcg,k,ppw);  %number of fine grid points and levels
+h = 1/npf_fem; grid  = h*(1:1:npf_fem)'; 
 
-A = helmholtzfem(k,npf,0);   %Helmholtz matrix
-S = helmholtzfem(k,npf,eps); %Shifted Laplace matrix
-M = mass(npf);               %Mass matrix (for the norm)
+op_type = 'gal'; %galerkin coarse operators
+
+A = helmholtzfem(k,npf_fem,0);   %Helmholtz matrix
+S = helmholtzfem(k,npf_fem,eps); %Shifted Laplace matrix
+M = mass(npf_fem);               %Mass matrix (for the norm)
 norm2 = @(x)sqrt(abs(x'*M*x)); 
 
 %right hand side %(constant function f=1, note the scaling by h)
-f = ones(npf,1); f(npf)=0.5; h=1/npf; f=h*f; 
+f = ones(npf_fem,1); f(npf_fem)=0.5; h=1/npf_fem; rhs=h*f; 
 u_ex   = exact_sol(k,grid); %analytic solution
-u_dir  = A\f;    %solution computed by direct method (to check the discr. error)
+u_dir  = A\rhs;    %solution computed by direct method (to check the discr. error)
 relerr_dir = norm2(u_ex-u_dir)/norm2(u_ex); %Relative error in the L2 norm
 
 %Including the endpoint x=0 in the grid and the solutions
@@ -39,33 +41,36 @@ hold on
 plot(grid,real(u_dir),'b-');
 title('Analytic solution vs Discrete Solution');
 
+%% 
 %Solving Au=f with GMRES and no preconditioner
 restart = []; %% number of iter before restart, [] = no restart.
 tol     = 1e-8;   %% tolerance for relative residual
-maxit   = npf;
+maxit   = npf_fem;
 
 tic 
-[u_gmres,~,~,iter_gmres,resvec_gmres] = gmres(A, f, restart, tol, npf) ;
+[u_gmres,~,~,iter_gmres,resvec_gmres] = gmres(A, rhs, restart, tol, npf_fem) ;
 time_gmres = toc;
 
 %Relative error of GMRES solution
 relerr_gmres = norm2(u_gmres-u_ex)/norm2(u_ex);
 
 %Setting up the multigrid preconditioner for the shifted Laplacian
-[galerkin_matrices,galerkin_split,restrict,interp] = mg_setupfem(S,numlev,dim);
+[mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npcg,numlev_fem,dim);
 u0 = zeros(length(S),1);
 
+%size(mg_mat{1})
+
 npre = 2; npos = 2; w = 2/3; numvcycles = 1; smo = 'wjac';
-Sinv = @(v) Vcyclefem(galerkin_matrices,galerkin_split,restrict,...
+Sinv = @(v) Vcyclefem(mg_mat,mg_split,restrict,...
                       interp,u0,v,npre,npos,w,smo,numvcycles);
-         
+                               
 ASinv = @(v) A*Sinv(v); %Right Preconditioned matrix
          
 %If we use right preconditioning we solve in two steps: ASinv*v=f, u=Sinv*v;
 profile clear      
 tic   
 profile on
-[u_rpgmres,~,~,iter_rpgmres,resvec_rpgmres] = gmres(ASinv, f, restart, tol, npf);
+[u_rpgmres,~,~,iter_rpgmres,resvec_rpgmres] = gmres(ASinv, rhs, restart, tol, npf_fem);
 profile off
 time_rpgmres= toc;
 
@@ -76,7 +81,7 @@ relerr_rpgmres = norm2(u_rpgmres-u_ex)/norm2(u_ex);
 %One can also use left preconditioning and pass the preconditioner as
 %an argument to the gmres function (left prec. is default in MATLAB gmres)
 tic   
-[u_lpgmres,~,~,iter_lpgmres,resvec_lpgmres] = gmres(A, f, restart, tol,npf,Sinv);
+[u_lpgmres,~,~,iter_lpgmres,resvec_lpgmres] = gmres(A, rhs, restart, tol,npf_fem,Sinv);
 time_lpgmres= toc;
 relerr_lpgmres = norm2(u_lpgmres-u_ex)/norm2(u_ex);
 
@@ -86,7 +91,6 @@ hold on
 plot(grid,real(u_rpgmres),'b-'); 
 title('Analytic solution vs Iterative Solution, Right preconditioning');
 legend('Analytic solution','GMRES solution (right prec.)')
-
 
 figure(3)
 plot(grid,real(u_ex),'r-');
