@@ -4,14 +4,14 @@ close all;
 clc;
 
 %% Parameters
-k     = 50;       %wavenumber
+k     = 100;       %wavenumber
 ppw   = 20;       %min points per wavelength%
 npcg  = 1;        %number of points in coarsest grid
 dim   = 2;        %dimension
 eps   = 0.5*k^2 ; %imaginary shift of shifted Laplacian
 
 % Parameters of multigrid solver
-npre = 1; npos = 1; w = 0.2; smo = 'wjac';
+npre = 1; npos = 1; w = 2/3; smo = 'wjac';
 
 %% Sommerfeld problem
 bc           = 'som';      %boundary conditions
@@ -104,19 +104,19 @@ AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
 
 
 %GMRes parameters
-tol   = 1e-6;
+tol   = 1e-8;
 maxit = min(300,length(A_dir));
 
-profile on
-tic
-[x_lgdir,flag_lgdir,relres_lgdir,iter_lgdir,resvec_lgdir] = gmres(A_dir,b_dir,[],tol,maxit,Minv_dir);
-time_lgdir = toc;
-
-tic
-[x_rgdir,flag_rgdir,relres_rgdir,iter_rgdir,resvec_rgdir] = gmres(AMinv_dir,b_dir,[],tol,maxit);
-time_rgdir = toc;
-
-profile off
+% profile on
+% tic
+% [x_lgdir,flag_lgdir,relres_lgdir,iter_lgdir,resvec_lgdir] = gmres(A_dir,b_dir,[],tol,maxit,Minv_dir);
+% time_lgdir = toc;
+% 
+% tic
+% [x_rgdir,flag_rgdir,relres_rgdir,iter_rgdir,resvec_rgdir] = gmres(AMinv_dir,b_dir,[],tol,maxit);
+% time_rgdir = toc;
+% 
+% profile off
 
 %% Sommerfeld Problem
 bc = 'som';
@@ -155,7 +155,7 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['1D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
+title(['2D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
 
 iter_rgsom
 iter_rgdir
@@ -172,10 +172,13 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['1D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
+title(['2D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
 
 iter_lgsom
 iter_lgdir
+
+resvec_lgsom(end)/resvec_lgsom(1)
+resvec_lgdir(end)/resvec_lgdir(1)
 
 time_lgsom
 time_lgdir

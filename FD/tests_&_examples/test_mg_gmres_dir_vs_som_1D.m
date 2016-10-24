@@ -144,12 +144,12 @@ tic
 [x_rgsom,flag_rgsom,relres_rgsom,iter_rgsom,resvec_rgsom] = gmres(AMinv_som,b_som,[],tol,maxit);
 time_rgsom = toc;
 
-iter_lgsom
-iter_gdir
+iter_rgsom
+iter_rgdir
 
 
 
-%% Plots of GMRES results
+%% Plots of GMRES results (right)
 figure(1)
 semilogy(0:iter_rgsom(2), resvec_rgsom/resvec_rgsom(1), 'k-');
 hold on
@@ -158,5 +158,18 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['1D Helmholtz with CSL-preconditioner (k=',num2str(k),')'])
+title(['1D Helmholtz with CSL-preconditioner on the right (k=',num2str(k),')'])
+
+
+%% Plots of GMRES results (left)
+figure(2)
+semilogy(0:iter_lgsom(2), resvec_lgsom/resvec_lgsom(1), 'k-');
+hold on
+semilogy(0:iter_lgdir(2), resvec_lgdir/resvec_lgdir(1), 'b-');
+ylabel('relative residual')
+xlabel('iteration')
+
+legend('Sommerfeld BCs', 'Dirichlet BCs')
+title(['1D Helmholtz with CSL-preconditioner on the left (k=',num2str(k),')'])
+
 
