@@ -56,8 +56,8 @@ relerr = norm(u_ex-u_d,Inf)/norm(u_ex,Inf)
   
 % Parameters of V-cycle and Jacobi iteration
  npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
- x0       = zeros(size(b));
- normr0   = norm(b-A*x0);
+ x0      = zeros(size(b));
+ normr0  = norm(b-A*x0);
 
 % Test of multigrid on 2D Poisson problem
 % Use the profiler to evaluate performance of code
@@ -67,17 +67,17 @@ relerr = norm(u_ex-u_d,Inf)/norm(u_ex,Inf)
  relres = zeros(1,numcycles);
  for i=1:numcycles
     [u_mg] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,1);
-    relres(i)=norm(b-A*u_mg)
+    relres(i)=norm(b-A*u_mg);
     x0 =u_mg;
  end
  
 profile off
-relres = relres/relres(1)
+relres = relres/relres(1);
 factor = relres(2:length(relres))./relres(1:length(relres)-1);
  
-%r1     = b-A*u_mg;
-%normr1 = norm(r1);
-%relres = normr1/normr0;
+r1     = b-A*u_mg;
+normr1 = norm(r1);
+relres_mg = normr1/normr0
  
 %plot of solution computed with multigrid
 U_mg  = reshape(u_mg,[npx,npy]); 

@@ -43,7 +43,7 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
                        mg_split{1}.Dk, mg_split{1}.P,rhs,x_sol,w,4,'gs');                   
             elseif strcmp(smo,'liv')
                 x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
-                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,'gs');            
+                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,'wjac');            
             else
                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
                         mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,smo);
