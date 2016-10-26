@@ -9,7 +9,6 @@ bc  = 'dir';
 
 [npf,numlev]  = fd_npc_to_npf(npc,k,ppw);  %number of interior points in finest grid (1D)
 
-
 %% Poisson matrix and right hand side
 k =  0; eps=0;
 npx = npf; npy = npf;  
@@ -56,7 +55,7 @@ relerr = norm(u_ex-u_d,Inf)/norm(u_ex,Inf)
   setuptime = toc;
   
 % Parameters of V-cycle and Jacobi iteration
- npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 5;
+ npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
  x0       = zeros(size(b));
  normr0   = norm(b-A*x0);
 
