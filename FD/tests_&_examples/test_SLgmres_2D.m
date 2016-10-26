@@ -14,6 +14,7 @@ ppw = 20;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 
+
 %% %Exact solution of Dirichlet problem
 % u = @(x,y)  x.*(x-1).^2.*(y.^2).*(y-1);
 % f = @(x,y) -k^2*x.*(y.^2).*((x-1).^2).*(y-1)...

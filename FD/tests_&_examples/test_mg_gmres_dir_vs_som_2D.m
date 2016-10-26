@@ -4,14 +4,14 @@ close all;
 clc;
 
 %% Parameters
-k     = 100;       %wavenumber
-ppw   = 20;       %min points per wavelength%
+k     = 50;       %wavenumber
+ppw   = 10;       %min points per wavelength%
 npcg  = 1;        %number of points in coarsest grid
 dim   = 2;        %dimension
 eps   = 0.5*k^2 ; %imaginary shift of shifted Laplacian
 
 % Parameters of multigrid solver
-npre = 1; npos = 1; w = 2/3; smo = 'wjac';
+npre = 1; npos = 1; w = 0.2; smo = 'wjac';
 
 %% Sommerfeld problem
 bc           = 'som';      %boundary conditions
@@ -104,7 +104,7 @@ AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
 
 
 %GMRes parameters
-tol   = 1e-8;
+tol   = 1e-6;
 maxit = min(300,length(A_dir));
 
 % profile on
@@ -155,7 +155,7 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['2D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
+title(['1D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
 
 iter_rgsom
 iter_rgdir
@@ -172,13 +172,10 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['2D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
+title(['1D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
 
 iter_lgsom
 iter_lgdir
-
-resvec_lgsom(end)/resvec_lgsom(1)
-resvec_lgdir(end)/resvec_lgdir(1)
 
 time_lgsom
 time_lgdir

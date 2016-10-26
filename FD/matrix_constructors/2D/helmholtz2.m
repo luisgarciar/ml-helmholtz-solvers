@@ -53,7 +53,8 @@ hy  = 1/(npy+1);  %gridsize in y-direction
 
 
 switch bc
-    case 'dir'                
+    case 'dir'        
+        
           np = npx*npy;
           W = -ones(np,1)/hx^2;  E=W; %Dxx
           N = -ones(np,1)/hy^2; S=N; %Dyy
@@ -136,32 +137,34 @@ switch bc
         S  = SC+SE+SW+SN;
         A(ind,:)=S(ind,:);        
 %          
-        %East boundary
-        j=1:npy; ind = nx*(j+1);
-        Ec = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
-        Ew = -2/hx^2;
-        Es = -1/hy^2;
-        En = -1/hy^2;
-        EC = sparse(ind,ind,Ec,np,np);
-        EW = sparse(ind,ind-1,Ew,np,np);
-        ES = sparse(ind,ind-nx,Es,np,np);
-        EN = sparse(ind,ind+nx,En,np,np);
-        E  = EC+EW+EN+ES;
-        A(ind,:)=E(ind,:);
+         %East boundary
+         j=1:npy; ind = nx*(j+1);
+         Ec = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
+         Ew = -2/hx^2;
+         Es = -1/hy^2;
+         En = -1/hy^2;
+         EC = sparse(ind,ind,Ec,np,np);
+         EW = sparse(ind,ind-1,Ew,np,np);
+         ES = sparse(ind,ind-nx,Es,np,np);
+         EN = sparse(ind,ind+nx,En,np,np);
+         E  = EC+EW+EN+ES;
+         A(ind,:)=E(ind,:);
                       
-        %North boundary
-        i = 1:npx; ind = (nx)*(npy+1)+(i+1);
-        Nc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-        Ne = -1/hx^2;
-        Nw = -1/hx^2; 
-        Ns = -2/hy^2;
-        NC = sparse(ind,ind,Nc,np,np);
-        NW = sparse(ind,ind-1,Nw,np,np);
-        NS = sparse(ind,ind-nx,Ns,np,np);
-        NE = sparse(ind,ind+1,Ne,np,np);
-        N  = NC+NW+NS+NE;
-        A(ind,:)=N(ind,:);
+         %North boundary
+         i=1:npx; ind = (nx)*(npy+1)+(i+1);
+         Nc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+         Ne = -1/hx^2;
+         Nw = -1/hx^2; 
+         Ns = -2/hy^2;
+         NC = sparse(ind,ind,Nc,np,np);
+         NW = sparse(ind,ind-1,Nw,np,np);
+         NS = sparse(ind,ind-nx,Ns,np,np);
+         NE = sparse(ind,ind+1,Ne,np,np);
+         N  = NC+NW+NS+NE;
+         A(ind,:)=N(ind,:);
          
+         
+   
     otherwise
         error('invalid boundary conditions')
 end
