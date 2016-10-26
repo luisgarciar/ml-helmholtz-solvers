@@ -32,14 +32,13 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
     else
         x_sol = x0;
         
-        for i=1:numcycles
-            
+        for i=1:numcycles            
             %Presmoothing and computation of the residual
             %fprintf('Presmoothing with matrix of size %d\n',length(grid_matrices{1,1}));
             %Special case: Kaczmarcz relaxation
             if (length(mg_split{1})>4 && strcmp(smo,'liv')) 
                 %Gauss-Seidel applied to normal equations
-                rhs = mg_mat{i}'*b;
+                rhs   = mg_mat{1}'*b;
                 x_sol = smoother(mg_split{1}.Uk, mg_split{1}.Lk,...
                        mg_split{1}.Dk, mg_split{1}.P,rhs,x_sol,w,4,'gs');                   
             elseif strcmp(smo,'liv')
@@ -73,9 +72,9 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
             %Postsmoothing  
             if (length(mg_split{1})>4 && strcmp(smo,'liv')) 
                 %4 its of Gauss-Seidel applied to normal equations
-                rhs = mg_mat{i}'*b;
+                rhs = mg_mat{1}'*b;
                 x_sol = smoother(mg_split{1}.Uk, mg_split{1}.Lk,...
-                       mg_split{1}.Dk, mg_split{1}.P,rhs,x_sol,w,4,'gs');
+                       mg_split{1}.Dk,mg_split{1}.P,rhs,x_sol,w,4,'gs');
                    
             elseif strcmp(smo,'liv')
                 x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...

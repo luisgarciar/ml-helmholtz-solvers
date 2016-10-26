@@ -62,6 +62,7 @@ mg_split  = cell(numlev,1);      %grid_split{i}: matrix splittings needed for sm
 %% Added this for Kaczmarcz
 hmax = 1/(npcc+1);
 hlevs = hmax*fliplr(2.^-(0:1:(numlev-1)));
+
 %kczlevel is the level at which Kaczmarcz relaxation should be performed
 [~,kczlevel] = min(abs(k*hlevs - 1.25));  
 if length(kczlevel)>1
@@ -87,7 +88,6 @@ mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of A
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
 mg_split{1}.D = spdiags(diag(mg_mat{1}),0,length(mg_mat{1}),length(mg_mat{1}));
 mg_split{1}.P = eye(length(mg_mat{1}));
-
 
 if dim==2
     mg_split{1}.P = perm_rb(length(mg_mat{1}));

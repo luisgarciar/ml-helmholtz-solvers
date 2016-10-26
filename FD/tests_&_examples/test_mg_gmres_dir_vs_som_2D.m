@@ -4,22 +4,19 @@ close all;
 clc;
 
 %% Parameters
-k     = 100;       %wavenumber
-ppw   = 20;       %min points per wavelength%
+k     = 1;       %wavenumber
+ppw   = 15;       %min points per wavelength%
 npcg  = 1;        %number of points in coarsest grid
 dim   = 2;        %dimension
 eps   = 0.5*k^2 ; %imaginary shift of shifted Laplacian
 
 % Parameters of multigrid solver
-npre = 1; npos = 1; w = 2/3; smo = 'wjac';
+npre = 1; npos = 1; w = 1/3; smo = 'gs';
 
 %% Sommerfeld problem
 bc           = 'som';      %boundary conditions
 [npf,numlev] = fd_npc_to_npf(npcg,k,ppw); 
 op_type      = 'gal';
-
-%npf = 127; numlev = 7;
-%k=0; eps=0;
 
 %Multigrid setup for shifted Laplacian
 [mg_mat_som,mg_split_som,restrict_som,interp_som] = mg_setup(k,eps,op_type,npcg,numlev,bc,dim);
@@ -101,7 +98,6 @@ Minv_dir   = @(v)feval(@Vcycle,mg_mat_dir,mg_split_dir,restrict_dir,interp_dir,x
 %[L_dir, U_dir] = lu(M_dir);
 %Minv_dir = @(v) U_dir\(L_dir\v);
 AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
-
 
 %GMRes parameters
 tol   = 1e-8;
