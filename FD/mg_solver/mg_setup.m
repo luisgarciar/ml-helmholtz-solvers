@@ -54,11 +54,19 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 %[npc,npf] = size2npc(s,dim,bc);
 %s  = length(A);
 npf = npc_numlev_to_npf(npcc,numlev);
-
 restrict  = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
 interp    = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
 mg_mat    = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
 mg_split  = cell(numlev,1);      %grid_split{i}: matrix splittings needed for smoothers i
+
+%% Added this for Kaczmarcz
+hmax = 1/(npcc+1);
+hlevs = hmax*fliplr(2.^-(0:1:(numlev-1)));
+%kczlevel is the level at which Kaczmarcz relaxation should be performed
+[~,kczlevel] = min(abs(k*hlevs - 1.25));  
+if length(kczlevel)>1
+    kczlevel=kczlevel(1);
+end
 
 %Level 1 
 switch dim
@@ -79,6 +87,7 @@ mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of A
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
 mg_split{1}.D = spdiags(diag(mg_mat{1}),0,length(mg_mat{1}),length(mg_mat{1}));
 mg_split{1}.P = eye(length(mg_mat{1}));
+
 
 if dim==2
     mg_split{1}.P = perm_rb(length(mg_mat{1}));
@@ -117,6 +126,14 @@ for i=2:numlev-1
     mg_split{i}.U = sparse(triu(mg_mat{i},1));
     mg_split{i}.L = sparse(tril(mg_mat{i},-1));
     mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
+    
+    %If on Kaczmarcz level, save the splittings for
+    %Kaczmarcz relaxation also
+    if i == kczlevel
+        mg_split{i}.Uk = sparse(triu(mg_mat{i}'*mg_mat{i},1));
+        mg_split{i}.Lk = sparse(tril(mg_mat{i}'*mg_mat{i},1));
+        mg_split{i}.Dk = sparse(diag(mg_mat{i}'*mg_mat{i},1));
+    end
     
     switch dim
         case 1

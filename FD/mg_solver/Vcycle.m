@@ -36,8 +36,22 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
             %Presmoothing and computation of the residual
             %fprintf('Presmoothing with matrix of size %d\n',length(grid_matrices{1,1}));
             
-            x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
-                             mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,smo);
+            %Special case: Kaczmarcz relaxation
+            if (length(mg_split{1})>4 && strcmp(smo,'liv')) 
+                %Gauss-Seidel applied to normal equations
+                rhs = mg_mat{i}'*b;
+                x_sol = smoother(mg_split{1}.Uk, mg_split{1}.Lk,...
+                       mg_split{1}.Dk, mg_split{1}.P,rhs,x_sol,w,4,'gs');
+                   
+            else
+                
+                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
+                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,smo);
+            
+                
+            end
+            
+                         
             res   = b-mg_mat{1}*x_sol;
 
             %Restriction of the residual to coarse grid
