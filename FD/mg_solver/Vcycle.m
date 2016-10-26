@@ -46,7 +46,7 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
                         mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,'gs');            
             else
                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
-                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,'smo');
+                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npre,smo);
             end
             
             res   = b-mg_mat{1}*x_sol;
@@ -81,7 +81,7 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
                         mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npos,'gs');            
             else
                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
-                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npos,'smo');
+                        mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npos,smo);
             end
             
                          

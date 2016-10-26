@@ -10,7 +10,6 @@ bc  = 'dir';
 [npf,numlev]  = fd_npc_to_npf(npc,k,ppw);  %number of interior points in finest grid (1D)
 
 
-
 %% Poisson matrix and right hand side
 k =  0; eps=0;
 npx = npf; npy = npf;  

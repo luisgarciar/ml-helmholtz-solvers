@@ -59,7 +59,7 @@ interp    = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
 mg_mat    = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
 mg_split  = cell(numlev,1);      %grid_split{i}: matrix splittings needed for smoothers i
 
-%% Added this for Kaczmarcz
+%For Kaczmarcz
 hmax = 1/(npcc+1);
 hlevs = hmax*fliplr(2.^-(0:1:(numlev-1)));
 
