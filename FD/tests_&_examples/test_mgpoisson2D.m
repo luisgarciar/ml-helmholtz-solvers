@@ -54,7 +54,7 @@ b   = f(x,y); b = b'; b = reshape(b,[npt,1]);
   setuptime = toc;
  
 % Parameters of V-cycle and Jacobi iteration
- npre = 1; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 10;
+ npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
  x0       = zeros(size(b));
  normr0   = norm(b-A*x0);
 
