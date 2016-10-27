@@ -55,9 +55,12 @@ setup_time=toc;
 b    = zeros(length(A),1); b(ceil(length(A)/4),1)=1/(hx*hy);
 x0   = zeros(length(A),1);
 npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
-Minv_mg = @(v)feval(@Wcycle,galerkin_matrices,galerkin_split,restrict,...
+Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
                             interp,x0,v,npre,npos,w,smo,numcycles);
 
+Minv_vmg = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,...
+                            interp,x0,v,npre,npos,w,smo,numcycles);
+                                               
 [L,U]=lu(M);                        
 Minv_lu=  @(v) (L\(U\v));                   
                         
@@ -70,16 +73,16 @@ maxit = 200;
 % [~,flag1,relres1,iter1,resvec1] = gmres(A,b,[],tol,maxit,[]);
 % time1 = toc;
  
-% GMRES iteration with exact SL preconditioner
-AMinv_lu = @(v) A*feval(Minv_lu,v);
-tic
-[x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_lu,b,[],tol,maxit);
-time2 = toc;
+% GMRES iteration with V cycle preconditioner
+ AMinv_vmg = @(v) A*feval(Minv_vmg,v);
+ tic
+ [x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_vmg,b,[],tol,maxit);
+ time2 = toc;
 
 % GMRES iteration with right SL preconditioner
-AMinv_mg = @(v) A*feval(Minv_mg,v);
+AMinv_fmg = @(v) A*feval(Minv_fmg,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_mg,b,[],tol,maxit);
+[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_fmg,b,[],tol,maxit);
 time3 = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
@@ -88,8 +91,12 @@ figure(1)
 semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
 hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
-legend('exact preconditioner','MG preconditioner')
-% 
+legend('Vcycle preconditioner','Fcycle preconditioner')
+
+time2
+time3
+
+
 % figure(2)
 % u_ex = A\b; 
 % sol = reshape(real(u_ex),npx,npy); surf(X,Y,sol); title('Real part of solution')
