@@ -1,6 +1,5 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
 % 2-D Example, Dirichlet boundary conditions
-
 clc
 clear global;
 close all;
@@ -9,7 +8,7 @@ bc  ='dir';
 dim = 2;    %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 100;  eps = 0.5*k^2; %Helmholtz problem
+k   = 40;  eps = 0.5*k^2; %Helmholtz problem
 ppw = 12;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
@@ -32,7 +31,7 @@ ppw = 12;                 %number of points per wavelength
 % b    = f(X,Y); b = b'; b = reshape(b,[np,1]);  %right hand side
 
 %% Multigrid Setup
-%npf = 63;    numlev=6;
+npf = 63; numlev=6;
 profile on
 A       = helmholtz2(k,0,npf,npf,bc);
 op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
@@ -42,19 +41,15 @@ op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
 % Parameters of V-cycle and Jacobi iteration
 b    = ones(length(A),1);
 x0   = zeros(size(b));
-npre = 2; npos = 1; w = 0.5; smo = 'wjac'; numcycles = 1;
-Minv_mg = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
-AMinv_mg = @(v) A*feval(Minv_mg,v);
-
+npre = 1; npos = 1; w = 2/3; smo = 'gs'; numcycles = 1;
+Minv = @(v)feval(@Wcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
 
 [L,U]   = lu(mg_mat{1});
-Minv_ex  = @(v) U\(L\v);
-AMinv_ex = @(v) A*feval(Minv_ex,v);
-
+Minv_ex = @(v) U\(L\v);
 
 % %Parameters of GMRES iteration
-tol   = 1e-6;
-maxit = 400;
+tol   = 1e-7;
+maxit = 200;
 
 %GMRES iteration without preconditioner (too slow for large wavenumbers)
 %tic
@@ -63,14 +58,14 @@ maxit = 400;
  
 % GMRES iteration with left SL preconditioner
 tic
-[x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_mg,b,[],tol,maxit);
+[x2,flag2,relres2,iter2,resvec2] = gmres(A,b,[],tol,maxit,Minv);
 profile off
 time2 = toc;
 
 %GMRES iteration with right SL preconditioner
-AMinv = @(v) A*feval(Minv_mg,v);
+AMinv = @(v) A*feval(Minv,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_ex,b,[],tol,maxit);
+[x3,flag3,relres3,iter3,resvec3] = gmres(A,b,[],tol,maxit,Minv_ex);
 %x3 = feval(Minv,x3);
 time3=toc;
 
@@ -87,5 +82,5 @@ semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
 
 %%print results
 %fprintf('Number of GMRES iterations (no preconditioning) %i\n',iter1(2));
-fprintf('Number of GMRES iterations (+MG right  V-cycle preconditioning) %i\n',iter2(2));
+fprintf('Number of GMRES iterations (+MG left  V-cycle preconditioning) %i\n',iter2(2));
 fprintf('Number of GMRES iterations (+MG exact preconditioning) %i\n',iter3(2));

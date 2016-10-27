@@ -1,9 +1,11 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
 % 2-D Example, Dirichlet boundary conditions
-clear all; close all;
+clc
+clear global;
+close all;
 
-npc = 1;    %number of interior points in coarsest grid in one dim 
-bc  = 'som'; dim = 2; %boundary conditions, dimension
+npc = 3;    %number of interior points in coarsest grid in one dim 
+bc  = 'dir'; dim = 2; %boundary conditions, dimension
 
 %variable wavenumber and imaginary shift of shifted Laplacian
 kref    = 80; eps = 0.6;
@@ -14,7 +16,7 @@ ppw     = 12;                          %number of points per wavelength
 [npf,lev] = fd_npc_to_npf(npc,kref,ppw);  %number of points in finest grid (1D)
 
 %Grid for plotting
-npx = npf; npy=npf; hx = 1/(npx+1); hy = 1/(npy+1);
+npx   = npf; npy=npf; hx=1/(npx+1); hy=1/(npy+1);
 xgrid = hx*(1:1:npx); ygrid = hy*(1:1:npy);
 np    = npx*npy;
 [X,Y] = meshgrid(xgrid,ygrid);
@@ -52,7 +54,7 @@ setup_time=toc;
 
 %Setting the SL preconditioner Minv
 %Parameters of V-cycle and Jacobi iteration
-b    = zeros(length(A),1); b(ceil(length(A)/4),1)=1/(hx*hy);
+b    = zeros(length(A),1); b(ceil(length(A)/2),1) = 1/(hx*hy);
 x0   = zeros(length(A),1);
 npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
 Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
@@ -65,8 +67,8 @@ Minv_vmg = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,...
 Minv_lu=  @(v) (L\(U\v));                   
                         
 %Parameters of GMRES iteration
-tol   = 1e-8;
-maxit = 200;
+tol   = 1e-10;
+maxit = length(A);
 
 %GMRES iteration without preconditioner (too slow for large wavenumbers)
 % tic
@@ -80,15 +82,15 @@ maxit = 200;
  time2 = toc;
 
 % GMRES iteration with right SL preconditioner
-AMinv_fmg = @(v) A*feval(Minv_fmg,v);
+AMinv = @(v) A*feval(Minv,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_fmg,b,[],tol,maxit);
+[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv,b,[],tol,maxit);
 time3 = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
 %hold on
 figure(1)
-semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
+semilogy(1:(iter_rmg(2)+1),resvec_rmg'/resvec_rmg(1),'r-+');
 hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
 legend('Vcycle preconditioner','Fcycle preconditioner')

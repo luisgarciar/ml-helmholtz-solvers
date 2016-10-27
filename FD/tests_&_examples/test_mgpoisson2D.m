@@ -55,9 +55,9 @@ relerr = norm(u_ex-u_d,Inf)/norm(u_ex,Inf)
   setuptime = toc;
   
 % Parameters of V-cycle and Jacobi iteration
- npre = 2; npos = 1; w = 2/3; smo = 'gs'; numcycles = 10;
- x0      = zeros(size(b));
- normr0  = norm(b-A*x0);
+ npre = 1; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 10;
+ x0       = zeros(size(b));
+ normr0   = norm(b-A*x0);
 
 % Test of multigrid on 2D Poisson problem
 % Use the profiler to evaluate performance of code

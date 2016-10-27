@@ -1,4 +1,4 @@
-%% Script for testing the function helmholtz2var.m
+%% Script for testing the functions /helmholtz2var.m and shift_laplace2var.m
 
 kmax  = 20; kmin = 30;    %For problem with random wavenumbers
 kref  = 40;               %For wedge problem
