@@ -1,6 +1,6 @@
-function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
-%% VCYCLE Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
-%   Use: Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+function [x_sol] = Fcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
+%% FCYCLE Solves the Helmholtz/Poisson equation using a multigrid W-cycle.
+%   Use: Fcycle(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %   Input:
 %       Output from the function mg_setup_som: 
 %         - mg_mat:      cell array with multigrid matrices on all
@@ -50,20 +50,21 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
             end
             
             res   = b-mg_mat{1}*x_sol;
-
+            
             %Restriction of the residual to coarse grid
             fc   = restrict{1}*res; 
             nc   = length(fc); vc = zeros(nc,1);
             levs = length(mg_mat);
         
-            %Calling Vcycle to solve the error equation
+            %Calling Fcycle to solve the error equation
             if(levs >2)
-                vc  = Vcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);
+                vc  = Wcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);
+                vc  = Vcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);              
                 %size(fc)
                 
             elseif(levs==2)
+                vc = Wcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
                 vc = Vcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
-                %size(fc)
             end
         
             %Prolongation and correction on current grid
@@ -83,7 +84,6 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
                         mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npos,smo);
             end
-            
                          
         end
     end   

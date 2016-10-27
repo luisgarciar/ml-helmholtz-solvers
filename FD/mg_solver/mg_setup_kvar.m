@@ -1,9 +1,9 @@
-function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
-%% MG_SETUP: Constructs a hierarchy of coarse grid operators,
+function [mg_mat,mg_split,restrict,interp] = mg_setup_kvar(kref,eps,op_type,npcc,numlev,bc,dim)
+%% MG_SETUP_KVAR: Constructs a hierarchy of coarse grid operators,
 %            splittings and intergrid operators for a Helmholtz/Laplace PDE problem   
 %  Use:
 %
-% [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
+% [mg_mat,mg_split,restrict,interp] = mg_setup(kref,eps,op_type,npcc,numlev,bc,dim)
 %
 %  Input: 
 %
@@ -53,29 +53,26 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 
 %[npc,npf] = size2npc(s,dim,bc);
 %s  = length(A);
+
+kvar    = @(x,y) klay(x,y,kref);
+epsvar  = @(x,y) eps*(klay(x,y,kref).^2); 
+
 npf = npc_numlev_to_npf(npcc,numlev);
+
 restrict  = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
 interp    = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
 mg_mat    = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
 mg_split  = cell(numlev,1);      %grid_split{i}: matrix splittings needed for smoothers i
 
-%For Kaczmarcz
-hmax = 1/(npcc+1);
-hlevs = hmax*fliplr(2.^-(0:1:(numlev-1)));
-
-%kczlevel is the level at which Kaczmarcz relaxation should be performed
-[~,kczlevel] = min(abs(k*hlevs - 1.25));  
-if length(kczlevel)>1
-    kczlevel=kczlevel(1);
-end
-
 %Level 1 
 switch dim
     case 1
-    mg_mat{1} = helmholtz(k,eps,npf,bc);
+    mg_mat{1} = helmholtz(kref,eps,npf,bc);
+    %error('no variable wavenumber in dimension 1')
     case 2
     %npf
-    mg_mat{1} = helmholtz2(k,eps,npf,npf,bc);
+    mg_mat{1} = helmholtz2var(kvar,epsvar,npf,npf,bc);
+
     otherwise
         error('invalid dimension')
 end
@@ -87,7 +84,7 @@ interp{1}     = lininterpol(npc,dim,bc);    %lin interp, grid 2 to grid 1
 mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of A
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
 mg_split{1}.D = spdiags(diag(mg_mat{1}),0,length(mg_mat{1}),length(mg_mat{1}));
-mg_split{1}.P = eye(length(mg_mat{1}));
+mg_split{1}.P = speye(length(mg_mat{1}));
 
 if dim==2
     mg_split{1}.P = perm_rb(length(mg_mat{1}));
@@ -111,7 +108,7 @@ for i=2:numlev-1
                case 1
                    mg_mat{i} = helmholtz(k,eps,npf,bc);
                case 2
-                   mg_mat{i} = helmholtz2(k,eps,npf,npf,bc); 
+                   mg_mat{i} = helmholtz2(kref,eps,npf,npf,bc); 
                otherwise
                    error('invalid dimension')
            end
@@ -127,19 +124,11 @@ for i=2:numlev-1
     mg_split{i}.L = sparse(tril(mg_mat{i},-1));
     mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
     
-    %If on Kaczmarcz level, save the splittings for
-    %Kaczmarcz relaxation also
-    if i == kczlevel
-        mg_split{i}.Uk = sparse(triu(mg_mat{i}'*mg_mat{i},1));
-        mg_split{i}.Lk = sparse(tril(mg_mat{i}'*mg_mat{i},1));
-        mg_split{i}.Dk = sparse(diag(mg_mat{i}'*mg_mat{i},1));
-    end
-    
     switch dim
         case 1
             mg_split{i}.P = eye(npf); 
         case 2
-            mg_split{i}.P = eye(npf); 
+            mg_split{i}.P = speye(npf); 
     end    
     npf = npc; npc= round((npf-1)/2);
   
@@ -168,7 +157,7 @@ mg_split{numlev}.D  = spdiags(diag(mg_mat{numlev}),0,length(mg_mat{numlev}),leng
 
 switch dim
     case 1
-        mg_split{numlev}.P = eye(npf); 
+        mg_split{numlev}.P = speye(npf); 
     case 2
         mg_split{numlev}.P = perm_rb(length(mg_mat{numlev}));
 end

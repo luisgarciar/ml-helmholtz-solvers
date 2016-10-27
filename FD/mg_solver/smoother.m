@@ -16,14 +16,16 @@ function [x0] = smoother(U,L,D,P,b,x0,w,numit,smo)
 %            'gs': Gauss-Seidel
 %            'wjac': w-Jacobi
 %            'rbgs': red-black Gauss-Seidel (for 2D problems - currently not working)
+%            'liv': Livshits hybrid smoothing scheme, see [1] in references
 %
+%References:
+%[1] I. Livshits, Shifted Laplacian based multigrid preconditioners for 
+%   solving indefinite Helmholtz equations, arXiv.org, vol. math.NA. p. 2880, 10-Dec-2013.
+%   
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin
 %          Version 1.0, Sep 2016
-%
-%Includes Red-Black Gauss-Seidel
-%
-
+%%Includes Red-Black Gauss-Seidel
 %%
 
 [n,m]=size(U);
@@ -38,14 +40,14 @@ switch smo
         %M = D+L; N = -U;
         for i=1:numit            
             %x0 = M\(N*x0+b);
-            x0 = (D+L)\(-U*x0+b);
+            x0 = (D+L)\(b-U*x0);
         end   
         
     case  'wjac'
         for i=1:numit
-            N = -(L+U); 
-            x0 = w*(D\(N*x0+b))+(1-w)*x0;
-            %x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;          
+            %N = -(L+U); 
+            %x0 = w*(D\(N*x0+b))+(1-w)*x0;
+            x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;          
         end
         
     case  'rbgs'

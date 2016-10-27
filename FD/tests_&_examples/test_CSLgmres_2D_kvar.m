@@ -2,17 +2,16 @@
 % 2-D Example, Dirichlet boundary conditions
 clear all; close all;
 
-npc = 3;    %number of interior points in coarsest grid in one dim 
-bc  = 'dir'; dim = 2; %boundary conditions, dimension
+npc = 1;    %number of interior points in coarsest grid in one dim 
+bc  = 'som'; dim = 2; %boundary conditions, dimension
 
 %variable wavenumber and imaginary shift of shifted Laplacian
-kref    = 10; 
+kref    = 80; eps = 0.6;
 kvar    = @(x,y) klay(x,y,kref);
-epsvar  = @(x,y) 0.5*(klay(x,y,kref).^2); 
+epsvar  = @(x,y) eps*(klay(x,y,kref).^2); 
 zero    = @(x,y) 0*x;
-k       = 5*kref;
 ppw     = 12;                          %number of points per wavelength
-[npf,lev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
+[npf,lev] = fd_npc_to_npf(npc,kref,ppw);  %number of points in finest grid (1D)
 
 %Grid for plotting
 npx = npf; npy=npf; hx = 1/(npx+1); hy = 1/(npy+1);
@@ -47,34 +46,43 @@ b(center)= 1/(hx*hy);
 
 %% Multigrid Setup
 tic
-[galerkin_matrices,galerkin_split,restrict,interp]= mg_setup(M,lev,bc,dim);
-setuptime=toc;
+[galerkin_matrices,galerkin_split,restrict,interp]... 
+= mg_setup_kvar(kref,eps,'gal',npc,lev,bc,dim);
+setup_time=toc;
 
 %Setting the SL preconditioner Minv
 %Parameters of V-cycle and Jacobi iteration
 b    = zeros(length(A),1); b(ceil(length(A)/4),1)=1/(hx*hy);
 x0   = zeros(length(A),1);
-npre = 2; npos = 0; w = 2/3; smo = 'wjac'; numcycles = 1;
-Minv = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
- 
+npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
+Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
+                            interp,x0,v,npre,npos,w,smo,numcycles);
+
+Minv_vmg = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,...
+                            interp,x0,v,npre,npos,w,smo,numcycles);
+                                               
+[L,U]=lu(M);                        
+Minv_lu=  @(v) (L\(U\v));                   
+                        
 %Parameters of GMRES iteration
-tol   = 1e-10;
-maxit = length(A);
+tol   = 1e-8;
+maxit = 200;
 
 %GMRES iteration without preconditioner (too slow for large wavenumbers)
 % tic
 % [~,flag1,relres1,iter1,resvec1] = gmres(A,b,[],tol,maxit,[]);
 % time1 = toc;
  
-% GMRES iteration with left SL preconditioner
-tic
-[x2,flag2,relres2,iter2,resvec2] = gmres(A,b,[],tol,maxit,Minv);
-time2 = toc;
+% GMRES iteration with V cycle preconditioner
+ AMinv_vmg = @(v) A*feval(Minv_vmg,v);
+ tic
+ [x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_vmg,b,[],tol,maxit);
+ time2 = toc;
 
 % GMRES iteration with right SL preconditioner
-AMinv = @(v) A*feval(Minv,v);
+AMinv_fmg = @(v) A*feval(Minv_fmg,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv,b,[],tol,maxit);
+[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_fmg,b,[],tol,maxit);
 time3 = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
@@ -83,9 +91,14 @@ figure(1)
 semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
 hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
+legend('Vcycle preconditioner','Fcycle preconditioner')
 
-figure(2)
-u_ex = A\b; 
-sol = reshape(real(u_ex),npx,npy); surf(X,Y,sol); title('Real part of solution')
-figure(3)
-sol = reshape(real(x2),npx,npy);   surf(X,Y,sol); title('Real part of solution')
+time2
+time3
+
+
+% figure(2)
+% u_ex = A\b; 
+% sol = reshape(real(u_ex),npx,npy); surf(X,Y,sol); title('Real part of solution')
+% figure(3)
+% sol = reshape(real(x2),npx,npy);   surf(X,Y,sol); title('Real part of solution')
