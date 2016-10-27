@@ -42,7 +42,7 @@ op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
 b    = ones(length(A),1);
 x0   = zeros(size(b));
 npre = 1; npos = 1; w = 2/3; smo = 'gs'; numcycles = 1;
-Minv = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
+Minv = @(v)feval(@Wcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
 
 [L,U]   = lu(mg_mat{1});
 Minv_ex = @(v) U\(L\v);

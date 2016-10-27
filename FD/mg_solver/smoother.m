@@ -19,8 +19,8 @@ function [x0] = smoother(U,L,D,P,b,x0,w,numit,smo)
 %            'liv': Livshits hybrid smoothing scheme, see [1] in references
 %
 %References:
-%[1] I. Livshits, ?Shifted Laplacian based multigrid preconditioners for 
-%   solving indefinite Helmholtz equations,? arXiv.org, vol. math.NA. p. 2880, 10-Dec-2013.
+%[1] I. Livshits, Shifted Laplacian based multigrid preconditioners for 
+%   solving indefinite Helmholtz equations, arXiv.org, vol. math.NA. p. 2880, 10-Dec-2013.
 %   
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin

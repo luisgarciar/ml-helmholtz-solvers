@@ -1,6 +1,6 @@
-function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
-%% VCYCLE Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
-%   Use: Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+function [x_sol] = Wcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
+%% WCYCLE Solves the Helmholtz/Poisson equation using a multigrid W-cycle.
+%   Use: Wcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %   Input:
 %       Output from the function mg_setup_som: 
 %         - mg_mat:      cell array with multigrid matrices on all
@@ -56,13 +56,13 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
             nc   = length(fc); vc = zeros(nc,1);
             levs = length(mg_mat);
         
-            %Calling Vcycle to solve the error equation
+            %Calling Wcycle to solve the error equation
             if(levs >2)
-                vc  = Vcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);
+                vc  = Wcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,2);
                 %size(fc)
                 
             elseif(levs==2)
-                vc = Vcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
+                vc = Wcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,2);
                 %size(fc)
             end
         
@@ -83,7 +83,6 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
                x_sol = smoother(mg_split{1}.U, mg_split{1}.L,...
                         mg_split{1}.D, mg_split{1}.P,b,x_sol,w,npos,smo);
             end
-            
                          
         end
     end   
