@@ -37,7 +37,7 @@ x0 = zeros(length(A),1);
 %% Test of Preconditioned GMRES
 %Setting the MG preconditioner Minv
 %Parameters of V-cycle and Jacobi iteration
-npre = 2; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 1;
+npre = 1; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 1;
 Minv = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,1);
 
 %Parameters of GMRES iteration

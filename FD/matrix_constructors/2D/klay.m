@@ -24,7 +24,7 @@ index2 = y>y1;
 index3 = y>y2;
 
 k = zeros(size(x));
-k(index1) = 4/3*kref;
+k(index1) = (4/3)*kref;
 k(index2) = kref;
 k(index3) = 2*kref;
 end

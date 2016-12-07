@@ -42,7 +42,7 @@ op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
 % Parameters of V-cycle and Jacobi iteration
 b    = ones(length(A),1);
 x0   = zeros(size(b));
-npre = 2; npos = 1; w = 0.5; smo = 'wjac'; numcycles = 1;
+npre = 1; npos = 1; w = 0.5; smo = 'wjac'; numcycles = 1;
 Minv_mg = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
 AMinv_mg = @(v) A*feval(Minv_mg,v);
 

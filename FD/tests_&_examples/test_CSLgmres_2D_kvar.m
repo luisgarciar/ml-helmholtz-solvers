@@ -1,6 +1,8 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
 % 2-D Example, Dirichlet boundary conditions
-clear all; close all;
+clc
+clear global;
+close all;
 
 npc = 1;    %number of interior points in coarsest grid in one dim 
 bc  = 'som'; dim = 2; %boundary conditions, dimension
@@ -52,7 +54,7 @@ setup_time=toc;
 
 %Setting the SL preconditioner Minv
 %Parameters of V-cycle and Jacobi iteration
-b    = zeros(length(A),1); b(ceil(length(A)/4),1)=1/(hx*hy);
+b    = zeros(length(A),1); b(ceil(length(A)/2),1) = 1/(hx*hy);
 x0   = zeros(length(A),1);
 npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
 Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
@@ -77,13 +79,13 @@ maxit = 200;
  AMinv_vmg = @(v) A*feval(Minv_vmg,v);
  tic
  [x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_vmg,b,[],tol,maxit);
- time2 = toc;
+ time_v = toc;
 
 % GMRES iteration with right SL preconditioner
 AMinv_fmg = @(v) A*feval(Minv_fmg,v);
 tic
 [x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_fmg,b,[],tol,maxit);
-time3 = toc;
+time_f = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
 %hold on
@@ -93,8 +95,8 @@ hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
 legend('Vcycle preconditioner','Fcycle preconditioner')
 
-time2
-time3
+timev
+timef
 
 
 % figure(2)

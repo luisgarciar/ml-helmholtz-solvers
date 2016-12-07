@@ -1,5 +1,5 @@
 function Z = lininterpolfem(npc, dim)
-%% LININTERPOL Constructs the matrix corresponding to the linear interpolation
+%% LININTERPOLFEM Constructs the matrix corresponding to the linear interpolation
 %  operator from a coarse grid with npc interior points.
 %  
 %   Use:    Z = lininterpol(npc,dim)  
