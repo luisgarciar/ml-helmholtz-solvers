@@ -112,7 +112,7 @@ switch bc
         %West boundary
         j   = 1:npy; 
         ind = j*nx+1;
-        Wc  =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
+        Wc  = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
         Ws  = -1/hy^2;
         We  = -2/hx^2;
         Wn  = -1/hy^2;
@@ -125,16 +125,16 @@ switch bc
       
         %South boundary
         ind = (1:npx)+1;
-        Sc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-        Sw = -1/hx^2;
-        Se = -1/hx^2;
-        Sn = -2/hy^2;
-        SC = sparse(ind,ind,Sc,np,np);
-        SE = sparse(ind,ind+1,Se,np,np);
-        SW = sparse(ind,ind-1,Sw,np,np);
-        SN = sparse(ind,ind+nx,Sn,np,np);
-        S  = SC+SE+SW+SN;
-        A(ind,:)=S(ind,:);        
+        Sc  =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+        Sw  = -1/hx^2;
+        Se  = -1/hx^2;
+        Sn  = -2/hy^2;
+        SC  = sparse(ind,ind,Sc,np,np);
+        SE  = sparse(ind,ind+1,Se,np,np);
+        SW  = sparse(ind,ind-1,Sw,np,np);
+        SN  = sparse(ind,ind+nx,Sn,np,np);
+        S   = SC+SE+SW+SN;
+        A(ind,:) = S(ind,:);        
 %          
         %East boundary
         j=1:npy; ind = nx*(j+1);

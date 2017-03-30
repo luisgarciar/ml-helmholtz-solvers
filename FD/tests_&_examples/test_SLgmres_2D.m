@@ -1,4 +1,4 @@
-%% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
+% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
 % 2-D Example, Dirichlet boundary conditions
 clc
 clear global;
@@ -9,8 +9,8 @@ bc  ='som';
 dim = 2;    %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 30;  eps = 0.5*k^2; %Helmholtz problem
-ppw = 20;                 %number of points per wavelength
+k   = 10;  eps = 0.5*k^2; %Helmholtz problem
+ppw = 10;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 

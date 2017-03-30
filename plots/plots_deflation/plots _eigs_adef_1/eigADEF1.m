@@ -1,4 +1,4 @@
-function [eigvADEF1] = eigADEF1(k,ppw,b1,b2)
+function [eigvADEF1] = eigADEF1(k,N,b1,b2)
 %% EIGADEF1 Generates the eigenvalues of the 1D Helmholtz
 %  operator with Dirichlet boundary conditions
 %  preconditioned by the ADEF-1 preconditioner
@@ -6,18 +6,17 @@ function [eigvADEF1] = eigADEF1(k,ppw,b1,b2)
 %
 %   Input:
 %       k: Wavenumber
-%       ppw: points per wavelength
+%       N: number of interior grid points (size of linear system)
 %       (b1,b2): shift
 %
 %   Output: 
-%           eADEF1: nonzero eigenvalues of the preconditioned system           
+%       eADEF1: nonzero eigenvalues of the preconditioned system           
 %
 %   Author: Luis Garcia Ramos,          
 %           Institut fur Mathematik, TU Berlin
 %           Version 0.1, May 2016
 %
 %%
-N = ceil(ppw*k/(2*pi))-1;
 if (mod(N+1,2)==1) 
     N = N+1; 
 end
@@ -51,13 +50,13 @@ egvANj = (2-2*cos(g)-k^2*h^2)/h^2;
 
 %Low frequency part of the spectrum of M
 g      = (pi*h*j);
-egvMj  = (2-2*cos(g)-k^2*(b1-1i*b2)*h^2)/h^2;
+egvMj  = (2-2*cos(g)-k^2*(b1+1i*b2)*h^2)/h^2;
 %lj = (sin(g).^2-(k*h)^2)./(sin(g).^2-(k*h)^2*(b1-1i*b2));
 
 %High frequency part of the spectrum of M
 Nj  = N+1-j;
 g   = (pi*h*Nj);
-egvMNj = (2-2*cos(g)-k^2*(b1-1i*b2)*h^2)/h^2;
+egvMNj = (2-2*cos(g)-k^2*(b1+1i*b2)*h^2)/h^2;
 
 % We compute the eigenvalues of M.Pd.A
 % Each eigenvalue is of the form xj = yj.zj  
