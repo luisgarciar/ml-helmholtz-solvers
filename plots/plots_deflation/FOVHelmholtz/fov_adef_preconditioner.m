@@ -4,7 +4,7 @@ clear all
 close all
 
 dim = 1;
-k   = 100;
+k   = 20;
 ppw = 0.5;
 npc = 4;
 eps = 0.5*k^2;
