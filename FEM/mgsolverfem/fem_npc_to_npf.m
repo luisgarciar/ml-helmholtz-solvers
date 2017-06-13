@@ -6,12 +6,12 @@ function [npf,lev] = fem_npc_to_npf(npc,k,par)
 % Use:  [npf,lev] = npc_to_npf(npcc,k,ppw)
 %
 % Input
-%       npcc : number of points on coarsest grid (including endpoint 0)
+%       npcc : number of points on coarsest grid (only interior points)
 %       k    : wavenumber (for Helmholtz eqn)
 %       ppw  : minimum number of points per wavelength   
 %
 % Output
-%       npf : number of points on the finest grid (including endpoint 0)
+%       npf : number of interior points on the finest grid
 %       l   : number of levels (grids) from coarsest to finest
 %
 %  Author:      Luis Garcia Ramos, 
@@ -25,19 +25,19 @@ function [npf,lev] = fem_npc_to_npf(npc,k,par)
 %chosen according to the rule (2*pi/k*npf) approx par=ppw
 if par >1
     ppw = par;
-    m   = ppw*k/(2*pi*npc);
+    m   = ppw*k/(2*pi*(npc+1));
     lev = ceil(log2(m));
     lev = max(lev,1);   %at least 1 level
     npf = npc*(2^(lev-1));
-    
+    npf = npf-1;
 else 
 %Case 2: The number of fine grid points grows 
-%linearly w.r.t. k^2. In this case par <<1, 
+%linearly with respect to k^2. In this case par <1, 
 %and the gridsize h=1/(npf+1) satisfies k^2*h approx par
-    m  = (k^2/par)*(1/(npc));
+    m  = (k^2/par)*(1/(npc+1));
    lev = ceil(log2(m));
    lev = max(lev,1);   %at least 1 level
-   npf = npc*(2^(lev-1));
+   npf = (npc+1)*(2^(lev-1))-1;
     
 end
 

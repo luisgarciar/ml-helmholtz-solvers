@@ -1,10 +1,18 @@
-function [A] = helmholtzfem(k,np,eps)
+function [A] = helmholtzfem(k,np,eps,bc)
 %% HELMHOLTZFEM: Constructs a matrix for a 1D Helmholtz and Shifted Laplace model problem.
 %  Constructs the matrix corresponding to the discretization of a 1D Helmholtz (or shifted Laplace)
-%  problem
+%  problem with mixed or Sommerfeld boundary conditions
+%
+%       Mixed bc:
 %       -u''- k^2*u-i*eps*u = f in (0,1)
 %        u(0)       = 0   
 %        u'(1)-ku(1)= 0
+%
+%       Sommerfeld bc
+%       -u''- k^2*u-i*eps*u = f in (0,1)
+%        u'(0) + ku(0) = 0   
+%        u'(1) - ku(1) = 0
+%
 % 
 % Use: A = helmholtzfem(k,np,eps)
 %
@@ -19,15 +27,17 @@ function [A] = helmholtzfem(k,np,eps)
 % F. Ihlenburg and I. Babuska, Finite element solution of the 
 % Helmholtz equation with high wave number Part I: The h-version of the FEM
 %
-% S Langdon , S Chandler-Wilde, Finite element methods for acoustic scattering 
+% S Langdon, S Chandler-Wilde, Finite element methods for acoustic scattering 
 % 
 %  Input: 
 %  k:   wavenumber
-%  np:  size of the matrix (x=0 and interior points)
+%  np:  size of the matrix (only interior points)
 %  eps: imaginary shift    (eps=0 for Helmholtz problem)
 %  
 %  Output:
 %  A:   FEM discretization matrix
+%       size(A) = (np+2,np+2) for if bc = 'som'  
+%       size(A) = (np+1,np+1) for if bc = 'mix'  
 %
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin
@@ -36,12 +46,18 @@ function [A] = helmholtzfem(k,np,eps)
 %%%
 
 %%
-h  = 1/np;                 %gridsize
-e = ones(np,1);
-A = (1/h)*spdiags([-e 2*e -e],[-1 0 1],np,np); A(np,np)=1/h; %Laplacian (Stiffness) Matrix
-B = h*spdiags([(1/6)*e (2/3)*e (1/6)*e],[-1 0 1],np,np); B(np,np)=h/3; %Mass matrix
-C = sparse(np,np); C(np,np)=1;  %Boundary term
-A = A-(k^2+1i*eps)*B-1i*k*C;
+
+switch bc
+    case 'mix'
+        h  = 1/(np+1);                 %gridsize
+        e = ones(np+1,1);
+        A = (1/h)*spdiags([-e 2*e -e],[-1 0 1],np+1,np); A(np+1,np+1)=1/h; %Laplacian Matrix
+        B = h*spdiags([(1/6)*e (2/3)*e (1/6)*e],[-1 0 1],np+1,np+1); B(np+1,np+1)=h/3; %Mass matrix
+        C = sparse(np+1,np+1); C(np+1,np+1)=1;  %Boundary term
+        A = A-(k^2+1i*eps)*B-1i*k*C;        %Helmholtz matrix
+
+    case 'som'
+
 end
 
 

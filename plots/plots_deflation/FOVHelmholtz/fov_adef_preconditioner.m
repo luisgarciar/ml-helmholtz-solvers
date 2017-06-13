@@ -7,9 +7,9 @@ dim = 1;
 k   = 20;
 ppw = 0.1;
 npc = 4;
-eps = 100000*k^2;
-[npf,lev] = fem_npc_to_npf(npc,k,ppw);
+eps = 1*k^2;
 
+[npf,lev] = fem_npc_to_npf(npc,k,ppw);
 A  = helmholtzfem(k,npf,0); %Helmholtz matrix
 SL = helmholtzfem(k,npf,eps); %Shifted Laplace matrix
 

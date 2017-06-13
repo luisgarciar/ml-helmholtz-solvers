@@ -9,6 +9,7 @@ function [x] = smoother(U,L,D,P,b,x0,w,numit,smo)
 %   Input:
 %
 %   U, L, D: (strictly) upper,lower and diagonal parts of A
+%         P: Permutation matrix for Red-Black Gauss-Seidel (not working)
 %     x0, b: Initial guess, right hand side    
 %     numit: number of iterations 
 %         w: relaxation parameter for Jacobi iteration
