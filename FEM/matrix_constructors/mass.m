@@ -7,8 +7,7 @@ function [M] = mass(np)
 %        u(0)       = 0   
 %        u'(1)-ku(1)= 0
 % 
-% Use: A = mass(np,eps)
-%
+% Use: A = mass(np)
 %
 % References:
 % F. Ihlenburg and I. Babuska, Finite element solution of the 
@@ -26,7 +25,6 @@ function [M] = mass(np)
 %          Institut fur Mathematik, TU Berlin
 %  Version 0.1 - Jun 2016
 %
-%%%
 
 %%
 h = 1/np;            %gridsize

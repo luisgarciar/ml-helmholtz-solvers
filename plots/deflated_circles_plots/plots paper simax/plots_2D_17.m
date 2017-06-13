@@ -18,8 +18,8 @@ plot_csl = 'yes';
 plot_defcsl = 'yes';
 
 % Wavenumber
-%kk = [200 500 1000];
-kk = 20;
+kk = [20 40 80];
+%kk = 20;
 
 for i=1:length(kk)
 close all
@@ -148,7 +148,7 @@ name1 = strcat('2d_dcsl','_wn',wn,'_ppw',pts,...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
 
         if strcmp(pollution,'no')
-            name1 = strcat('dcsl_wn',wn,'_nopoll', ...
+            name1 = strcat('2d_dcsl_wn',wn,'_nopoll', ...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
         end
                 
