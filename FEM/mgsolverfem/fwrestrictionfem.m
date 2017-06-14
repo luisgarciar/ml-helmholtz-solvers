@@ -1,15 +1,18 @@
-function R = fwrestrictionfem(npf,dim)
+function R = fwrestrictionfem(npf,dim,bc)
 %% FWRESTRICTIONFEM Constructs the matrix corresponding to the full weight restriction
 %   operator from a fine grid with npf interior points.
 %  
-%   Use:    R = fwrestriction(npf,dim)  
+%   Use:    R = fwrestriction(npf,dim,bc)  
 %
 %   Input: 
-%       npf:    number of interior points in 1-D fine grid (must be even)
+%       npf:    number of interior points in 1-D fine grid (must be odd)
 %       dim:    dimension (1 or 2)
+%       bc:     boundary conditions ('mix' or 'som')
 %       
 %   Output:
-%       R:      restriction matrix of size npc x npf
+%       R:  restriction matrix
+%           size(R) = ((npf+1)/2,npf+1) if bc = 'mix'
+%                   = ((npf-1)/2 +2,npf+2) if bc = 'som'
 %
 %   Author: Luis Garcia Ramos, 
 %           Institut fur Mathematik, TU Berlin
@@ -19,12 +22,28 @@ function R = fwrestrictionfem(npf,dim)
 %%
 switch dim
     case 1
-        assert(mod(npf,2)==0,'number of gridpoints is not even');
-        npc = round(npf/2); %length of coarse grid vectors
-        y = zeros(npf,1); y(1:3,1) = [1;2;1];
-        R = gallery('circul',y');
-        R = 0.5*sparse(R(1:2:(npf),:));
-        R(npc,:)= zeros(1,npf);R(npc,npf)=1; R(npc,npf-1)=0.5;
+        switch bc
+            case 'mix'
+                assert(mod(npf,2)==1,'number of interior gridpoints is not odd');
+                npc = round((npf+1)/2); %length of coarse grid vectors
+                y = zeros(npf+1,1); y(1:3,1) = [1;2;1];
+                R = gallery('circul',y');
+                R = 0.5*sparse(R(1:2:(npf+1),:));
+                R(npc,:)= zeros(1,npf+1);
+                R(npc,npf+1)=1; R(npc,npf)=0.5;
+            
+            case 'som'
+                assert(mod(npf,2)==1,'number of interior gridpoints is not odd');
+                npc = round((npf+1)/2); %length of coarse grid vectors
+                y = zeros(npf+1,1); y(1:3,1) = [1;2;1];
+                R = gallery('circul',y');
+                R = 0.5*sparse(R(1:2:(npf+1),:));
+                R(npc,:)= zeros(1,npf+1);
+                R(npc,npf)=1; R(npc,npf-1)=0.5;
+                
+        end
+                
+                
     case 2
 %         %npc = round(npf/2)-1;  
 %         y   = zeros(npf,1); y(1:3,1) = [1;2;1];
