@@ -34,12 +34,14 @@ switch dim
             
             case 'som'
                 assert(mod(npf,2)==1,'number of interior gridpoints is not odd');
-                npc = round((npf+1)/2); %length of coarse grid vectors
-                y = zeros(npf+1,1); y(1:3,1) = [1;2;1];
-                R = gallery('circul',y');
-                R = 0.5*sparse(R(1:2:(npf+1),:));
-                R(npc,:)= zeros(1,npf+1);
-                R(npc,npf)=1; R(npc,npf-1)=0.5;
+                npc = round((npf-1)/2)+2; %length of coarse grid vectors
+                y = zeros(npf+2,1); y(1:4,1) = [0;1;2;1];
+                R1 = gallery('circul',y');
+                R1 = 0.5*sparse(R1(1:2:npf-1,:));
+                R = sparse(npc,npf+2);
+                R(2:npc-1,:) = R1;
+                R(npc,npf+2)= 1; R(npc,npf+1)=0.5;
+                R(1,1)=1; R(1,2)=0.5;
                 
         end
                 
