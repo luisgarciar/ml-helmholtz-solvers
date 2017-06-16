@@ -13,11 +13,11 @@ function [A] = helmholtzfem(k,np,eps,bc)
 %        u'(0) + ku(0) = 0   
 %        u'(1) - ku(1) = 0
 %
-%  Use: A = helmholtzfem(k,np,eps)
+%  Use: A = helmholtzfem(k,np,eps,bc)
 %
 %  Input: 
 %  k:   wavenumber
-%  np:  size of the matrix (only interior points)
+%  np:  number of interior points in (0,1)
 %  eps: imaginary shift    (eps=0 for Helmholtz problem)
 %  bc: 'mix' or 'som'
 %  

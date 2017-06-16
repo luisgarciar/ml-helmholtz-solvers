@@ -1,52 +1,136 @@
 %Field of values of finite element matrices 1D
 %ADEF preconditioner
+
+%% Construction of the matrices
 clear all
 close all
 
 dim = 1;
 k   = 20;
-ppw = 0.1;
+ppw = 0.4;
 npc = 4;
 eps = 1*k^2;
+bc = 'mix';
 
-[npf,lev] = fem_npc_to_npf(npc,k,ppw);
-A  = helmholtzfem(k,npf,0); %Helmholtz matrix
-SL = helmholtzfem(k,npf,eps); %Shifted Laplace matrix
+plot_csl    = 'no';
+plot_defcsl = 'no';
 
-Ahat = full(SL\A);
-eigv = eig(Ahat);
-plot(real(eigv),imag(eigv),'.b','MarkerSize',22);
-axis([0 1 -0.5 0.5])
-xlabel('real(\lambda)','FontSize',14)
-ylabel('imag(\lambda)','FontSize',14)
+%if pollution = 'no' the number of points np= ceil(k^(3/2)) 
+pollution = 'no';
 
-R = fwrestrictionfem(npf,dim);
-Z = R'; %Prolongation. Deflation subspace: columns of Z
+%otherwise the number of grid points is chosen
+%with a fixed number of points per wavelength
+npf = ceil(ppw*k/(2*pi))-1; 
+if strcmp(pollution,'no')
+npf = ceil(k^(3/2));
+end
+
+if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
+    npf = npf+1; 
+end
+npc = (npf-1)/2; 
+
+%[npf,lev] = fem_npc_to_npf(npc,k,ppw);
+A  = helmholtzfem(k,npf,0,bc); %Helmholtz matrix
+Aeps = helmholtzfem(k,npf,eps,bc); %Shifted Laplace matrix
+
+%% FOV of Helmholtz + Shifted Laplace with full matrices 
+% Ahat = full(Aeps\A);
+% N    = length(A);
+% 
+% %Field of values of Ahat Sl-preconditioned Helmholtz matrix
+% [fvAhat, eigAhat] = fv(Ahat,1,32,1);
+% 
+% figure(1)
+% plot(real(fvAhat), imag(fvAhat),'b') %Plot the FOV of Padef
+% hold on
+% plot(real(eigAhat), imag(eigAhat),'r+')    %Plot the eigenvalues too.
+% %axis('equal');
+
+%% FOV of Deflated Shifted Laplace with full matrices 
+% 
+% R = fwrestrictionfem(npf,dim,bc);
+% Z = R';             %Prolongation. Deflation subspace: columns of Z
+% dim_def = size(Z,2);
+% 
+% %Deflated-shifted Operator PadefA
+% M = mass(npf,bc);
+% sqrtM = sqrtm(full(M));
+% I = eye(length(A));
+% P = full(Aeps\(I-A*Z*((Z'*A*Z)\Z')));
+% P = sqrtM*P*sqrtM;
+% 
+% %Field of values of PadefA in Minv inner product
+% [fvAP] = 1+1i*eps*fv(P,1,32,1);
+% 
+% %Plots
+% figure(2)
+% plot(real(fvAhat), imag(fvAhat),'b') %Plot the FOV of Padef
+% hold on
+% plot(real(eigAhat), imag(eigAhat),'r+')    %Plot the eigenvalues too.
+% axis('equal');
+% plot(0,0,'+k')
+% plot(real(fvAP), imag(fvAP),'k*') %Plot the FOV of Padef
+
+%% Sparse FOV of Helmholtz + Shifted Laplace
+[L,U] = lu(Aeps);    
+LH = U'; UH=L';
+N=length(A);
+
+Ahat     = @(x) A*(U\(L\x));
+AhatH    = @(x) UH\(LH\(A'*x));
+H        = @(x) 0.5*(feval(Ahat,x) + feval(AhatH,x)); %Hermitian part of Ahat
+
+%Compute first the maximum eigenvalue of A
+[eigvecA, eigvalA] =  eig(full(A));
+[eigvalmaxA,ind] = max(diag(eigvalA));
+ vmaxA = eigvecA(:,ind);
+
+%Compute now the maximum eigenvalue of the Hermitian part of A
+opts.p = 30;
+opts.isreal = 0;
+opts.v0 = vmaxA;
+[vmaxH, eigmaxH] =  eigs(H,N,1,'LM',opts);
+
+%Use the maximum eigenvalue of the Hermitian part of A
+[fovAhat,~,~] = sfov(Ahat,AhatH,vmaxH,N,50);
+
+%Find the convex hull of the FOV and plot it
+reFOV = real(fovAhat); imFOV= imag(fovAhat);
+k = convhull(reFOV,imFOV);
+plot(reFOV(k), imFOV(k),'b')      % Plot the field of values
+axis('equal');
+hold on;
+
+%% Sparse FOV of Deflated shifted Laplacian
+R = fwrestrictionfem(npf,dim,bc);
+Z = R';             %Prolongation. Deflation subspace: columns of Z
 dim_def = size(Z,2);
 
 %Deflated-shifted Operator PadefA
-M = mass(npf);
+M = mass(npf,bc);
+Ac = Z'*A*Z; %Coarse operator
+[Lc, Uc] = lu(Ac); 
+LcH = Uc'; UcH = Lc';
 sqrtM = sqrtm(full(M));
-I = eye(length(A));
-P = full(SL\(I-A*Z*((Z'*A*Z)\Z')));
-P = sqrtM*P*sqrtM;
 
-%Field of values of Ahat Sl-preconditioned Helmholtz matrix
-[fvAhat, eigAhat] = fv(Ahat,1,32,1);
+%Deflated operator 
+I     = speye(length(A));
+P     =    @(x)  sqrtM*(I- A*Z*(Uc\(Lc\(Z'*sqrtM*x))));
+PH    =    @(x)  sqrtM*(I-Z*(UcH\(LcH\(Z'*(A'*sqrtM*x)))));
+Hdef  =    @(x) 0.5*(feval(P,x) + feval(PH,x)); %Hermitian part of Pdef
 
-%Field of values of PadefA in Minv inner product
-[fvAP] = 1+1i*eps*fv(P,1,32,1);
+%Field of values of APadef in Minv inner product
+[fovAP,~,~] = sfov(P,PH,vmaxH,N,50);
+fovAP = 1+1i*eps*fovAP;
 
-%Plots
-figure(2)
-plot(real(fvAhat), imag(fvAhat),'b') %Plot the FOV of Padef
-hold on
-plot(real(eigAhat), imag(eigAhat),'r+')    %Plot the eigenvalues too.
+reFOVAP = real(fovAP); imFOVAP= imag(fovAP);
+k1 = convhull(reFOVAP,reFOVAP);
+plot(reFOVAP(k1),reFOVAP(k1),'*+')      % Plot the field of values
 axis('equal');
-plot(0,0,'+k')
-plot(real(fvAP), imag(fvAP),'k*') %Plot the FOV of Padef
 
 
+%%
 %hold on
 %plot(real(eigAP), imag(eigAP),'r+')    %Plot the eigenvalues too.
 
