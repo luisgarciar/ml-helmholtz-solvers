@@ -8,16 +8,16 @@ close all
 dim = 1;
 
 poweps    = 2;
-factoreps = 0.5;
+factoreps = 1;
 bc = 'som';
 %Wavenumber
-kk = [20 40 80];
-
-plot_csl    = 'no';
-plot_defcsl = 'no';
-plot_csl_defcsl = 'no';
+%kk = 20;
+kk = [20 40 80 120];
 
 
+plot_csl    = 'yes';
+plot_defcsl = 'yes';
+plot_csl_defcsl = 'yes';
 ppw = 0.5;
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
 pollution = 'no';
@@ -70,13 +70,15 @@ for i=1:length(kk)
         cvh = convhull(reFOV,imFOV);
     
     if strcmp(plot_csl,'yes')
-        plot(reFOV(cvh), imFOV(cvh),'b','LineWidth',2)      % Plot the field of values
+        plot(reFOV(cvh), imFOV(cvh),'b','LineWidth',4)      % Plot the field of values
+        hold on
+        plot(0,0,'k+','Markersize',10,'LineWidth',4)
         axis equal
-        axis([-0.5 1.5 -0.5 1.5]);
+        axis([-0.2 1.2 -0.7 0.7]);
         xlabel('Re(z)','FontSize',14);
         ylabel('Im(z)','FontSize',14);
-        set(gca,'Xtick',[-0.5 0 0.5 1 1.5],'FontSize',14);
-        set(gca,'Ytick',[-0.5 0 0.5 1 1.5],'FontSize',14);
+        set(gca,'Xtick',[0 0.5 1],'FontSize',14);
+        set(gca,'Ytick',[-0.5 0 0.5 1],'FontSize',14);
         
         wn     = num2str(k);  pts = num2str(ppw);
         powershift  = num2str(poweps);
@@ -131,15 +133,20 @@ for i=1:length(kk)
     [fovAP,~,~] = sfov(AP,APH,vmaxH,N,50);
     fovAP = 1+1i*eps*fovAP;
     
+    close all
     if strcmp(plot_defcsl,'yes')
+        close all
         refovAP = real(fovAP); imfovAP= imag(fovAP);
-        plot(refovAP,imfovAP,'LineWidth',2)      % Plot the field of values
+        plot(refovAP,imfovAP,'k','LineWidth',4)      % Plot the field of values
+        hold on 
+        hold on
+        plot(0,0,'k+','Markersize',10,'LineWidth',4)
         axis('equal');
-        axis([-0.5 1.5 -0.5 1.5]);
+        axis([-0.2 1.2 -0.7 0.7]);
         xlabel('Re(z)','FontSize',14);
         ylabel('Im(z)','FontSize',14);
-        set(gca,'Xtick',[-0.5 0 0.5 1 1.5],'FontSize',14);
-        set(gca,'Ytick',[-0.5 0 0.5 1 1.5],'FontSize',14);
+        set(gca,'Xtick',[0 0.5 1],'FontSize',14);
+        set(gca,'Ytick',[-0.5 0 0.5 1],'FontSize',14);
         
         x = xlabel('$\mathrm{Re}(z)$');
         % x-axis label
@@ -159,15 +166,18 @@ for i=1:length(kk)
     end %End of FOV DCSL
     
     if strcmp(plot_csl_defcsl,'yes')
-        plot(reFOV(k), imFOV(k),'b')      % Plot the field of values
+        close all
+        plot(reFOV(cvh), imFOV(cvh),'b','LineWidth',4);      % Plot the field of values
         hold on
-        plot(refovAP,imfovAP,'k+')      % Plot the field of values
+        plot(0,0,'k+','Markersize',10,'LineWidth',4)
+        hold on
+        plot(refovAP,imfovAP,'k','LineWidth',4);      % Plot the field of values
         axis equal
-        axis([-0.5 1.5 -0.5 1.5]);
+        axis([-0.2 1.2 -0.7 0.7]);
         xlabel('Re(z)','FontSize',14);
         ylabel('Im(z)','FontSize',14);
-        set(gca,'Xtick',[-0.5 0 0.5 1 1.5],'FontSize',14);
-        set(gca,'Ytick',[-0.5 0 0.5 1 1.5],'FontSize',14);
+        set(gca,'Xtick',[0 0.5 1],'FontSize',14);
+        set(gca,'Ytick',[-0.5 0 0.5 1],'FontSize',14);
         
         wn     = num2str(k);  pts = num2str(ppw);
         powershift  = num2str(poweps);
