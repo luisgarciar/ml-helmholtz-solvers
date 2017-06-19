@@ -44,7 +44,6 @@ Ahatm = full(Aeps\A);
 eigvA = eig(Ahatm);
 
 %%
-
 [LH,UH] = lu(Aeps');
 [L,U] = lu(Aeps);    
 
