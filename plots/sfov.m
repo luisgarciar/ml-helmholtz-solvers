@@ -1,8 +1,8 @@
 function [fovA,eigvA,m,M]=sfov(A,AH,v0max,N,k)
 %% SFOV 
-%  [m,M]= sfov(A,AH, k) computes the field of values of the sparse
+%  [fovA,eigvA,m,M]= sfov(A,AH, k) computes the field of values of the sparse
 %  matrix A and approximations to the inner numerical radius and 
-%  spectral radius using the method  of Johnson 
+%  numerical radius using the method  of Johnson 
 %
 %  INPUT
 %  A:  function handle that computes  A*x
@@ -11,12 +11,12 @@ function [fovA,eigvA,m,M]=sfov(A,AH,v0max,N,k)
 %  k: number of angles
 
 %  OUTPUT
-%  m: Inner numerical radius (distance of the fov to zero)
-%  M: Spectral radius
-%  fv: Field of values
-
+%  m: Inner numerical radius of A (distance of the fov to zero)
+%  M: Numerical radius of A
+%  fv, eigvA: Field of values and eigenvalues of A
+% 
 % Author: Luis Garcia Ramos, TU Berlin
-%         (Based on a routine of Nick Higham (Matrix Toolbox))
+%         Based on a routine of Nick Higham (Matrix Toolbox)
           % version 0.1 - Apr 2017
          
 %%%
@@ -26,17 +26,18 @@ theta = linspace(0,2*pi,k); %range of angles
 fovA  = zeros(k,1);         %boundary points
 eigvA = 0;
 for j=1:k
+    j
     %We rotate the matrix A to obtain At=exp(i*theta(j))*A 
     %and compute the max eigenvalue and unit eigenvector of 
     %Ht = Hermitian part of At
-     j
+     %j
      et = exp(1i*theta(j));  
      Ht = @(x) 0.5*(et*feval(A,x) + et'*feval(AH,x));
     
      opts.isreal = 0;
      opts.v0     = v0max;
      opts.p = 60;
-     [vmaxHt,~,flag] = eigs(Ht,N,1,'LR',opts);
+     [vmaxHt,~,~] = eigs(Ht,N,1,'LR',opts);
      
      %if flag ~=0
       %  fovA(j) = fovA(j-1);

@@ -12,7 +12,7 @@ factoreps = 1;
 bc = 'som';
 %Wavenumber
 %kk = 20;
-kk = [140 180];
+kk = [60];
 
 
 plot_csl    = 'yes';
