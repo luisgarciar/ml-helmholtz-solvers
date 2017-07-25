@@ -119,7 +119,7 @@ function matlab2tikz(varargin)
 %      matlab2tikz('myfile.tex');
 %
 
-%   Copyright (c) 2008--2015, Nico Schlömer <nico.schloemer@gmail.com>
+%   Copyright (c) 2008--2015, Nico Schl??mer <nico.schloemer@gmail.com>
 %   All rights reserved.
 %
 %   Redistribution and use in source and binary forms, with or without
@@ -160,7 +160,7 @@ m2t.transform = []; % For hgtransform groups
 m2t.pgfplotsVersion = [1,3];
 m2t.name = 'matlab2tikz';
 m2t.version = '1.0.0';
-m2t.author = 'Nico Schlömer';
+m2t.author = 'Nico Schl??mer';
 m2t.authorEmail = 'nico.schloemer@gmail.com';
 m2t.years = '2008--2015';
 m2t.website = 'http://www.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz';
@@ -1224,7 +1224,7 @@ function [m2t, options] = getAxisOptions(m2t, handle, axis)
         options = ...
             opts_add(options, ...
             ['every ',axis,' tick label/.append style'], ...
-            ['{font=\color{',col,'}}']);
+            ['{font=',col,'}']);
     end
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     % handle the orientation
@@ -5423,9 +5423,9 @@ function c = prettyPrint(m2t, strings, interpreter)
                 string = s;
 
                 % degree symbol following "^" or "_" needs to be escaped
-                string = regexprep(string, '([\^\_])°', '$1{{}^\\circ}');
-                string = strrep(string, '°', '^\circ');
-                string = strrep(string, '∞', '\infty');
+                string = regexprep(string, '([\^\_])??', '$1{{}^\\circ}');
+                string = strrep(string, '??', '^\circ');
+                string = strrep(string, '???', '\infty');
 
                 % Parse string piece-wise in a separate function.
                 string = parseTexString(m2t, string);
@@ -5704,14 +5704,14 @@ function string = parseTexSubstring(m2t, string)
     string = strrep(string, '%', '\%');
     string = strrep(string, '#', '\#');
 
-    % Escape "§" as "\S" since it can give UTF-8 problems otherwise.
-    % The TeX string 'a_§' in particular lead to problems in Octave 3.6.0.
+    % Escape "??" as "\S" since it can give UTF-8 problems otherwise.
+    % The TeX string 'a_??' in particular lead to problems in Octave 3.6.0.
     % m2t transcoded that string into '$\text{a}_\text{*}\text{#}$' with
     % * = 0xC2 and # = 0xA7 which corresponds with the two-byte UTF-8
     % encoding. Even though this looks like an Octave bug that shows
     % during the '..._\text{abc}' to '..._\text{a}\text{bc}' conversion,
     % it's best to include the workaround here.
-    string = strrep(string, '§', '\S{}');
+    string = strrep(string, '??', '\S{}');
 
     string = escapeAmpersands(m2t, string, origstr);
     string = escapeTildes(m2t, string, origstr);
@@ -5727,7 +5727,7 @@ function string = parseTexSubstring(m2t, string)
     % like '\alpha' because they use math mode and therefore are never inside a
     % \text{...} block to begin with. This means that the number of special
     % characters affected by this issue is actually quite small:
-    %   $ # % & _ { } \o § ~ \ ^
+    %   $ # % & _ { } \o ?? ~ \ ^
     expr = ['(_|\^)(\\text)\{([^}\\]|\\\$|\\#|\\%|\\&|\\_|\\\{|\\\}|', ...
         ... %   (_/^)(\text) {(non-}\| \$ | \#| \%| \&| \_| \{ | \} |
         ... %   ($1)( $2 )  (                 $3                      ->
