@@ -1,0 +1,4 @@
+**./texpadtmp
+*.pdf
+*.log
+**./ipynb_checkpoints/
