@@ -10,7 +10,7 @@ clear all;
 save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 
 % Setup parameters
-% Setup list of wavenumbers
+% Setup list of wavenumbers and shifts
 wavenum   = 20:20:100 ;
 poweps    = [1 1.5 2];
 

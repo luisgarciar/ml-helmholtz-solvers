@@ -115,9 +115,9 @@ for i=1:length(kk)
         %set(gca,'Xtick',[0.7 1 1.3],'FontSize',30);
         %set(gca,'Ytick',[-0.3 0 0.4],'FontSize',30);
         
-        kmin        = num2str(min(kk));
-        kma         = num2str(max(kk));
-        pts         = num2str(ppw);
+        kmin  = num2str(min(kk));
+        kmax  = num2str(max(kk));
+        pts   = num2str(ppw);
         powershift  = num2str(poweps);
         factorshift = num2str(10*factoreps);
          
