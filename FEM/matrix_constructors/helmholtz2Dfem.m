@@ -4,23 +4,28 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option)
 %  Constructs the matrix corresponding to the discretization of a 1D Helmholtz (or shifted Laplace)
 %  problem with mixed or Sommerfeld boundary conditions
 %
-%   [eqn,info] = Helmholtz(node,elem,pde,bdFlag) produces the 
-%   matrix and right hand side corresponding
-%   to the discretization of the Helmholtz problem
+%   [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option) produces the 
+%   matrix and right hand side corresponding  to the discretization of 
+%   the Helmholtz problem
 %
 %       -\div(grad u) - k^2u  = f in \Omega, with
-%       -i*k*u + grad(u)*n = g;  on \Gamma (Absorbing boundary condition)  
+%       -i*k*u + grad(u)*n    = g;  on \Gamma (Absorbing boundary condition)  
 %
-%       or the shifted Laplace problem
+%   or the shifted Laplace problem
 %
-%       -\div(grad u) - (k^2 + i*eps )u  = f in \Omega, with
-%       -i*k*u + grad(u)*n = g  on \Gamma (Absorbing boundary condition)  
+%   -\div(grad u) - (k^2 + i*eps)u  = f in \Omega, with
+%   -i*k*u + grad(u)*n = g  on \Gamma (ABC)  
 %
-%   The mesh is given by node and elem and the boundary edge is given by
-%   bdFlag. See meshdoc, bddoc for details. 
+%   The mesh is given by node and elem and the info on boundary edges
+%   is given by bdFlag. See meshdoc, bddoc for details.
+%
 %   The data is given by the
 %   structure pde which contains function handles f, g and the parameters
 %   for the shifted Laplacian
+%   The structure option contains the order of quadrature for the 
+%   integration of the right hand side function.
+%   
+%   Input:
 %
 %   Example
 %
@@ -56,7 +61,7 @@ k2M   = sparse(Ndof,Ndof);
 
 for i = 1:3
     for j = i:3
-        % $A_{ij}|_{\tau} = \int_{\tau}K\nabla \phi_i\cdot \nabla \phi_j dxdy$ 
+        % $A_{ij}|_{\tau} = \int_{\tau}\nabla \phi_i \cdot \nabla \phi_j dxdy$ 
         Aij = (Dphi(:,1,i).*Dphi(:,1,j) + Dphi(:,2,i).*Dphi(:,2,j)).*area;    
         if (j==i)
             Delta = Delta + sparse(elem(:,i),elem(:,j),Aij,Ndof,Ndof);
@@ -112,9 +117,9 @@ if ~isempty(pde.f)
 end
 clear pxy bt
 
-%% Set up boundary conditions
+%% Set up boundary conditions, see function getbd below
 if ~exist('bdFlag','var'), bdFlag = []; end
-[AD,b,u,freeNode] = getbd(b);
+[AD,b,freeNode] = getbd(b);
 
 %% Record assembling time
 assembleTime = toc;
@@ -133,39 +138,20 @@ info.assembleTime = assembleTime;
     function [AD,b,u,freeNode] = getbd(b)
     %% Set up of boundary conditions.
     %
-    % 1) Modify the matrix for Dirichlet boundary nodes, which are not degree
-    % of freedom. Values at these nodes are evaluatation of pde.g_D. The
-    % original stiffness matrix A is turn into the matrix AD by enforcing
-    % AD(fixedNode,fixedNode)=I, AD(fixedNode,freeNode)=0, AD(freeNode,fixedNode)=0.
-    %
-    % 2) Modify the right hand side b. The Neumann boundary integral is added
-    % to b. For Dirichlet boundary ndoes, b(fixedNode) is the evaluation of
-    % pde.g_D.
-    %
-    % Special attentation should be given for the pure Neumann boundary
-    % condition. To enforce the compatible condition, the vector b should have
-    % mean value zero. To avoid a singular matrix, the 1st node is chosen as
-    % fixedNode. 
-    %
-    % The order of assigning Neumann and Dirichlet boundary condition is
-    % important to get the right setting at the intersection nodes of Dirichlet
-    % and Neumann boundary edges.
+    % 1) Modify the right hand side b for the Sommerfeld boundary 
+    %   condition. The boundary integral of the function g is added to b. 
+    
     %
     % Reference: Long Chen. Finite Element Methods and its Programming. Lecture
     % Notes.
 
-    % ABC means aborbing boundary condition, is a special robin boundary
-    % condition: -iku + grad u \dot n =0;and this condition is used
-    % widely, so we only need focus on this boundary condition rather than
-    % general robin boundary condition.
-    
-    u = zeros(Ndof,1); 
+    %u = zeros(Ndof,1); 
     %% Initial check
-    if ~isfield(pde,'g_D'), pde.g_D = []; end
-    if ~isfield(pde,'g_N'), pde.g_N = []; end
+    if ~isfield(pde,'g'),   pde.g = 0; end
 
-    %% Part 1: Modify the matrix for Dirichlet and ABC condition
-    % Absorbing boundary condition
+    %% Part 1: Modify the matrix for Sommerfeld BC
+    % In the array bdFlag the Sommerfeld BC is marked as ABC:=3
+    % This is a default option of iFEM, could be modified later.
     
     ABC = [];
     isABC = (bdFlag(:) == 3);
@@ -176,13 +162,19 @@ info.assembleTime = assembleTime;
     if ~isempty(ABC)
         ve = node(ABC(:,1),:) - node(ABC(:,2),:);
         edgeLength = sqrt(sum(ve.^2,2)); 
-%         mid = (node(ABC(:,1),:) + node(ABC(:,2),:))/2;
-        % int g_R phi_iphi_j ds
+%       mid = (node(ABC(:,1),:) + node(ABC(:,2),:))/2;
+        
+        %Computation of boundary integral
+        % int g phi_i phi_j ds
         ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
         jj = [ABC(:,1),ABC(:,2),ABC(:,1),ABC(:,2)];
         temp = -sqrt(-1)*sqrt(k2)*edgeLength;
+        
+        %computing the boundary integrals:
+        %int_{edge} phi_i phi_j ds = 1/3*edgeLength if i==j, 
+        %int_{edge} phi_i phi_j ds = 1/6*edgeLength if i=/= j
         ss = [1/3*temp, 1/6*temp, 1/6*temp, 1/3*temp];
-        A = A + sparse(ii,jj,ss,Ndof,Ndof);
+        A = A + sparse(ii,jj,ss,Ndof,Ndof); %?
     end
     
     % Find Dirichlet boundary nodes: fixedNode
