@@ -64,6 +64,7 @@ for i = 1:3
             Delta = Delta + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
                                    [Aij; Aij],Ndof,Ndof);        
         end
+            %Assembling the mass matrix
             if isnumeric(pde.k2)    %constant wave number
                k2 = pde.k2;         
             else                    %variable wave number k
@@ -80,31 +81,20 @@ for i = 1:3
     end
 end
 clear Aij
-% mass matrix
-if option.lumpflag
-    M = accumarray([elem(:,1);elem(:,2);elem(:,3)],[area;area;area]/3,[N,1]);
-    if isnumeric(pde.k2)
-       k2 = pde.k2;                              % k is an array
-    else    % k is a function   
-       k2 = pde.k2(node);
-    end
-    k2M = spdiags(k2.*M,0,N,N);
-end
-A = Delta - k2M;
 
-%% The rest is the same as Poisson except the solver part
+A = Delta - k2M;
 
 %% Assemble the right hand side
 b = zeros(Ndof,1);
 if ~isfield(option,'fquadorder')
-    option.fquadorder = 3;   % default order
+    option.fquadorder = 3; %default order of quadrature for integration
 end
 if ~isfield(pde,'f') || (isreal(pde.f) && (pde.f==0))
     pde.f = [];
 end
 if ~isempty(pde.f) 
     [lambda,weight] = quadpts(option.fquadorder);
-    phi = lambda;                 % linear bases
+    phi = lambda;        % linear bases
 	nQuad = size(lambda,1);
     bt = zeros(NT,3);
     for p = 1:nQuad
@@ -112,7 +102,7 @@ if ~isempty(pde.f)
 		pxy = lambda(p,1)*node(elem(:,1),:) ...
 			+ lambda(p,2)*node(elem(:,2),:) ...
 			+ lambda(p,3)*node(elem(:,3),:);
-		fp = pde.f(pxy);
+		fp = pde.f(pxy); %evaluate f at the quadrature points
         for i = 1:3
             bt(:,i) = bt(:,i) + weight(p)*phi(p,i)*fp;
         end
@@ -133,76 +123,6 @@ if option.printlevel >= 2
     fprintf('Time to assemble matrix equation %4.2g s\n',assembleTime);
 end
 
-%% Solve the system of linear equations
-if isempty(freeNode), return; end
-% Set up solver type
-if isempty(option) || ~isfield(option,'solver')    % no option.solver
-    if Ndof <= 2e3  % Direct solver for small size systems
-        option.solver = 'direct';
-    else            % MGCG  solver for large size systems
-        option.solver = 'mg';
-    end
-end
-
-solver = option.solver;
-tol    = option.tol;
-% solve
-switch solver
-    case 'direct'
-        tic;
-        u(freeNode) = AD(freeNode,freeNode)\b(freeNode);
-        residual = norm(b - AD*u);
-        info = struct('solverTime',toc,'itStep',0,'err',residual,'flag',2,'stopErr',residual);
-    case 'bicgstab'
-        tic;
-        Ni = size(freeNode,1);
-        [u(freeNode),~,~,iter] = bicgstab(AD(freeNode,freeNode),b(freeNode),1.0e-6,Ni,Delta(freeNode,freeNode));
-        residual = norm(b - AD*u);
-        info = struct('solverTime',toc,'itStep',iter,'err',residual,'flag',2,'stopErr',residual);
-    case 'slp' % shifted Laplacian preconditioner
-        tic;
-        Ni = size(freeNode,1);
-        pre = [];
-        beta = option.shiftparameter;
-        if any(beta)
-            shift = 1-beta(1) + sqrt(-1)*beta(2);
-            pre = AD + shift*k2M(freeNode,freeNode);
-        end      
-        if strcmp(option.mg.solver,'DIRECT')
-%             [u0,flag,relres,iter] =  gmres(AD,b,[],tol,min(Ni,300),pre);
-            [u0,flag,relres,iter] =  gmres(@ADpre,b,[],tol,min(Ni,300)); 
-            u0 = pre\u0;
-        else
-            option.mg.freeDof = freeNode;
-            [u0,flag,relres,iter] =  gmres(@ADpremg,b,[],tol,min(Ni,300));
-            u0 = mg(pre,u0,elem,option.mg);
-        end
-        u(freeNode) = u0;
-        itStep = (iter(1)-1)*min(Ni,300) + iter(2);
-        residual = norm(b - AD*u0);
-        info = struct('solverTime',toc,'itStep',itStep,'err',residual,'flag',2,'stopErr',residual); 
-    case 'Deflash-shifted'
-        tic;
-        pre = [];
-        beta = option.shiftparameter;
-        if any(beta)
-            pre = Delta - spdiags(((beta(1) - sqrt(-1)*beta(2))*k2).*k2M,0,N,N);
-        end
-        isfreeNode             = false(N,1);
-        isfreeNode(freeNode)   = true;
-        [u(freeNode),~,itStep] = deflationshifted(elem,AD(freeNode,freeNode),b(freeNode),pre,isfreeNode,tol);
-        info = struct('solverTime',toc,'itStep',itStep,'err',[],'flag',3,'stopErr',tol);
-    case 'none'
-        info = struct('solverTime',[],'itStep',0,'err',[],'flag',3,'stopErr',tol);
-    case 'mg'
-        option.x0 = u;
-        option.solver = 'CG';
-        [u,info] = mg(AD,b,elem,option);
-    case 'amg'
-        option.solver = 'CG';
-        [u(freeNode),info] = amg(AD(freeNode,freeNode),b(freeNode),option);                 
-end
-
 %% Output information
 eqn = struct('A',AD,'b',b,'freeNode',freeNode,'Delta',Delta);
 info.assembleTime = assembleTime;
@@ -210,13 +130,6 @@ info.assembleTime = assembleTime;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % subfunctions getbd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function y = ADpre(x)
-        y = AD*(pre\x);
-    end
-    function y = ADpremg(x)
-        y = mg(pre,x,elem,option.mg);
-        y = AD*y;
-    end
     function [AD,b,u,freeNode] = getbd(b)
     %% Set up of boundary conditions.
     %
