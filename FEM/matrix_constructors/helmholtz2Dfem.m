@@ -32,24 +32,6 @@ Ndof = N;
 
 tic;  % record assembling time
 
-%% Diffusion coefficient
-if ~isfield(pde,'d'), pde.d = []; end
-if ~isfield(option,'dquadorder'), option.dquadorder = 1; end
-if ~isempty(pde.d) && isnumeric(pde.d)
-   K = pde.d;                                 % d is an array
-end
-
-if ~isempty(pde.d) && ~isnumeric(pde.d)       % d is a function   
-    [lambda,weight] = quadpts(option.dquadorder);
-    nQuad = size(lambda,1);
-    K = zeros(NT,dim);
-    for p = 1:nQuad
-		pxy = lambda(p,1)*node(elem(:,1),:) ...
-			+ lambda(p,2)*node(elem(:,2),:) ...
-			+ lambda(p,3)*node(elem(:,3),:);
-        K = weight(p)*pde.d(pxy);
-   end
-end
 
 %% Compute geometric quantities and gradient of local basis
 [Dphi,area] = gradbasis(node,elem);
