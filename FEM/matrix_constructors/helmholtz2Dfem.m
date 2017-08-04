@@ -177,93 +177,74 @@ info.assembleTime = assembleTime;
         A = A + sparse(ii,jj,ss,Ndof,Ndof); %?
     end
     
-    % Find Dirichlet boundary nodes: fixedNode
-    fixedNode = []; freeNode = [];
-    if ~isempty(bdFlag) % find boundary edges and boundary nodes
-        [fixedNode,bdEdge,isBdNode] = findboundary(elem,bdFlag);
-        freeNode = find(~isBdNode);
-    end
-    if isempty(bdFlag) && ~isempty(pde.g_D) && isempty(pde.g_N) && isempty(pde.g_R)
-        % no bdFlag, only pde.g_D is given
-        [fixedNode,bdEdge,isBdNode] = findboundary(elem);
-        freeNode = find(~isBdNode);
-    end
-    % Modify the matrix
-    % Build Dirichlet boundary condition into the matrix AD by enforcing
-    % AD(fixedNode,fixedNode)=I, AD(fixedNode,freeNode)=0, AD(freeNode,fixedNode)=0.
-    if ~isempty(fixedNode)
-        AD = A(freeNode,freeNode);
-%         bdidx = zeros(Ndof,1); 
-%         bdidx(fixedNode) = 1;
-%         Tbd = spdiags(bdidx,0,Ndof,Ndof);
-%         T = spdiags(1-bdidx,0,Ndof,Ndof);
-%         AD = T*A*T + Tbd;
-    else
-        AD = A;
-    end
     
     %% Part 2: Find boundary edges and modify the right hand side b
+    
+    %Old iFEM code: Neumann BCs (not considered here)
     % Find boundary edges: Neumann
-    Neumann = []; 
-    if ~isempty(bdFlag)  % bdFlag specifies different bd conditions
-        Neumann = bdEdge;  % bdEdge found in findboundary: line 275      
-    end
-    if isempty(bdFlag) && ~isempty(pde.g_N)
-        % no bdFlag, only pde.g_N or pde.g_R is given in the input
-        [tempvar,Neumann] = findboundary(elem); %#ok<ASGLU>
-    end
+%     if ~isempty(bdFlag)  % bdFlag specifies different bd conditions
+%         ABC = bdEdge;  % bdEdge found in findboundary: line 275      
+%     end
+%     if isempty(bdFlag) && ~isempty(pde.g_N)
+%         % no bdFlag, only pde.g_N or pde.g_R is given in the input
+%         [tempvar,Neumann] = findboundary(elem); %#ok<ASGLU>
+%     end
 
-    % Neumann boundary condition
-    % In most cases, g_N = [] for Helmholtz equation
-    if  isnumeric(pde.g_N) && all(pde.g_N == 0)
-        pde.g_N = [];
+    % Absorbing boundary condition in the right hand side
+    % In most cases, g= [] for Helmholtz equation
+    if  isnumeric(pde.g) && all(pde.g == 0)
+        pde.g = [];
     end
-    if ~isempty(Neumann) && ~isempty(pde.g_N)
-        el = sqrt(sum((node(Neumann(:,1),:) - node(Neumann(:,2),:)).^2,2));
-        if ~isfield(option,'gNquadorder')
-            option.gNquadorder = 2;   % default order exact for linear gN
+    if ~isempty(ABC) && ~isempty(pde.g) 
+        ve = node(ABC(:,1),:) - node(ABC(:,2),:);
+        edgeLength = sqrt(sum(ve.^2,2)); 
+    
+        if ~isfield(option,'gquadorder')
+            option.gquadorder = 2;   % default order exact for linear gN
         end
-        [lambdagN,weightgN] = quadpts1(option.gNquadorder);
-        phigN = lambdagN;                 % linear bases
-        nQuadgN = size(lambdagN,1);
-        ge = zeros(size(Neumann,1),2);
-        for pp = 1:nQuadgN
+        [lambda_g,weight_g] = quadpts1(option.gquadorder);
+        phi_g = lambda_g;                 % linear bases
+        nQuadg = size(lambda_g,1);
+        ge = zeros(size(ABC,1),2);
+        for pp = 1:nQuadg
             % quadrature points in the x-y coordinate
-            ppxy = lambdagN(pp,1)*node(Neumann(:,1),:) ...
-                 + lambdagN(pp,2)*node(Neumann(:,2),:);
-            gNp = pde.g_N(ppxy);
-            for igN = 1:2
-                ge(:,igN) = ge(:,igN) + weightgN(pp)*phigN(pp,igN)*gNp;
+            ppxy = lambda_g(pp,1)*node(ABC(:,1),:) ...
+                 + lambda_g(pp,2)*node(ABC(:,2),:);
+            gp = pde.g_(ppxy);  %boundary function at the quadrature nodes
+            for ig = 1:2
+                ge(:,ig) = ge(:,ig) + weight_g(pp)*phi_g(pp,ig)*gp;
             end
         end
-        ge = ge.*repmat(el,1,2);
-        b = b + accumarray(Neumann(:), ge(:),[Ndof,1]); 
+        ge = ge.*repmat(edgeLength,1,2);%Jacobian (edgeLength)
+        b = b + accumarray(ABC(:), ge(:),[Ndof,1]); 
     end
-    % The case with non-empty Neumann edges but g_N=0 or g_N=[] corresponds to
-    % the zero flux boundary condition on Neumann edges and no modification of
-    % A,u,b is needed.
-
-    % Dirichlet boundary condition
-    if isnumeric(pde.g_D) && all(pde.g_D == 0)   % zero g_D
-        pde.g_D = [];
-    end
-    if ~isempty(fixedNode) && ~isempty(pde.g_D)
-        if isnumeric(pde.g_D)  % pde.g_D could be a numerical array 
-            u(fixedNode) = pde.g_D(fixedNode); 
-        else % pde.g_D is a function handle
-            u(fixedNode) = pde.g_D(node(fixedNode,:));
-        end
-        b = b - A*u;
-%         b(fixedNode) = u(fixedNode);
-    end
-    if ~isempty(fixedNode)
-        b = b(freeNode);
-    end
-    % Difference with Poisson: no modification for pure Neumann case.
     
-    % The case with non-empty Dirichlet nodes but g_D=0 or g_D=[] corresponds
-    % to the zero Dirichlet boundary condition and no modification of u,b is
-    % needed.
+    
+%     % The case with non-empty Neumann edges but g_N=0 or g_N=[] corresponds to
+%     % the zero flux boundary condition on Neumann edges and no modification of
+%     % A,u,b is needed.
+% 
+%     % Dirichlet boundary condition
+%     if isnumeric(pde.g_D) && all(pde.g_D == 0)   % zero g_D
+%         pde.g_D = [];
+%     end
+%     if ~isempty(fixedNode) && ~isempty(pde.g_D)
+%         if isnumeric(pde.g_D)  % pde.g_D could be a numerical array 
+%             u(fixedNode) = pde.g_D(fixedNode); 
+%         else % pde.g_D is a function handle
+%             u(fixedNode) = pde.g_D(node(fixedNode,:));
+%         end
+%         b = b - A*u;
+% %         b(fixedNode) = u(fixedNode);
+%     end
+%     if ~isempty(fixedNode)
+%         b = b(freeNode);
+%     end
+%     % Difference with Poisson: no modification for pure Neumann case.
+%     
+%     % The case with non-empty Dirichlet nodes but g_D=0 or g_D=[] corresponds
+%     % to the zero Dirichlet boundary condition and no modification of u,b is
+%     % needed.
     end % end of getbd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end % end of Poisson
