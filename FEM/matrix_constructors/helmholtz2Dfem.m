@@ -1,27 +1,33 @@
-function [u,eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option)
+function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option)
 %% HELMHOLTZ2DFEM Helmholtz equation: P1 linear element.
 %  Constructs a matrix for a 2D Helmholtz and Shifted Laplace model problem.
 %  Constructs the matrix corresponding to the discretization of a 1D Helmholtz (or shifted Laplace)
 %  problem with mixed or Sommerfeld boundary conditions
 %
-%   A = Helmholtz(node,elem,pde,bdFlag) produces the matrix corresponding
-%   to the discretization of the Helmholtz equation
+%   [eqn,info] = Helmholtz(node,elem,pde,bdFlag) produces the 
+%   matrix and right hand side corresponding
+%   to the discretization of the Helmholtz problem
 %
-%       -\div(d u) - k^2u = f  in \Omega, with 
-%       Dirichlet boundary condition u = g_D on \Gamma_D, 
-%       Neumann boundary condition   grad(u)*n=g_N on \Gamma_N,
-%       Absorbing boundary condition  -i*k*u + grad(u)*n = 0;  on \Gamma
+%       -\div(grad u) - k^2u  = f in \Omega, with
+%       -i*k*u + grad(u)*n = g;  on \Gamma (Absorbing boundary condition)  
+%
+%       or the shifted Laplace problem
+%
+%       -\div(grad u) - (k^2 + i*eps )u  = f in \Omega, with
+%       -i*k*u + grad(u)*n = g  on \Gamma (Absorbing boundary condition)  
 %
 %   The mesh is given by node and elem and the boundary edge is given by
-%   bdFlag. See meshdoc, bddoc for details. The data is given by the
-%   structure pde which contains function handles f, g_D, g_N, g_R, or d.
-%   For general elliptic equations with convection and reaction
-%   coefficients, see ellipticpde.
+%   bdFlag. See meshdoc, bddoc for details. 
+%   The data is given by the
+%   structure pde which contains function handles f, g and the parameters
+%   for the shifted Laplacian
 %
 %   Example
 %
-%
 %   See also Poisson3, squarePoisson, Lshape, crack, mg
+%
+%   Modified by Luis Garcia Ramos, based on the iFEM package
+%   by Long Chen
 %
 %   Copyright (C) Long Chen. See COPYRIGHT.txt for details.
 
@@ -32,33 +38,35 @@ Ndof = N;
 
 tic;  % record assembling time
 
-
 %% Compute geometric quantities and gradient of local basis
+
+%Dlambda(1:NT, 1:2, 1:3) is an array containing the gradients
+%of local P1 basis functions
+%For example, Dlambda(t,:,1) is the gradient of 
+% the basis function lambda corresponding to the 1st index (vertex) of
+% the t-th triangle. The elemSign array taking values 1 or -1 records the
+% sign of the signed area.
+
 [Dphi,area] = gradbasis(node,elem);
 
 %% Assemble stiffness matrix
-% Delta is negative Laplacian
+% Delta is the negative Laplacian
 Delta = sparse(Ndof,Ndof);
-k2M = sparse(Ndof,Ndof);
+k2M   = sparse(Ndof,Ndof);
+
 for i = 1:3
     for j = i:3
         % $A_{ij}|_{\tau} = \int_{\tau}K\nabla \phi_i\cdot \nabla \phi_j dxdy$ 
-        if ~isempty(pde.d)
-            Aij = (Dphi(:,1,i).*K(:,1).*Dphi(:,1,j) + ...
-                   Dphi(:,2,i).*K(:,2).*Dphi(:,2,j)).*area;
-        else
-            Aij = (Dphi(:,1,i).*Dphi(:,1,j) + Dphi(:,2,i).*Dphi(:,2,j)).*area;
-        end
+        Aij = (Dphi(:,1,i).*Dphi(:,1,j) + Dphi(:,2,i).*Dphi(:,2,j)).*area;    
         if (j==i)
             Delta = Delta + sparse(elem(:,i),elem(:,j),Aij,Ndof,Ndof);
         else
             Delta = Delta + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
                                    [Aij; Aij],Ndof,Ndof);        
         end
-        if ~option.lumpflag 
-            if isnumeric(pde.k2)
-               k2 = pde.k2;         % constant wave number
-            else                    % variable wave number k
+            if isnumeric(pde.k2)    %constant wave number
+               k2 = pde.k2;         
+            else                    %variable wave number k
                center = (node(elem(:,1),:) + node(elem(:,2),:) + node(elem(:,3),:))/3; 
                k2 = pde.k2(center);
             end
@@ -69,10 +77,9 @@ for i = 1:3
                 k2M = k2M + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
                                    [Mij; Mij],Ndof,Ndof);        
             end
-        end
     end
 end
-clear K Aij
+clear Aij
 % mass matrix
 if option.lumpflag
     M = accumarray([elem(:,1);elem(:,2);elem(:,3)],[area;area;area]/3,[N,1]);
