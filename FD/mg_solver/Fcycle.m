@@ -1,5 +1,5 @@
 function [x_sol] = Fcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
-%% FCYCLE Solves the Helmholtz/Poisson equation using a multigrid W-cycle.
+%% FCYCLE Solves the Helmholtz/Poisson equation using a multigrid F-cycle.
 %   Use: Fcycle(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
 %   Input:
 %       Output from the function mg_setup_som: 
