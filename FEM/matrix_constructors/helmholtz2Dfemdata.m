@@ -6,17 +6,18 @@ function pde = helmholtz2Dfemdata
 %   
 %     -div(grad u)-k^2 u = f;
 %    with absorbing boundary condition
-%
 %    grad(u) dot n - i*ku = g; 
-%    u = sin(k*pi*x)^2*sin(k*pi*y)^2;
+%
+%    with exact solution
+%    u = cos(pi*x)*cos(pi*y);
 %    f = -div(grad u)- k^2 u;
 %
 %   Usage:  Set the wavenumber k as a global variable in 
 %           the main .m file
 %   Output: 
 %       pde: struct containing the following data:
-%         All function handles to be applied to input of size (N,2) 
-%           'f'     : function handle for right hand side                     
+%            All function handles to be applied to input of size (N,2) 
+%           'f'    : function handle for right hand side                     
 %           exactu': function handle for exact solution
 %           'gradu':
 %           'k2': squared wavenumber
@@ -35,23 +36,20 @@ pde = struct('f',@f,'exactu',@exactu,'k2',@k2,...,
     function rhs =  f(p)
         global k
         x = p(:,1); y = p(:,2);
-        rhs = -2*pi^2*k^2*(cos(2*k*pi*x).*sin(k*pi*y).^2+cos(2*k*pi*y).*sin(k*pi*x).^2)-k^2*sin(k*pi*x).^2.*sin(k*pi*y).^2;
-        rhs = rhs;
+        rhs = (-k^2+2*pi^2)*(cos(pi*x).*cos(pi*y));      rhs = rhs;
     end
 
     % exact solution
     function u =  exactu(p)
-        global k
         x = p(:,1); y = p(:,2);
-        u = sin(k*pi*x).^2.*sin(k*pi*y).^2;
+        u = cos(pi*x).*cos(pi*y);
     end
 
     % gradient of the exact solution
     function grad_u =  gradu(p)
-        global k
         x = p(:,1); y = p(:,2);
-        grad_u(:,1) = k*pi*sin(2*k*pi*x).*sin(k*pi*y).^2;
-        grad_u(:,2) = k*pi*sin(2*k*pi*y).*sin(k*pi*x).^2;
+        grad_u(:,1) = -pi*sin(pi*x).*cos(pi*y);
+        grad_u(:,2) = -pi*sin(pi*y).*cos(pi*x);
     end
 
     function wavenumber = k2(~)
@@ -60,7 +58,8 @@ pde = struct('f',@f,'exactu',@exactu,'k2',@k2,...,
     end
     function g_B = g(p)
         global k
-        g_B = p; %?? fix this
+        x = p(:,1); y = p(:,2);
+        g_B = 1i*k*(cos(pi*x).*cos(pi*y));
     end
 
 end
