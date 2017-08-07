@@ -18,7 +18,6 @@ iter_SL = zeros(length(kk),2);
 %Colors for plots
 hexcolor   = ['#332288'; '#88CCEE'; '#44AA99'; '#117733'; '#999933'; ...
               '#DDCC77'; '#CC6677'; '#882255'; '#AA4499'];
-rgbcolor1  = hex2rgb(hexcolor);
 %rgbcolor2 = linspecer(9);
 
 minfov  = zeros(length(kk),1);
@@ -56,7 +55,7 @@ for i=1:length(kk)
         npf = ceil(k^(3/2));
     end
     
-    if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
+    if (mod(npf+1,2)==1)  %set an even number of interior points in 1D (??)
         npf = npf+1;
     end
     npc = (npf-1)/2;

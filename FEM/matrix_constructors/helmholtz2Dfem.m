@@ -20,16 +20,16 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option)
 %   is given by bdFlag. See meshdoc, bddoc for details.
 %
 %   The data is given by the
-%   structure pde which contains function handles f, g and the parameters
-%   for the shifted Laplacian
+%   structure pde which contains function handles k2, f, g 
+%   and the parameters poweps, factoreps for the shifted Laplacian
+%   TO DO: Add parameters for the shifted Laplacian
+%
 %   The structure option contains the order of quadrature for the 
 %   integration of the right hand side function.
 %   
 %   Input:
 %
 %   Example
-%
-%   See also Poisson3, squarePoisson, Lshape, crack, mg
 %
 %   Modified by Luis Garcia Ramos, based on the iFEM package
 %   by Long Chen
@@ -135,19 +135,19 @@ info.assembleTime = assembleTime;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % subfunctions getbd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function [AD,b,u,freeNode] = getbd(b)
+    function [AD,b,freeNode] = getbd(b)
     %% Set up of boundary conditions.
-    %
+    
     % 1) Modify the right hand side b for the Sommerfeld boundary 
     %   condition. The boundary integral of the function g is added to b. 
-    
     %
-    % Reference: Long Chen. Finite Element Methods and its Programming. Lecture
-    % Notes.
+    % Reference: Long Chen. Finite Element Methods and its Programming. 
+    % Lecture Notes.
 
     %u = zeros(Ndof,1); 
     %% Initial check
     if ~isfield(pde,'g'),   pde.g = 0; end
+    if ~isfield(pde,'f'),   pde.f = 0; end
 
     %% Part 1: Modify the matrix for Sommerfeld BC
     % In the array bdFlag the Sommerfeld BC is marked as ABC:=3
@@ -163,7 +163,38 @@ info.assembleTime = assembleTime;
         ve = node(ABC(:,1),:) - node(ABC(:,2),:);
         edgeLength = sqrt(sum(ve.^2,2)); 
 %       mid = (node(ABC(:,1),:) + node(ABC(:,2),:))/2;
+
+% Find Dirichlet boundary nodes: fixedNode
+    fixedNode = []; freeNode = [];
+    if ~isempty(bdFlag) % find boundary edges and boundary nodes
+        [fixedNode,bdEdge,isBdNode] = findboundary(elem,bdFlag);
+        freeNode = find(~isBdNode);
+    end
+    if isempty(bdFlag) && ~isempty(pde.g_D) && isempty(pde.g_N) && isempty(pde.g_R)
+        % no bdFlag, only pde.g_D is given
+        [fixedNode,bdEdge,isBdNode] = findboundary(elem);
+        freeNode = find(~isBdNode);
+    end
+    
+    if ~isempty(fixedNode)
+        AD = A(freeNode,freeNode);
+    else
+        AD = A;
+    end
+
+
         
+
+
+
+
+
+
+
+
+
+
+
         %Computation of boundary integral
         % int g phi_i phi_j ds
         ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
@@ -210,7 +241,7 @@ info.assembleTime = assembleTime;
             % quadrature points in the x-y coordinate
             ppxy = lambda_g(pp,1)*node(ABC(:,1),:) ...
                  + lambda_g(pp,2)*node(ABC(:,2),:);
-            gp = pde.g_(ppxy);  %boundary function at the quadrature nodes
+            gp = pde.g(ppxy);  %boundary function at the quadrature nodes
             for ig = 1:2
                 ge(:,ig) = ge(:,ig) + weight_g(pp)*phi_g(pp,ig)*gp;
             end
@@ -218,8 +249,7 @@ info.assembleTime = assembleTime;
         ge = ge.*repmat(edgeLength,1,2);%Jacobian (edgeLength)
         b = b + accumarray(ABC(:), ge(:),[Ndof,1]); 
     end
-    
-    
+        
 %     % The case with non-empty Neumann edges but g_N=0 or g_N=[] corresponds to
 %     % the zero flux boundary condition on Neumann edges and no modification of
 %     % A,u,b is needed.

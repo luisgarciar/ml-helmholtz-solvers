@@ -1,11 +1,25 @@
+
+k   = 20*pi;
+dim = 2;
+pollution = 'no';
+npf = ceil(k^(3/2));
+        
+    if (mod(npf+1,2)==0)  %set an odd number of interior points in 1D
+        npf = npf+1;
+    end
+    npc = (npf-1)/2;
+
+poweps    = 2;
+factoreps = 1;
+bc = 'som';
+
 %Construct square mesh of meshsize h
-h = 0.5;
+h = 1/npf;
 [node,elem] = squaremesh([0,1,0,1],h);
 
 %Visualize mesh, nodes, elements
 showmesh(node,elem)
 hold on;
-findelem(node,elem); % plot element indices
 findnode(node,1:length(node));% find node indices
 
 %Find boundary nodes
@@ -13,30 +27,17 @@ findnode(node,1:length(node));% find node indices
 
 %Sets Robin boundary conditions on all boundary edges
 bdFlag = setboundary(node,elem,'ABC'); 
-bdFlag
 
-ABC = [];
-    isABC = (bdFlag(:) == 3);
-    if any(isABC)
-        allEdge = [elem(:,[2,3]); elem(:,[3,1]); elem(:,[1,2])];
-        ABC = allEdge(isABC,:);
-    end
+%the structure pde contains data for a simple test problem
+pde = helmholtz2Dtrigdata(k);
 
-k=10;
-ve = node(ABC(:,1),:) - node(ABC(:,2),:);
-edgeLength = sqrt(sum(ve.^2,2)); 
-ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
-jj = [ABC(:,1),ABC(:,2),ABC(:,1),ABC(:,2)];
-temp = -sqrt(-1)*k*edgeLength;
+[eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag);
 
-%these 1/3,1/6 result from computing the boundary integrals
+%Matrix and right hand side
+A=eqn.A; b=eqn.b;
+%b = zeros(length(A),1); b(ceil(length(A)/2),1)=1;
+u = A\b;
+u_exact = pde.exactu(node);
 
-%int_{\Gamma} phi_i^2 ds     = 1/3*edgeLength. 
-%int_{\Gamma} phi_i phi_j ds = 1/6*edgeLength.
-
-ss = [1/3*temp, 1/6*temp, 1/6*temp, 1/3*temp]; 
-
-
-      
-
+showsolution(node,elem,u);
 
