@@ -12,8 +12,10 @@ function pde = helmholtz2Dtrigdata(k)
 %    u = cos(pi*x)*cos(pi*y);
 %    f = -div(grad u)- k^2 u;
 %
-%   Usage:  Set the wavenumber k as a global variable in 
-%           the main .m file
+%   Usage:  
+%   Input: wavenumber k
+%
+%
 %   Output: 
 %       pde: struct containing the following data:
 %            All function handles to be applied to input of size (N,2) 
@@ -37,7 +39,7 @@ pde = struct('f',@f,'exactu',@exactu,'k2',k2,...,
     %load data (right hand side function)
     function rhs =  f(p)
         x = p(:,1); y = p(:,2);
-        rhs = (-k^2+2*pi^2)*(cos(pi*x).*cos(pi*y));      rhs = rhs;
+        rhs = (-k^2+2*pi^2)*(cos(pi*x).*cos(pi*y)); 
     end
 
     % exact solution
@@ -52,8 +54,6 @@ pde = struct('f',@f,'exactu',@exactu,'k2',k2,...,
         grad_u(:,1) = -pi*sin(pi*x).*cos(pi*y);
         grad_u(:,2) = -pi*sin(pi*y).*cos(pi*x);
     end
-
-
 
     function g_B = g(p)
         x = p(:,1); y = p(:,2);

@@ -12,7 +12,7 @@ clear all; clc; close all;
 k  = 10; %Helmholtz problem
 bc = 'som';
 t  = pi/2; c = cos(t); s=sin(t);
-u  = @(x,y)cos(k*x*cos(t) + k*y*s) + 1i*sin(k*x*c + k*y*s);
+u  = @(x,y)cos(k*x*c + k*y*s) + 1i*sin(k*x*c + k*y*s);
 
 %% gridsize fixed  
  npint1D = 1000; 
@@ -66,7 +66,7 @@ end
 A = helmholtz2(k,0,npxint,npyint,bc);
 %b_d = A*u_ex; 
 u_d = A\g; 
-relerr1 = norm(real(u_d)-real(u_ex),inf)/norm(real(u_ex),inf)
+relerr1 = norm(real(u_d)-real(u_ex),inf)/norm(real(u_ex),inf);
 
 %Plotting the exact solution
 U_ex = reshape(real(u_ex),[npxint+2,npyint+2]);
