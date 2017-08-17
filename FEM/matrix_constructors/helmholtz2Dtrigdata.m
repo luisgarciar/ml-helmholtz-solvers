@@ -15,13 +15,13 @@ function pde = helmholtz2Dtrigdata(k)
 %   Usage:  
 %   Input: wavenumber k
 %
-%
 %   Output: 
 %       pde: struct containing the following data:
 %            All function handles to be applied to input of size (N,2) 
 %           'f'    : function handle for right hand side                     
 %           exactu': function handle for exact solution
-%           'gradu':
+%           'gradu': function handle for the gradient of exact solution u
+%
 %           'k2': squared wavenumber
 %            'g': function handle for boundary data
 %

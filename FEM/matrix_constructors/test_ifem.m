@@ -1,15 +1,18 @@
-
-k   = 5;
+k   = 20;
 dim = 2;
 pollution = 'no';
 npf = ceil(k^(3/2));
-        
+
+np = npf;
+
+relerror = zeros(length(np),1);
+
+for i=1:length(np)
+    npf = np(i);
     if (mod(npf+1,2)==0)  %set an odd number of interior points in 1D
         npf = npf+1;
     end
     npc = (npf-1)/2;
-   
-for jj = 1:length(scale)
     
     poweps    = 2;
     factoreps = 1;
@@ -31,16 +34,27 @@ for jj = 1:length(scale)
     bdFlag = setboundary(node,elem,'ABC');
     
     %the structure pde contains data for a simple test problem
-    t = pi/2;
-    pde = helmholtz2Dtrigdata(k);
+    t   = pi/2;
+    %pde = helmholtz2Dtrigdata(k);
     
+    pde = helmholtz2Dplanewavedata(k,t);
+    option.tol = 1e-12;
     [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag);
-    
+    %[u,eqn,info] = Helmholtz(node,elem,pde,bdFlag,option);
+   
     %Matrix and right hand side
-    A=eqn.A; b=eqn.b;
+    A = eqn.A; b = eqn.b;
     %b = zeros(length(A),1); b(ceil(length(A)/2),1)=1;
-    u = A\b;
+    u       = A\b;
     u_exact = pde.exactu(node);
     
-    showsolution(node,elem,u);
+    figure(1)
+    showsolution(node,elem,real(u_exact));
+    
+    figure(2)
+    showsolution(node,elem,real(u));
+
+    
+    
+    relerror(i) = norm(real(u)-u_exact)/norm(u_exact);
 end

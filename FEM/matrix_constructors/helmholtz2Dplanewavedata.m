@@ -4,15 +4,15 @@ function pde = helmholtz2Dplanewavedata(k,t)
 % Returns a struct with data related to the
 % the Helmholtz problem
 %   
-%     -div(grad u)-k^2 u = 0 in Omega= (0,1)x(0,1)
-%    grad(u) dot n - i*ku = g in bd(Omega) 
+%  -div(grad u)-k^2 u = 0 in Omega= (0,1)x(0,1)
+%  grad(u) dot n - i*ku = g in bd(Omega) 
 %
-%    with a plane wave as exact solution, i.e.,
-%    u = e^{i kk \cdot (x,y)}
-%    where kk = k (cos(t), sin(t)) 
+%  with a plane wave as exact solution, i.e.,
+%  u = e^{i kk \cdot (x,y)}
+%  where kk = k (cos(t), sin(t)) 
 %
-%   Usage:  
-%   Input: wavenumber k, angle t
+%  Usage:  
+%  Input: wavenumber k, angle t
 %
 %   Output: 
 %       pde:    struct containing the following data:
@@ -64,13 +64,13 @@ pde = struct('f',@f,'exactu',@exactu,'k2',k2,...,
         %boundaries
         south = (y<=x)&(y<=(1-x)); 
         west  = (y<=(1-x))&(y>x);  
-        north = (y>(1-x))&(x<=y);
+        north = (y>(1-x))&(y>=x);
         east  = (y<x) & (y>(1-x));
         
         %compute g using boundary functions
         gB(south) = g_south(x(south),k,t);
         gB(west)  = g_west(y(west),k,t);
-        gB(north) = g_north(x(west),k,t);
+        gB(north) = g_north(x(north),k,t);
         gB(east)  = g_east(y(east),k,t);
     end
 
