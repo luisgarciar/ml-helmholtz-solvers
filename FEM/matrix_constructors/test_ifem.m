@@ -1,4 +1,4 @@
-k   = 20;
+k   = 25*pi;
 dim = 2;
 pollution = 'no';
 npf = ceil(k^(3/2));
@@ -17,7 +17,6 @@ for i=1:length(np)
     poweps    = 2;
     factoreps = 1;
     bc = 'som';
-    
     %Construct square mesh of meshsize h
     h = 1/npf;
     [node,elem] = squaremesh([0,1,0,1],h);
@@ -33,13 +32,14 @@ for i=1:length(np)
     %Sets Sommerfeld boundary conditions on all boundary edges
     bdFlag = setboundary(node,elem,'ABC');
     
+   
     %the structure pde contains data for a simple test problem
     t   = pi/2;
     %pde = helmholtz2Dtrigdata(k);
     
     pde = helmholtz2Dplanewavedata(k,t);
     option.tol = 1e-12;
-    [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag);
+    [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge);
     %[u,eqn,info] = Helmholtz(node,elem,pde,bdFlag,option);
    
     %Matrix and right hand side
@@ -53,8 +53,6 @@ for i=1:length(np)
     
     figure(2)
     showsolution(node,elem,real(u));
-
-    
-    
-    relerror(i) = norm(real(u)-u_exact)/norm(u_exact);
+  
+    relerror(i) = norm(u-u_exact)/norm(real(u_exact));
 end

@@ -54,7 +54,7 @@ pde = struct('f',@f,'exactu',@exactu,'k2',k2,...,
         x = p(:,1); y = p(:,2);
         arg = k*x*c + k*y*s;
         grad_u(:,1) = -c*k*sin(arg) + 1i*c*k*cos(arg); %du/dx
-        grad_u(:,2) = -s*k*sin(arg) + 1i*x*k*cos(arg); %du/dy
+        grad_u(:,2) = -s*k*sin(arg) + 1i*s*k*cos(arg); %du/dy
     end
 
     function gB = g(p)

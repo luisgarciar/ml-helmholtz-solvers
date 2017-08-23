@@ -1,4 +1,4 @@
-function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,option)
+function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge,option)
 %% HELMHOLTZ2DFEM Helmholtz equation: P1 linear element.
 %  Constructs a matrix for a 2D Helmholtz and Shifted Laplace model problem.
 %  Constructs the matrix corresponding to the discretization of a 1D Helmholtz (or shifted Laplace)
@@ -60,9 +60,7 @@ tic;  % record assembling time
 % M is the mass matrix
 Delta = sparse(Ndof,Ndof);
 M   = sparse(Ndof,Ndof);
-k2M   = sparse(Ndof,Ndof);
-
-
+k2M = sparse(Ndof,Ndof);
 
 for i = 1:3
     for j = i:3
@@ -168,6 +166,19 @@ info.assembleTime = assembleTime;
             ve = node(ABC(:,1),:) - node(ABC(:,2),:);
             edgeLength = sqrt(sum(ve.^2,2));
             %       mid = (node(ABC(:,1),:) + node(ABC(:,2),:))/2;
+                        
+            %Computation of boundary integral
+            % int g phi_i phi_j ds
+            ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
+            jj = [ABC(:,1),ABC(:,2),ABC(:,1),ABC(:,2)];
+            temp = -sqrt(-1)*sqrt(k2)*edgeLength;
+            
+            %computing the boundary integrals:
+            %int_{edge} phi_i phi_j ds = 1/3*edgeLength if i==j,
+            %int_{edge} phi_i phi_j ds = 1/6*edgeLength if i=/= j
+            ss = [1/3*temp, 1/6*temp, 1/6*temp, 1/3*temp];
+            A = A + sparse(ii,jj,ss,Ndof,Ndof); %?
+            
             
             % Find Dirichlet boundary nodes: fixedNode
             fixedNode = []; freeNode = [];
@@ -185,29 +196,17 @@ info.assembleTime = assembleTime;
                 AD = A(freeNode,freeNode);
             else
                 AD = A;
-            end
-            
-            %Computation of boundary integral
-            % int g phi_i phi_j ds
-            ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
-            jj = [ABC(:,1),ABC(:,2),ABC(:,1),ABC(:,2)];
-            temp = -sqrt(-1)*sqrt(k2)*edgeLength;
-            
-            %computing the boundary integrals:
-            %int_{edge} phi_i phi_j ds = 1/3*edgeLength if i==j,
-            %int_{edge} phi_i phi_j ds = 1/6*edgeLength if i=/= j
-            ss = [1/3*temp, 1/6*temp, 1/6*temp, 1/3*temp];
-            A = A + sparse(ii,jj,ss,Ndof,Ndof); %?
+            end            
         end
         
         
         %% Part 2: Find boundary edges and modify the right hand side b
         
         %Old iFEM code: Neumann BCs (not considered here)
-        % Find boundary edges: Neumann
-        %     if ~isempty(bdFlag)  % bdFlag specifies different bd conditions
-        %         ABC = bdEdge;  % bdEdge found in findboundary: line 275
-        %     end
+        % Find boundary edges: ABC
+             if ~isempty(bdFlag)  % bdFlag specifies different bd conditions
+                 ABC = bdEdge;  % bdEdge found in findboundary: line 275
+             end
         %     if isempty(bdFlag) && ~isempty(pde.g_N)
         %         % no bdFlag, only pde.g_N or pde.g_R is given in the input
         %         [tempvar,Neumann] = findboundary(elem); %#ok<ASGLU>
