@@ -32,7 +32,7 @@ function pde = helmholtz2Dplanewavedata(k,t)
 
 kk  = k; 
 pde = struct('f',@f,'exactu',@exactu,'k',kk,...,
-             'g',@g,'gradu', @gradu);
+             'g',@g,'gradu', @gradu,'factoreps',0,'poweps',0);
 
     %load data (right hand side function)
     function rhs =  f(p)

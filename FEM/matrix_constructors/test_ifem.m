@@ -7,9 +7,7 @@ npf = ceil(k^(3/2));
 factoreps = 0.5;
 poweps = 1;
 
-
 np = npf;
-
 relerror = zeros(length(np),1);
 
 for i=1:length(np)

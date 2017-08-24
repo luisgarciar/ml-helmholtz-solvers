@@ -44,7 +44,7 @@ N = size(node,1); NT = size(elem,1);
 dim = size(node,2);
 Ndof = N;
 
-if isempty(pde.factoreps)
+if isempty(pde.poweps)
     factoreps=0;
 else
     factoreps= pde.factoreps;
