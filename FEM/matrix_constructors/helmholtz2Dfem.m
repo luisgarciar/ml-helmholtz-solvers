@@ -8,8 +8,8 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge,option)
 %   matrix and right hand side corresponding  to the discretization of
 %   the Helmholtz problem
 %
-%       -\div(grad u) - k^2u  = f in \Omega, with
-%       -i*k*u + grad(u)*n    = g;  on \Gamma (Absorbing boundary condition)
+%    -\div(grad u) - k^2u  = f in \Omega, with
+%    -i*k*u + grad(u)*n    = g;  on \Gamma (Absorbing boundary condition)
 %
 %   or the shifted Laplace problem
 %
@@ -34,12 +34,27 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge,option)
 %   Modified by Luis Garcia Ramos, based on the iFEM package
 %   by Long Chen
 %
+%   TO DO: Fix problem with nonconstant wavenumbers in the
+%   function getbd
+%
 %   Copyright (C) Long Chen. See COPYRIGHT.txt for details.
 
 if ~exist('option','var'), option = []; end
 N = size(node,1); NT = size(elem,1);
 dim = size(node,2);
 Ndof = N;
+
+if isempty(pde.factoreps)
+    factoreps=0;
+else
+    factoreps= pde.factoreps;
+end
+
+if isempty(pde.poweps)
+    poweps=1;
+else
+    poweps= pde.poweps;
+end
 
 tic;  % record assembling time
 
@@ -59,8 +74,8 @@ tic;  % record assembling time
 % k2M is the squared wavenumber times the mass matrix
 % M is the mass matrix
 Delta = sparse(Ndof,Ndof);
-M   = sparse(Ndof,Ndof);
-k2M = sparse(Ndof,Ndof);
+%M   = sparse(Ndof,Ndof);
+k2iepsM = sparse(Ndof,Ndof);
 
 for i = 1:3
     for j = i:3
@@ -75,22 +90,24 @@ for i = 1:3
         %Assembling the mass matrix
         if isnumeric(pde.k)    %constant wave number
             k2 = (pde.k)^2;
-        else                    %variable wave number k
+            k2ieps = (pde.k)^2 + 1i*factoreps*(pde.k)^poweps;
+        else %variable wave number k
             center = (node(elem(:,1),:) + node(elem(:,2),:) + node(elem(:,3),:))/3;
             k2 = (pde.k(center))^2;
+            k2ieps = (pde.k(center))^2 + 1i*factoreps*pde.k(center)^poweps;
         end
-        Mij = k2.*area*((i==j)+1)/12;
+        Mij = k2ieps.*area*((i==j)+1)/12;
         if (j==i)
-            k2M = k2M + sparse(elem(:,i),elem(:,j),Mij,Ndof,Ndof);
+            k2iepsM = k2iepsM + sparse(elem(:,i),elem(:,j),Mij,Ndof,Ndof);
         else
-            k2M = k2M + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
+            k2iepsM = k2iepsM + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
                 [Mij; Mij],Ndof,Ndof);
         end
     end
 end
 clear Aij
 
-A = Delta - k2M;
+A = Delta - k2iepsM;
 
 %% Assemble the right hand side
 b = zeros(Ndof,1);
@@ -171,7 +188,7 @@ info.assembleTime = assembleTime;
             % int g phi_i phi_j ds
             ii = [ABC(:,1),ABC(:,1),ABC(:,2),ABC(:,2)];
             jj = [ABC(:,1),ABC(:,2),ABC(:,1),ABC(:,2)];
-            temp = -sqrt(-1)*sqrt(k2)*edgeLength;
+            temp = -sqrt(-1)*sqrt(k2)*edgeLength; 
             
             %computing the boundary integrals:
             %int_{edge} phi_i phi_j ds = 1/3*edgeLength if i==j,
