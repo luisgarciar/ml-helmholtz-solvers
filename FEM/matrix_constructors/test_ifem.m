@@ -1,7 +1,12 @@
-k   = 25*pi;
+k   = 2*pi;
 dim = 2;
 pollution = 'no';
 npf = ceil(k^(3/2));
+
+%parameters for shifted Laplacian
+factoreps = 0.5;
+poweps = 1;
+
 
 np = npf;
 
@@ -32,15 +37,11 @@ for i=1:length(np)
     %Sets Sommerfeld boundary conditions on all boundary edges
     bdFlag = setboundary(node,elem,'ABC');
     
-   
     %the structure pde contains data for a simple test problem
     t   = pi/2;
-    %pde = helmholtz2Dtrigdata(k);
-    
     pde = helmholtz2Dplanewavedata(k,t);
     option.tol = 1e-12;
     [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge);
-    %[u,eqn,info] = Helmholtz(node,elem,pde,bdFlag,option);
    
     %Matrix and right hand side
     A = eqn.A; b = eqn.b;
@@ -54,5 +55,5 @@ for i=1:length(np)
     figure(2)
     showsolution(node,elem,real(u));
   
-    relerror(i) = norm(u-u_exact)/norm(real(u_exact));
+    relerror(i) = norm(u-u_exact)/norm(real(u_exact))
 end
