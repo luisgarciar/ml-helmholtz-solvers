@@ -20,7 +20,7 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge,option)
 %   is given by bdFlag. See meshdoc, bddoc for details.
 %
 %   The data is given by the
-%   structure pde which contains function handles k2, f, g
+%   structure pde which contains function handles k, f, g
 %   and the parameters poweps, factoreps for the shifted Laplacian
 %   TO DO: Add parameters for the shifted Laplacian
 %
@@ -73,11 +73,11 @@ for i = 1:3
                 [Aij; Aij],Ndof,Ndof);
         end
         %Assembling the mass matrix
-        if isnumeric(pde.k2)    %constant wave number
-            k2 = pde.k2;
+        if isnumeric(pde.k)    %constant wave number
+            k2 = (pde.k)^2;
         else                    %variable wave number k
             center = (node(elem(:,1),:) + node(elem(:,2),:) + node(elem(:,3),:))/3;
-            k2 = pde.k2(center);
+            k2 = (pde.k(center))^2;
         end
         Mij = k2.*area*((i==j)+1)/12;
         if (j==i)
@@ -178,8 +178,7 @@ info.assembleTime = assembleTime;
             %int_{edge} phi_i phi_j ds = 1/6*edgeLength if i=/= j
             ss = [1/3*temp, 1/6*temp, 1/6*temp, 1/3*temp];
             A = A + sparse(ii,jj,ss,Ndof,Ndof); %?
-            
-            
+             
             % Find Dirichlet boundary nodes: fixedNode
             fixedNode = []; freeNode = [];
             if ~isempty(bdFlag) % find boundary edges and boundary nodes
