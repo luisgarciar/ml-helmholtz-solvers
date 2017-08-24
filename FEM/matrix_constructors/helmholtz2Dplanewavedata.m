@@ -16,12 +16,12 @@ function pde = helmholtz2Dplanewavedata(k,t)
 %
 %   Output: 
 %       pde:    struct containing the following data:
-%               All function handles to be applied to input of size (N,2)
-%       'f':    function handle for right hand side (equal to 0)
-%       'exactu': function handle for exact solution
-%       'gradu':
-%       'k2': squared wavenumber
-%        'g': function handle for boundary data
+%       All function handles to be applied to input of size (N,2)
+%            'f':    function handle for right hand side (equal to 0)
+%           'exactu': function handle for exact solution
+%            'gradu':
+%                'k':  wavenumber
+%                 'g': function handle for boundary data
 %
 % Created by Jie Zhou.
 %
@@ -30,8 +30,8 @@ function pde = helmholtz2Dplanewavedata(k,t)
 % Copyright (C)  Long Chen. See COPYRIGHT.txt for details.
 
 
-k2  = k^2; 
-pde = struct('f',@f,'exactu',@exactu,'k2',k2,...,
+kk  = k; 
+pde = struct('f',@f,'exactu',@exactu,'k',kk,...,
              'g',@g,'gradu', @gradu);
 
     %load data (right hand side function)
