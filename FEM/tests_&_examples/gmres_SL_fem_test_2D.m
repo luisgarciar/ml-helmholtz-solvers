@@ -1,17 +1,27 @@
-k   = 2*pi;
-dim = 2;
-pollution = 'no';
-npf = ceil(k^(3/2));
+%Test of GMRES for the 2D Helmholtz problem with P1 finite elements
+%
+% We use the test problem
+%
+%  -div(grad u)-k^2 u   = f   in Omega= (0,1)x(0,1)
+%  grad(u) dot n - i*ku = g on boundary(Omega)
+%
+% for the preconditioner we use the shifted Laplacian
+%
+%  -div(grad u)-(k^2 + i*eps) u   = f   in Omega= (0,1)x(0,1)
+%  grad(u) dot n - i*ku = g on boundary(Omega)
+%
 
-%parameters for shifted Laplacian
-factoreps = 0.5;
-poweps = 1;
+%% Fixed wavenumber k and variable shift eps
+kk   = [10 20 40 60];
+itercsl = zeros(length(kk),1);
 
-np = npf;
-relerror = zeros(length(np),1);
-
-for i=1:length(np)
-    npf = np(i);
+for i=1:length(kk)
+    
+    k = kk(i);
+    dim = 2;
+    pollution = 'no';
+    npf = ceil(k^(3/2));
+    
     if (mod(npf+1,2)==0)  %set an odd number of interior points in 1D
         npf = npf+1;
     end
@@ -24,10 +34,6 @@ for i=1:length(np)
     h = 1/npf;
     [node,elem] = squaremesh([0,1,0,1],h);
     
-    %Visualize mesh, nodes, elements
-    showmesh(node,elem)
-    hold on;
-    findnode(node,1:length(node));% find node indices
     
     %Find boundary nodes
     [bdNode,bdEdge,isBdNode] = findboundary(elem);
@@ -35,23 +41,34 @@ for i=1:length(np)
     %Sets Sommerfeld boundary conditions on all boundary edges
     bdFlag = setboundary(node,elem,'ABC');
     
-    %the structure pde contains data for a simple test problem
-    t   = pi/2;
-    pde = helmholtz2Dplanewavedata(k,t);
+    %The structures pde* contains data for the Helmholtz and Shifted Laplace
+    %problems
+    pdehelm = helmholtz2Dconstantwndata(k,0,1);
+    pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
+    
     option.tol = 1e-12;
-    [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge);
-   
-    %Matrix and right hand side
-    A = eqn.A; b = eqn.b;
-    %b = zeros(length(A),1); b(ceil(length(A)/2),1)=1;
-    u       = A\b;
-    u_exact = pde.exactu(node);
+    [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
+    [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
     
-    figure(1)
-    showsolution(node,elem,real(u_exact));
+    %Helmholtz and shifted Laplace matrices
+    A    = eqn1.A;
+    Aeps = eqn2.A;
     
-    figure(2)
-    showsolution(node,elem,real(u));
-  
-    relerror(i) = norm(u-u_exact)/norm(real(u_exact))
+    %Parameters for GMRES
+    restart   = [];
+    tol       = 1e-8;
+    maxit     = 200;
+    
+    %Setting up the preconditioner
+    [L,U] = lu(Aeps);
+    AAepsinv  = @(x) A*(U\(L\x));  %Shifted Laplace preconditioned matrix
+    
+    b  = ones(length(A),1);
+    x0 = zeros(size(b));
+    
+    [~, ~, ~, iter, ~] = gmres(AAepsinv, b, restart, tol, maxit);
+    
+    
+    itercsl(i) = iter(2);
+    
 end
