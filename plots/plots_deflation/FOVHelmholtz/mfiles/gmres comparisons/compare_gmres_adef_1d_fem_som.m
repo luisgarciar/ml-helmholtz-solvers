@@ -1,7 +1,7 @@
 %Field of values of finite element matrices 1D
 %ADEF preconditioner
 %% Experiments with the  Helmholtz equation.
-% preconditoned with the shifted Laplacian (SL) 
+% preconditioned with the shifted Laplacian (SL) 
 % and the deflated SL
 % We compare iteration numbers for solving
 % A inv(Aeps)x = b

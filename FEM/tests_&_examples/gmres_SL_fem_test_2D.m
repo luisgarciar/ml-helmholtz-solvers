@@ -12,11 +12,11 @@
 %
 
 %% Fixed wavenumber k and variable shift eps
-kk   = [10 20 40 60];
+kk   = [10 20 40];
 itercsl = zeros(length(kk),1);
+time_lu = zeros(length(kk),1);
 
 for i=1:length(kk)
-    
     k = kk(i);
     dim = 2;
     pollution = 'no';
@@ -27,21 +27,20 @@ for i=1:length(kk)
     end
     npc = (npf-1)/2;
     
-    poweps    = 2;
+    poweps    = 1;
     factoreps = 1;
     bc = 'som';
     %Construct square mesh of meshsize h
     h = 1/npf;
     [node,elem] = squaremesh([0,1,0,1],h);
-    
-    
+       
     %Find boundary nodes
     [bdNode,bdEdge,isBdNode] = findboundary(elem);
     
     %Sets Sommerfeld boundary conditions on all boundary edges
     bdFlag = setboundary(node,elem,'ABC');
     
-    %The structures pde* contains data for the Helmholtz and Shifted Laplace
+    %The structures pde* contain data for the Helmholtz and Shifted Laplace
     %problems
     pdehelm = helmholtz2Dconstantwndata(k,0,1);
     pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
@@ -60,15 +59,15 @@ for i=1:length(kk)
     maxit     = 200;
     
     %Setting up the preconditioner
+    tic
     [L,U] = lu(Aeps);
-    AAepsinv  = @(x) A*(U\(L\x));  %Shifted Laplace preconditioned matrix
+    time_lu(i) = toc;
     
+    AAepsinv  = @(x) A*(U\(L\x));  %Shifted Laplace preconditioned matrix
     b  = ones(length(A),1);
     x0 = zeros(size(b));
     
     [~, ~, ~, iter, ~] = gmres(AAepsinv, b, restart, tol, maxit);
-    
-    
     itercsl(i) = iter(2);
     
 end
