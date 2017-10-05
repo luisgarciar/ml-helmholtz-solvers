@@ -1,18 +1,18 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
-% 2-D Example, Dirichlet boundary conditions
+% 2-D Example, Sommerfeld boundary conditions, variable wavenumber
 clc
 clear global;
 close all;
 
-npc = 1;    %number of interior points in coarsest grid in one dim 
+npc = 5;    %number of interior points in coarsest grid in one dim 
 bc  = 'som'; dim = 2; %boundary conditions, dimension
 
 %variable wavenumber and imaginary shift of shifted Laplacian
-kref    = 80; eps = 0.6;
-kvar    = @(x,y) klay(x,y,kref);
-epsvar  = @(x,y) eps*(klay(x,y,kref).^2); 
-zero    = @(x,y) 0*x;
-ppw     = 12;                          %number of points per wavelength
+kref      = 80; eps = 0.6;
+kvar      = @(x,y) klay(x,y,kref);
+epsvar    = @(x,y) eps*(klay(x,y,kref).^2); 
+zero      = @(x,y) 0*x;
+ppw       = 12;                           %number of points per wavelength
 [npf,lev] = fd_npc_to_npf(npc,kref,ppw);  %number of points in finest grid (1D)
 
 %Grid for plotting
@@ -95,8 +95,8 @@ hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
 legend('Vcycle preconditioner','Fcycle preconditioner')
 
-timev
-timef
+time_v
+time_f
 
 
 % figure(2)
