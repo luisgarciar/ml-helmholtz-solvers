@@ -10,7 +10,6 @@
 %  -div(grad u)-(k^2 + i*eps) u   = f   in Omega= (0,1)x(0,1)
 %  grad(u) dot n - i*ku = g on boundary(Omega)
 %
-
 %% Fixed wavenumber k and variable shift eps
 kk   = [10 20 40];
 itercsl = zeros(length(kk),1);
@@ -40,8 +39,8 @@ for i=1:length(kk)
     %Sets Sommerfeld boundary conditions on all boundary edges
     bdFlag = setboundary(node,elem,'ABC');
     
-    %The structures pde* contain data for the Helmholtz and Shifted Laplace
-    %problems
+    %The structures pde(helm,SL) contain data for the Helmholtz and 
+    %shifted Laplace problems
     pdehelm = helmholtz2Dconstantwndata(k,0,1);
     pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
     
@@ -62,11 +61,11 @@ for i=1:length(kk)
     tic
     [L,U] = lu(Aeps);
     time_lu(i) = toc;
-    
     AAepsinv  = @(x) A*(U\(L\x));  %Shifted Laplace preconditioned matrix
     b  = ones(length(A),1);
     x0 = zeros(size(b));
     
+    %GMRES run
     [~, ~, ~, iter, ~] = gmres(AAepsinv, b, restart, tol, maxit);
     itercsl(i) = iter(2);
     

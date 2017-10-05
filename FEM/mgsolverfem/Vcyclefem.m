@@ -28,7 +28,6 @@ function [x_sol] = Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp
 %
 %%    
 
-
 if numcycles==1
 
     if length(galerkin_matrices) == 1 %If on coarse level, solve exactly
@@ -36,8 +35,7 @@ if numcycles==1
         return;
     else
         x_sol = x0;
-        
-            
+                    
             %Presmoothing and computation of the residual
             %fprintf('Presmoothing with matrix of size %d\n',length(grid_matrices{1,1}));
             x_sol = smoother(galerkin_split{1}.U, galerkin_split{1}.L,...

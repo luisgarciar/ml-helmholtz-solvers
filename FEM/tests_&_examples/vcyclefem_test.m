@@ -2,11 +2,11 @@
 clear global; 
 
 %Parameters of Helmholtz equation and shifted Laplacian
-dim  = 1;
-k    = 50;
-eps  = 0.5*k^2;   %Imaginary part of shift (for shifted Laplacian)
-ppw  = 12;        %number of points per wavelength (fine grid)
-npc  = 3; %number of points in the coarsest grid
+dim      = 1;
+k        = 50;
+eps      = 0.5*k^2;   %Imaginary part of shift (for shifted Laplacian)
+ppw      = 12;        %number of points per wavelength (fine grid)
+npc      = 3; %number of points in the coarsest grid
 op_type  = 'gal';
 bc       = 'som';
 
@@ -18,7 +18,7 @@ bc       = 'som';
 %[(2^(numlev-1))*npc,numlev];
 
 h = 1/npf; grid = h*(1:1:npf); 
-M = mass(npf);               %Mass matrix (for the norm)
+M = mass(npf,'mix');               %Mass matrix (for the norm)
 norm2 = @(x)sqrt(abs(x'*M*x)); 
 
 %%   Test of V-cycle on Helmholtz problem

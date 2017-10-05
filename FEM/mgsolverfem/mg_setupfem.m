@@ -1,10 +1,11 @@
-function [mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npcc,numlev,dim)
+function [mg_mat,mg_split,restr,prol] = mg_setupfem(k,eps,op_type,npcc,numlev,dim,bc)
 %% MG_SETUPFEM: Constructs a hierarchy of Galerkin coarse grid matrices,
 % smoother splittings and interpolation operators for a Helmholtz problem
 % discretized with P1 finite elements
 %
 %  Use:
-% [mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npcc,numlev,dim)
+% [mg_mat,mg_split,restr,prol] = mg_setupfem(k,eps,op_type,npcc,numlev,dim)
+%
 %  Input: 
 %  k:
 %  eps:     Parameters of Helmholtz problem (k=0 for Poisson) and
@@ -25,14 +26,14 @@ function [mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npcc,numl
 %                     (grid_matrices{i}: Galerkin matrix level i)   
 %
 %  mg_split: Cell array with upper, lower and diagonal part of
-%                  Galerkin matrices to be applied in smoothing steps
-%                  (galerkin_split{i}.U, galerkin_split{i}.L, galerkin_split{i}.D)
+%            Galerkin matrices to be applied in smoothing steps
+%           (mg_split{i}.U, mg_split{i}.L, mg_split{i}.D)
 % 
 %  restrict:   Cell array with restriction operators
-%              (restrict_op{i}:restriction operator from i to i+1)
+%              (restrict{i}: restriction operator from i to i+1)
 %
-%  interp:      Cell array with interpolation operators
-%              (interp_op{i}:restriction operator from i+1 to i)
+%  prol:      Cell array with prolongation operators
+%              (prol{i}: prolongation operator from i+1 to i)
 %
 % Reference: F. Ihlenburg and I. Babuska, Finite element solution of the 
 % Helmholtz equation with high wave number Part I: The h-version of the FEM
@@ -43,22 +44,22 @@ function [mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npcc,numl
 %
 % To Do : Add 2D case
 
-%%  Construction of restriction and interpolation matrices
+%% Construction of restriction and interpolation matrices
 
 %% to be fixed
 npf = npc_numlev_to_npf_fem(npcc,numlev); %add this function%
 npc = round(npf/2); %ok for fem discretizations!!
 
 %%
-restrict = cell(numlev-1,1);    %restrict{i}: fw restriction grid i to grid i+1 
-interp = cell(numlev-1,1);    %interp{i}: lin interp grid i+1 to grid i
+restr = cell(numlev-1,1);  %restrict{i}: fw restriction grid i to grid i+1 
+prol = cell(numlev-1,1);      %interp{i}: lin interp grid i+1 to grid i
 mg_mat = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
-mg_split = cell(numlev,1);      %grid_smoothers{i}: matrix splittings needed for smoothers i
+mg_split = cell(numlev,1);    %grid_smoothers{i}: matrix splittings needed for smoothers i
 
 %Level 1 
-mg_mat{1} = helmholtzfem(k,npf,eps);
-restrict{1} = fwrestrictionfem(npf,dim);  %fw restriction, grid 1 to grid 2 
-interp{1}   = lininterpolfem(npc,dim);    %lin interp, grid 2 to grid 1
+mg_mat{1} = helmholtzfem(k,npf,eps,bc);
+restr{1} = fwrestrictionfem(npf,dim);  %fw restriction, grid 1 to grid 2 
+prol{1}   = lininterpolfem(npc,dim);    %lin interp, grid 2 to grid 1
 
 mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of mg_mat{}
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
@@ -74,15 +75,15 @@ npf = npc;   npc = round(npf/2);
 for i=2:numlev-1
     
     if i<numlev      
-        restrict{i} = fwrestrictionfem(npf,dim); %fw restriction, grid i to grid i+1
-        interp{i}   = lininterpolfem(npc,dim);   %lin interp, grid i+1 to grid i        
+        restr{i} = fwrestrictionfem(npf,dim); %fw restriction, grid i to grid i+1
+        prol{i}   = lininterpolfem(npc,dim);   %lin interp, grid i+1 to grid i        
     end
     
     switch op_type
         case 'rd'  %Coarse matrix by rediscretization
            switch dim
                case 1
-                   mg_mat{i} = helmholtzfem(k,npf,eps);
+                   mg_mat{i} = helmholtzfem(k,npf,eps,bc);
                case 2
                    %mg_mat{i} = helmholtz2(k,eps,npf,npf,bc); 
                    error ('invalid dimension') %add FEM 2D later%
@@ -91,7 +92,7 @@ for i=2:numlev-1
            end
            
         case 'gal' %Galerkin coarse matrix
-           mg_mat{i} = sparse(restrict{i-1}*mg_mat{i-1}*interp{i-1});
+           mg_mat{i} = sparse(restr{i-1}*mg_mat{i-1}*prol{i-1});
 
         otherwise
         error('Invalid operator type');      
@@ -110,14 +111,14 @@ switch op_type
         case 'rd'  %Coarse matrix by rediscretization
             switch dim
                case 1                  
-                   mg_mat{numlev} = helmholtzfem(k,npf,eps);  
+                   mg_mat{numlev} = helmholtzfem(k,npf,eps,bc);  
                case 2
                    error('invalid dimension') %fix later
                 otherwise
                    error('Invalid dimension')
             end
         case 'gal' %Galerkin coarse matrix
-            mg_mat{numlev} = sparse(restrict{numlev-1}*mg_mat{numlev-1}*interp{numlev-1});           
+            mg_mat{numlev} = sparse(restr{numlev-1}*mg_mat{numlev-1}*prol{numlev-1});           
         otherwise
         error('Invalid operator type');
 end
