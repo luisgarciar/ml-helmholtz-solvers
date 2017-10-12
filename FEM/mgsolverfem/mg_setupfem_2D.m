@@ -7,8 +7,7 @@ function [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
 % Requires the iFEM package!! 
 %
 %  Use:
-% [mg_mat,mg_split,restrict,interp] = mg_setupfem_2D(npcc,numlev,pde)
-%
+% [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
 %
 %  Input: 
 %
@@ -79,6 +78,7 @@ for i=1:numlev
     mg_split{i}.U = sparse(triu(mg_mat{i},1));  
     mg_split{i}.L = sparse(tril(mg_mat{i},-1));
     mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
+    mg_split{i}.P = speye(length(mg_mat{i}));
 
 end
 

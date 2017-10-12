@@ -32,8 +32,7 @@ Minv = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,nu
 
 %See help Vcycle
 
-
-% %Parameters of GMRES iteration
+%Parameters of GMRES iteration
 tol   = 1e-8;
 maxit = 50;
 

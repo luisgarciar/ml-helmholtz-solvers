@@ -2,9 +2,9 @@ function [x_sol] = Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp
 %% VCYCLEFEM Solves the Helmholtz equation using a multigrid V-cycle.
 %
 %   Use: Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
-% hallo hallo
+%
 %   Input:
-%       Output from the function mgsmsetup: 
+%       Output from the function mg_setupfem or mg_setupfem_2D: 
 %         - galerkin_matrices:  cell array with matrices on all
 %                               levels
 %         - galerkin_split:     cell array with matrix splittings for smoothers

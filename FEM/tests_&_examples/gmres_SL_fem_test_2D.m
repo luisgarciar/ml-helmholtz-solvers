@@ -2,14 +2,15 @@
 %
 % We use the test problem
 %
-%  -div(grad u)-k^2 u   = f   in Omega= (0,1)x(0,1)
+%  -div(grad u)-k^2 u  = f   in Omega = (0,1)x(0,1)
 %  grad(u) dot n - i*ku = g on boundary(Omega)
 %
 % for the preconditioner we use the shifted Laplacian
 %
-%  -div(grad u)-(k^2 + i*eps) u   = f   in Omega= (0,1)x(0,1)
+%  -div(grad u)-(k^2 + i*eps) u  = f   in Omega = (0,1)x(0,1)
 %  grad(u) dot n - i*ku = g on boundary(Omega)
 %
+
 %% Fixed wavenumber k and variable shift eps
 kk   = [10 20 40];
 itercsl = zeros(length(kk),1);
@@ -32,7 +33,7 @@ for i=1:length(kk)
     %Construct square mesh of meshsize h
     h = 1/npf;
     [node,elem] = squaremesh([0,1,0,1],h);
-       
+      
     %Find boundary nodes
     [bdNode,bdEdge,isBdNode] = findboundary(elem);
     
