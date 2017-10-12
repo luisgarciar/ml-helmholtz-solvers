@@ -10,8 +10,11 @@
  
 pdeSL = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
-[mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pdeSL);
- 
+%option.twolevel = true;
+option.twolevel = false;
+
+[mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pdeSL,option);
+
 % [node,elem] = squaremesh([0 1 0 1],h);
 % 
 % %refining the mesh numlev times
@@ -38,17 +41,15 @@ pdeSL = helmholtz2Dconstantwndata(k,factoreps,poweps);
 % assert(length(Ai)==numlev, 'error: incorrect number of levels');
 % 
 % mg_mat = flip(Ai);
-% 
-% restr = flip(Res);
-% restr = restr(1:numlev-1);
+% restr  = flip(Res);
+% restr  = restr(1:numlev-1);
 % 
 % prol  = flip(Pro); 
 % prol  = prol(2:numlev);
 % 
 % mg_split = cell(numlev,1);    
-% 
-% for i=1:numlev
-%     
+%
+% for i=1:numlev     
 %     %matrix splitting of mg_mat{i}
 %     mg_split{i}.U = sparse(triu(mg_mat{i},1));  
 %     mg_split{i}.L = sparse(tril(mg_mat{i},-1));

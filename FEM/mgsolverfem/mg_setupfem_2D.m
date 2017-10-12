@@ -1,4 +1,4 @@
-function [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
+function [mg_mat,mg_split,restrict,interp] = mg_setupfem_2D(npcc,numlev,pde,option)
 %% MG_SETUPFEM_2D: Constructs a hierarchy of Galerkin coarse grid matrices,
 % smoother splittings and interpolation operators for a 2D Helmholtz/shifted
 % Laplace problem discretized with P1 finite elements on a uniform square
@@ -14,6 +14,9 @@ function [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
 %  npcc:      number of interior points on coarsest grid in 1D          
 %  numlev:    Total number of levels (number of coarse grids + 1)
 %  pde:       Structure with the data of the pde problem
+%  option:    structure with options
+%         - option.twolevel: If 'true', the function only returns finest
+%           and coarsest grid
 %
 %  Output:
 %  mg_mat: Cell array with Galerkin matrices 
@@ -25,11 +28,16 @@ function [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
 % 
 %  restrict:   Cell array with restriction operators
 %              (restrict_op{i}:restriction operator from i to i+1)
+%  If option.twolevel = 'true', restrict is a matrix of size according to 
+%  finest and coarsest grids
 %
 %  interp:      Cell array with interpolation operators
 %              (interp_op{i}:restriction operator from i+1 to i)
+%  If option.twolevel = 'true', interp is a matrix of size according to 
+%  finest and coarsest grids, and interp = restrict'
 %
-
+%
+%
 %  Author:      Luis Garcia Ramos, 
 %               Institut fur Mathematik, TU Berlin
 %               Version 1.0 Sep 2017
@@ -67,7 +75,7 @@ assert(length(Ai)==numlev, 'error: incorrect number of levels');
 
 mg_mat = flip(Ai);
 
-restr = flip(Res);    restr  = restr(1:numlev-1);
+restrict = flip(Res); restrict  = restrict(1:numlev-1);
 interp  = flip(Pro);  interp = interp(2:numlev);
 
 mg_split = cell(numlev,1);    
@@ -82,7 +90,30 @@ for i=1:numlev
 
 end
 
+%If only coarsest and finest levels are needed
+if isfield(option,'twolevel') 
+    if option.twolevel==true 
+    two_lev{1} = mg_mat{1};
+    two_lev{2} = mg_mat{end};
+    mg_mat = two_lev;
+    
+    R = restrict{1};
+    
+    for i = 2:length(restrict)
+        R = restrict{i}*R;
+    end    
+    
+    restrict  = R;   
+    interp    = restrict';
+    
+    [m,n] = size(restrict); %Restriction operator from fine to coarse grid
+    assert(m==length(mg_mat{2}),'incorrect size of restriction operator');
+    assert(n==length(mg_mat{1}),'incorrect size of restriction operator');
+    end
+    
+end
 
-end       
+end
+       
 
 
