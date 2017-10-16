@@ -74,7 +74,7 @@ tic;  % record assembling time
 % k2M is the squared wavenumber times the mass matrix
 % M is the mass matrix
 Delta = sparse(Ndof,Ndof);
-%M   = sparse(Ndof,Ndof);
+M   = sparse(Ndof,Ndof);
 k2iepsM = sparse(Ndof,Ndof);
 
 for i = 1:3
@@ -89,18 +89,22 @@ for i = 1:3
         end
         %Assembling the mass matrix
         if isnumeric(pde.k)    %constant wave number
-            k2 = (pde.k)^2;
+            k2     = (pde.k)^2;
             k2ieps = (pde.k)^2 + 1i*factoreps*(pde.k)^poweps;
         else %variable wave number k
             center = (node(elem(:,1),:) + node(elem(:,2),:) + node(elem(:,3),:))/3;
-            k2 = (pde.k(center))^2;
+            k2     = (pde.k(center))^2;
             k2ieps = (pde.k(center))^2 + 1i*factoreps*pde.k(center)^poweps;
         end
-        Mij = k2ieps.*area*((i==j)+1)/12;
+        k2iepsMij = k2ieps.*area*((i==j)+1)/12;
+        Mij = area.*((i==j)+1)/12;
         if (j==i)
-            k2iepsM = k2iepsM + sparse(elem(:,i),elem(:,j),Mij,Ndof,Ndof);
+            k2iepsM = k2iepsM + sparse(elem(:,i),elem(:,j),k2iepsMij,Ndof,Ndof);
+            M = M + + sparse(elem(:,i),elem(:,j),Mij,Ndof,Ndof);
         else
             k2iepsM = k2iepsM + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
+                [k2iepsMij; k2iepsMij],Ndof,Ndof);
+            M =  M + sparse([elem(:,i);elem(:,j)],[elem(:,j);elem(:,i)],...
                 [Mij; Mij],Ndof,Ndof);
         end
     end
@@ -149,7 +153,7 @@ if option.printlevel >= 2
 end
 
 %% Output information
-eqn = struct('A',AD,'b',b,'freeNode',freeNode,'Delta',Delta);
+eqn = struct('A',AD,'b',b,'freeNode',freeNode,'Delta',Delta,'M',M);
 info.assembleTime = assembleTime;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,4 +289,4 @@ info.assembleTime = assembleTime;
         %     % needed.
     end % end of getbd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-end % end of Poisson
+end % end of Helmholtz
