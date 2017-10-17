@@ -48,7 +48,7 @@ for i=1:length(kk)
     
     k   = kk(i);
     eps = factoreps*k^poweps;
-    npf = ceil(k^(3/2));
+    npf = ceil(0.5*k^(3/2));
     
     if (mod(npf,2)==0)  %set an odd number of interior points in 1D
         npf = npf+1;
@@ -173,16 +173,16 @@ for i=1:length(kk)
     factorshift = num2str(10*factoreps);
  
     
-    name1 = strcat('1d_fov_dcsl_wn',wn,'_ppw',pts, ...
+    name1 = strcat('2D_fov_dcsl_wn',wn,'_ppw',pts, ...
         '_pshift_',powershift,'_fshift_',factorshift,'.tex');
     
     if strcmp(pollution,'no')
-        name1 = strcat('1d_fov_dcsl_wn',wn,'_nopoll', ...
+        name1 = strcat('2D_fov_dcsl_wn',wn,'_nopoll', ...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
     end
     
     matlab2tikz('filename',name1,'standalone',true); %save .tex file of tikz figure%
-    %End of FOV DCSL
+    %End of FOV DCSL 2D
     
     
 end

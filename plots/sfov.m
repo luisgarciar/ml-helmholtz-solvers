@@ -25,10 +25,14 @@ if nargin == 1, k = 32; end
 theta = linspace(0,2*pi,k); %range of angles
 fovA  = zeros(k,1);         %boundary points
 eigvA = 0;
+
+
+vinit =v0max;
 for j=1:k
-    if(mod(j,10)==0)
-        j 
+    if(j==1 || mod(j,5)==0)
+      fprintf('step %d of %d in fov computation \n',j,k);
     end
+    
     %We rotate the matrix A to obtain At=exp(i*theta(j))*A 
     %and compute the max eigenvalue and unit eigenvector of 
     %Ht = Hermitian part of At
@@ -36,23 +40,24 @@ for j=1:k
      et = exp(1i*theta(j));  
      Ht = @(x) 0.5*(et*feval(A,x) + et'*feval(AH,x));
     
-     opts.p      = 30;
-     opts.tol    = 1e-6;     
-     
+     opts.issym  = true;
+     opts.tol    = 1e-6;  
      opts.isreal = 0;
-     opts.v0     = v0max;
-     opts.p      = min(N,150);
+     opts.disp   = 0;
+     opts.v0     = vinit;
+     opts.p      = min(N,50);
      [vmaxHt,~,flag] = eigs(Ht,N,1,'LR',opts);
      
+     fprintf('convergence flag step %d: %d  \n', j, flag);
+
      if flag ~=0
         fovA(j) = fovA(j-1);
      else
         %The boundary point is the rotated max eigenvalue
         v  = vmaxHt/norm(vmaxHt);
         fovA(j) = v'*feval(A,v);
-        v0max=v;
-     end
-  
+        vinit=v;
+     end  
 end
 
 %The approximate fov is the convex hull of the computed boundary points
