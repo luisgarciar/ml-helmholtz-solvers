@@ -12,7 +12,7 @@ bc = 'som';
 
 %Wavenumber
 %kk = 200;
-kk = 50;
+kk = 30;
 %kk      = [20 50 100 150];
 iter_SL = zeros(length(kk),2);
 

@@ -29,9 +29,9 @@ eigvA = 0;
 
 vinit =v0max;
 for j=1:k
-    if(j==1 || mod(j,5)==0)
-      fprintf('step %d of %d in fov computation \n',j,k);
-    end
+    %if(j==1 || mod(j,5)==0)
+    %  fprintf('step %d of %d in fov computation \n',j,k);
+    %end
     
     %We rotate the matrix A to obtain At=exp(i*theta(j))*A 
     %and compute the max eigenvalue and unit eigenvector of 
@@ -41,15 +41,18 @@ for j=1:k
      Ht = @(x) 0.5*(et*feval(A,x) + et'*feval(AH,x));
     
      opts.issym  = true;
-     opts.tol    = 1e-6;  
+     opts.tol    = 1e-5;  
      opts.isreal = 0;
      opts.disp   = 0;
      opts.v0     = vinit;
-     opts.p      = min(N,50);
+     opts.maxit  = 50;
+     opts.p      = min(N,20);
      [vmaxHt,~,flag] = eigs(Ht,N,1,'LR',opts);
      
-     fprintf('convergence flag step %d: %d  \n', j, flag);
-
+     fprintf('step %d of %d in fov computation - flag: %d \n',j,k,flag);
+     
+     %fprintf('convergence flag step %d: %d  \n', j, flag);
+     
      if flag ~=0
         fovA(j) = fovA(j-1);
      else
