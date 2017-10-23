@@ -11,8 +11,8 @@ factoreps = 1;
 bc = 'som';
 
 %Wavenumber
-kk = 40;
-%kk      = [20 50 100 150];
+%kk = 40;
+kk      = [20 50 100 150];
 iter_SL = zeros(length(kk),2);
 
 %Colors for plots
@@ -60,7 +60,7 @@ for i=1:length(kk)
     end
     npc = (npf-1)/2;
     
-    A  = helmholtzfem(k,npf,0,bc); %Helmholtz matrix
+    A    = helmholtzfem(k,npf,0,bc); %Helmholtz matrix
     Aeps = helmholtzfem(k,npf,eps,bc); %Shifted Laplace matrix
     
     %% Sparse FOV of Helmholtz + Shifted Laplace
@@ -84,11 +84,11 @@ for i=1:length(kk)
     [vmaxH, eigmaxH] =  eigs(H,N,1,'LM',opts);
     
     %Use the maximum eigenvalue of the Hermitian part of A
-    [fovAhat,~,~] = sfov(Ahat,AhatH,vmaxH,N,50);
+    %[fovAhat,~,~] = sfov(Ahat,AhatH,vmaxH,N,50);
     
     %Find the convex hull of the FOV and plot it
-     reFOV = real(fovAhat); imFOV = imag(fovAhat);
-      cvh = convhull(reFOV,imFOV);
+    % reFOV = real(fovAhat); imFOV = imag(fovAhat);
+     % cvh = convhull(reFOV,imFOV);
     
    
     %% Sparse FOV of Deflated shifted Laplacian
@@ -140,8 +140,8 @@ for i=1:length(kk)
     set(y,'Interpreter','latex')
     figure(1)
     
-    wn  = num2str(kk(i));
-    pts   = num2str(ppw);
+    wn          = num2str(kk(i));
+    pts         = num2str(ppw);
     powershift  = num2str(poweps);
     factorshift = num2str(10*factoreps);
  

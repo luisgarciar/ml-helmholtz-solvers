@@ -2,10 +2,12 @@
 %ADEF preconditioner
 
 %% Construction of the matrices
+clear all
+close all
 
-dim = 1;
+dim       = 1;
 poweps    = 2;
-factoreps = 1;
+factoreps = 5;
 bc = 'som';
 
 %Wavenumber
@@ -27,7 +29,7 @@ opt     = {'m','b','g','k'};
 
 plot_csl     = 'yes';
 plot_gmres   = 'no';
-ppw = 0.5;
+ppw          =  0.5;
 
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
 fvpts = 50;
@@ -58,9 +60,9 @@ for i=1:length(kk)
     bc = 'som';
     
     %npf : number of interior points
-    
     %Construct coarse and fine grid meshes of meshsizes H,h
     H = 1/(npc+1);
+    
     [node,elem] = squaremesh([0,1,0,1],H);  %coarse mesh
     [node,elem] = uniformrefine(node,elem); %fine mesh (uniformly refined)
     
@@ -83,7 +85,7 @@ for i=1:length(kk)
     time_fem = toc;
     
     fprintf('finished computation of fem matrices  for k=%d  \n', k);
-    fprintf('time fem: %f  \n', time_fem);
+    fprintf('time fem: %f \n', time_fem);
     fprintf('size of fem matrices for k=%d: %d \n', k, length(eqn1.A));
     
     %Helmholtz and shifted Laplace matrices
@@ -105,85 +107,108 @@ for i=1:length(kk)
     AhatH   = @(x) UH\(LH\(A'*x));
     H       = @(x) 0.5*(feval(Ahat,x) + feval(AhatH,x)); %Hermitian part of Ahat
     
-    %Compute first the maximum eigenvalue of A
-    % [eigvecA, eigvalA] =  eig(full(A));
-    % [eigvalmaxA,ind] = max(diag(eigvalA));
-    % vmaxA = eigvecA(:,ind);
-    
-    %Compute now the maximum eigenvalue of the Hermitian part of A
-    opts.p = 30;
-    opts.isreal = 0;
-    opts.issym = 1;
-    %opts.v0 = vmaxA;
-    
-    
-    fprintf('beginning computation of max eigvalue of H for k = %d  \n', k);
-    tic
-    %[vmaxH, eigmaxH] =  eigs(H,N,1,'LR',opts);
-    time_maxeigv = toc;
-    fprintf('time maxeigv: %f  \n', time_maxeigv);
-    
-    %Use the maximum eigenvalue of the Hermitian part of A
-    %[fovAhat,~,~] = sfov(Ahat,AhatH,vmaxH,N,50);
-    
-    %Find the convex hull of the FOV and plot it
-    %reFOV = real(fovAhat); imFOV = imag(fovAhat);
-    %cvh = convhull(reFOV,imFOV);
     
     %% Sparse FOV of Deflated shifted Laplacian
     
     %Set up two-level structure
     option.twolevel = true;
     numlev = 2;
-    [mg_mat,~,R,Z] = mg_setupfem_2D(npc,numlev,pdehelm,option);
+    [mg_mat,~,~,Z] = mg_setupfem_2D(npc,numlev,pdehelm,option);
     
     %Deflation subspace: columns of Z
     dim_def = size(Z,2);
     
     %Deflated-shifted Operator PadefA
-    M = eqn1.M;
+    M  = eqn1.M;
     Ac = Z'*A*Z; %Coarse operator
     
-    fprintf('beginning computation of lu of coarse matrix for k=%d  \n', k);
+    %We compute the projection P = I-AZ(Z'AZ)^(-1)Z
+    %using the procedure from Stewart,
+    %"On the Numerical Analysis of Oblique Projectors" - SIMAX, 2011
+    
+    fprintf('Beginning computation of qr for projections for k=%d  \n', k);
     tic
-    [Lc, Uc] = lu(Ac);
-    time_luc = toc;
+    [X,S] = qr(full(A*Z));
+    time_qr1 = toc;
+    fprintf('finished computation of qr1 for k=%d  \n', k);
+    fprintf('time qr1: %f  \n', time_qr1);
+ 
+    tic
+    [Y,T] = qr(full(Z));
+    time_qr2 = toc;
+    fprintf('finished computation of qr2 for k=%d  \n', k);
+    fprintf('time qr2: %f  \n', time_qr2);
     
-    fprintf('coarse lu factorization for k=%d finished \n', k);
-    fprintf('time lu coarse: %f  \n', time_luc);
-    
-    LcH = Uc'; UcH = Lc';
-    %sqrtM = sqrtm(full(M));
+    [L1,U1] = lu(Y'*X);
+    [L2,U2] = lu(X'*Y);
+        
+%   M1 = Y'*X; 
+%   tic; [Q1,R1] = qr(M1); time_qr3 = toc;
+%   fprintf('finished computation of qr3 for k=%d  \n', k);
+%   fprintf('time qr3: %f  \n', time_qr3);
+     
+%   M2 = X'*Y; 
+%   tic; [Q2,R2] = qr(M2); time_qr4 = toc;
+%   fprintf('finished computation of qr for k=%d  \n', k);
+%   fprintf('time qr3: %f  \n', time_qr4);
+ 
+    fprintf('finished computation of qr for k=%d \n', k);
+    %fprintf('total time qr: %f \n', time_qr1+time_qr2+time_qr3+time_qr4);
+      
+% We compute the projection  P = AZ(Z'AZ)^(-1)AZ
+
+%   P  = @(x) X*(R1\(Q1'*(Y'*x)));
+%   PH = @(x) Y*(R2\(Q2'*(X'*x)));     
+        
+    P  = @(x) X*(U1\(L1\(Y'*x)));
+    PH = @(x) Y*(U2\(L2\(X'*x)));
+
+% fprintf('beginning computation of lu of coarse matrix for k=%d  \n', k);
+% tic
+% [Lc, Uc] = lu(Ac);
+% time_luc = toc;
+
+% fprintf('coarse lu factorization for k=%d finished \n', k);
+% fprintf('time lu coarse: %f  \n', time_luc);
+%
+% LcH = Uc'; UcH = Lc';
+% sqrtM = sqrtm(full(M));
+
     
     %Deflated operator
-    I        = speye(N);
+    I        =  speye(N);
     Aepsinv  =  @(x) U\(L\x);     %Inverse of shifted Laplace
     AepsHinv =  @(x) UH\(LH\x);   %Inverse of Hermitian transpose of shifted Laplace
-    Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
-    AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
+       
+    %Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
+    %AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
     
+    %FOV in the Euclidean inner product
+    %AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
+    %APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
+        
     %Field of values of APadef in Minv inner product
     %AP  =    @(x)  sqrtM*Aepsinv((sqrtM*x-A*Z*Acinv((Z'*sqrtM*x))));
     %APH =    @(x)  sqrtM*(AepsHinv(sqrtM*x)- Z*AcHinv(Z'*A'*AepsHinv(sqrtM*x)));
-    
-    %FOV in the Euclidean inner product
-    AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
-    APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
+        
+    %FOV using the XQRY form of the projection
+    AP  = @(x) M*Aepsinv(x-feval(P,x));
+    APH = @(x) AepsHinv(M*x) - feval(PH,AepsHinv(M*x));
     
     fprintf('beginning computation of fov for k=%d \n', k);
     tic
-    vmaxH = rand(N,1);
-    [fovAP,~,~] = sfov(AP,APH,vmaxH,N,50);
-    fovAP       = 1+1i*eps*fovAP;
+    vmaxH  = rand(N,1);
+    [fovAP1,~,~] = sfov(AP,APH,vmaxH,N,50);
+    fovAP1       = 1+1i*eps*fovAP1;
     time_fov = toc;
-    fprintf('time fov: %f  \n', time_fov);
+    fprintf('\n time fov: %f  \n', time_fov);
     
     %close all
-    refovAP = real(fovAP); imfovAP= imag(fovAP);
-    figure(123)
-    plot(refovAP,imfovAP,'b','LineWidth',2)      % Plot the field of values
+    refovAP1 = real(fovAP1); imfovAP1= imag(fovAP1); 
+    figure(1)
+    plot(refovAP1,imfovAP1,'b','LineWidth',3)  %Plot the field of values
     hold on
-    plot(0,0,'k+','Markersize',10,'LineWidth',2)
+    plot(0,0,'k+','Markersize',10,'LineWidth',2);
     axis('equal');
     axis([-0.2 1.2 -0.7 0.7]);
     xlabel('Re(z)','FontSize',14);
@@ -191,12 +216,12 @@ for i=1:length(kk)
     set(gca,'Xtick',[ 0   0.5   1],'FontSize',14);
     set(gca,'Ytick',[-0.5 0 0.5 1],'FontSize',14);
     
-    x = xlabel('$\mathrm{Re}(z)$');
-    % x-axis label
-    set(x,'Interpreter','latex')
+    
+    x = xlabel('$\mathrm{Re}(z)$');     % x-axis label
+    set(x,'Interpreter','latex');
     y=ylabel('$\mathrm{Im}(z)$','interpreter','latex'); % x-axis label
-    set(y,'Interpreter','latex')
-    figure(1)
+    set(y,'Interpreter','latex');
+    figure(1);
     
     wn  = num2str(kk(i));
     pts   = num2str(ppw);

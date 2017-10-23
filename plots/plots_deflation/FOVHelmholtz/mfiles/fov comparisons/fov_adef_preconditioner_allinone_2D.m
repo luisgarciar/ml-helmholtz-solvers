@@ -15,7 +15,7 @@ plot_csl_defcsl = 'yes';
 
 %Wavenumber
 %kk      = [20 40 60 80 100];
-kk = 200;
+kk = 10;
 
 %Colors for plots
 minfov  = zeros(length(kk),1);
