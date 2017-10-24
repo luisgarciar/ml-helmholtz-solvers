@@ -18,16 +18,17 @@ hexcolor   = ['#332288'; '#88CCEE'; '#44AA99'; '#117733'; '#999933'; ...
     '#DDCC77'; '#CC6677'; '#882255'; '#AA4499'];
 %rgbcolor2 = linspecer(9);
 
+
 minfov  = zeros(length(kk),1);
 linetyp = {'-','.','--','-'};
 color   = {'m','b','g','k'};
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
-%str2={'k','k.-','k--','b*-'};
+%str2   = {'k','k.-','k--','b*-'};
 
 plot_csl     = 'yes';
 plot_gmres   = 'no';
-ppw = 0.5;
+ppw          = 0.5;
 
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
 fvpts = 50;
@@ -162,18 +163,21 @@ for i=1:length(kk)
     Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
     AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
     
+    P  = @(x) A*Z*(Acinv(Z'*x));
+    PH = @(x) Z*AcHinv(Z'*(A'*x));
+    
     %Field of values of APadef in Minv inner product
     %AP  =    @(x)  sqrtM*Aepsinv((sqrtM*x-A*Z*Acinv((Z'*sqrtM*x))));
     %APH =    @(x)  sqrtM*(AepsHinv(sqrtM*x)- Z*AcHinv(Z'*A'*AepsHinv(sqrtM*x)));
     
     %FOV in the Euclidean inner product
-    AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
-    APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
+    AP  =  @(x)  M*Aepsinv(x-feval(P,x));
+    APH =  @(x)  AepsHinv(M*x)- feval(PH,AepsHinv(M*x));
     
     fprintf('beginning computation of fov for k=%d \n', k);
     tic
     vmaxH = rand(N,1);
-    [fovAP,~,~] = sfov(AP,APH,vmaxH,N,50);
+    [fovAP,~,~] = parallel_sfov(AP,APH,vmaxH,N,50);
     fovAP       = 1+1i*eps*fovAP;
     time_fov = toc;
     fprintf('time fov: %f  \n', time_fov);

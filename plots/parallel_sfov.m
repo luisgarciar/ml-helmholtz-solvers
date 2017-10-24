@@ -1,5 +1,5 @@
 function [fovA,eigvA,m,M]=parallel_sfov(A,AH,v0max,N,k)
-%% SFOV
+%% parallel_sfov
 %  [fovA,eigvA,m,M]= sfov(A,AH, k) computes the field of values of the sparse
 %  matrix A and approximations to the inner numerical radius and
 %  numerical radius using the method  of Johnson
@@ -26,18 +26,15 @@ theta = linspace(0,2*pi,k); %range of angles
 fovA  = zeros(k,1);         %boundary points
 eigvA = 0;
 
-opts.v0     = v0max;
+%opts.v0     = v0max;
 opts.tol    = 1e-8;
 opts.isreal = 0;
 opts.disp   = 0;
 opts.maxit  = 50;
 opts.p      = min(N,20);
-
+opts.issym  = true;
 
 parfor j=1:k
-    %if(j==1 || mod(j,5)==0)
-    %  fprintf('step %d of %d in fov computation \n',j,k);
-    %end
     
     %We rotate the matrix A to obtain At=exp(i*theta(j))*A
     %and compute the max eigenvalue and unit eigenvector of
@@ -45,13 +42,10 @@ parfor j=1:k
     et = exp(1i*theta(j));
     Ht = @(x) 0.5*(et*feval(A,x) + et'*feval(AH,x));
     
-    fprintf('\n step %d of %d in fov computation %d \n\n',j,k);
-    
-    %opts.issym  = true;
-    
+    fprintf('\n step %d of %d in fov computation %d \n',j,k);
     [vmaxHt,~,] = eigs(Ht,N,1,'LR',opts);
     
-    %fprintf('convergen~ce flag step %d: %d  \n', j, flag);
+    %fprintf('convergence flag step %d: %d  \n', j, flag);
     %
     %      if flag1 ~=0
     %         fovA(j) = fovA(j-1);
@@ -65,8 +59,7 @@ parfor j=1:k
     %The boundary point is the rotated max eigenvalue
     v  = vmaxHt/norm(vmaxHt);
     fovA(j) = v'*feval(A,v);
- 
-
+    
 end
 
 %The approximate fov is the convex hull of the computed boundary points
