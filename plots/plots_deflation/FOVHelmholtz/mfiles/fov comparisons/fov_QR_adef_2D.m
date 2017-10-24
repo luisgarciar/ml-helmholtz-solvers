@@ -2,7 +2,6 @@
 %ADEF preconditioner
 
 %% Construction of the matrices
-clear all
 close all
 
 dim       = 1;
@@ -198,7 +197,7 @@ for i=1:length(kk)
     fprintf('beginning computation of fov for k=%d \n', k);
     tic
     vmaxH  = rand(N,1);
-    [fovAP1,~,~] = sfov(AP,APH,vmaxH,N,50);
+    [fovAP1,~,~] = parallel_sfov(AP,APH,vmaxH,N,50);
     fovAP1       = 1+1i*eps*fovAP1;
     time_fov = toc;
     fprintf('\n time fov: %f  \n', time_fov);
