@@ -11,6 +11,7 @@ bc = 'som';
 
 %Wavenumber
 kk  = 40;
+kk = [10 20 40];
 %kk = [20 50 100 150];
 iter_SL = zeros(length(kk),2);
 

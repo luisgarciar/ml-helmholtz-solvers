@@ -9,12 +9,16 @@
 %
 %  -div(grad u)-(k^2 + i*eps) u  = f   in Omega = (0,1)x(0,1)
 %  grad(u) dot n - i*ku = g on boundary(Omega)
-%
+
 
 %% Fixed wavenumber k and variable shift eps
-kk   = [10 20 40];
+kk   = [10 20 40 60];
 itercsl = zeros(length(kk),1);
 time_lu = zeros(length(kk),1);
+
+
+poweps    = 2;
+factoreps = 1;
 
 for i=1:length(kk)
     k = kk(i);
@@ -27,8 +31,6 @@ for i=1:length(kk)
     end
     npc = (npf-1)/2;
     
-    poweps    = 1;
-    factoreps = 1;
     bc = 'som';
     %Construct square mesh of meshsize h
     h = 1/npf;

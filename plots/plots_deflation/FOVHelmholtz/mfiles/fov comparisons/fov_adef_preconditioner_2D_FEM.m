@@ -1,4 +1,4 @@
-%Field of values of finite element matrices 1D
+%Field of values of finite element matrices 2D
 %ADEF preconditioner
 
 %% Construction of the matrices
@@ -9,7 +9,7 @@ factoreps = 1;
 bc = 'som';
 
 %Wavenumber
-kk  = 20;
+kk  = [10];
 %kk = [20 50 100 150];
 iter_SL = zeros(length(kk),2);
 
@@ -61,7 +61,7 @@ for i=1:length(kk)
     %npf : number of interior points
     
     %Construct coarse and fine grid meshes of meshsizes H,h
-    H = 1/(npc+1);
+    H = 1/(npc+1); h = 1/(npf+1);
     [node,elem] = squaremesh([0,1,0,1],H);  %coarse mesh
     [node,elem] = uniformrefine(node,elem); %fine mesh (uniformly refined)
     
@@ -171,8 +171,16 @@ for i=1:length(kk)
     %APH =    @(x)  sqrtM*(AepsHinv(sqrtM*x)- Z*AcHinv(Z'*A'*AepsHinv(sqrtM*x)));
     
     %FOV in the Euclidean inner product
-    AP  =  @(x)  M*Aepsinv(x-feval(P,x));
-    APH =  @(x)  AepsHinv(M*x)- feval(PH,AepsHinv(M*x));
+    %AP  =  @(x)  M*Aepsinv(x-feval(P,x));
+    %APH =  @(x)  AepsHinv(M*x)- feval(PH,AepsHinv(M*x));
+    
+    Q  = @(x) Z*(Acinv(Z'*x));
+    QH = @(x) Z*AcHinv(Z'*x);
+    
+    %Modified FOV in the Euclidean inner product 
+    AP  =    @(x)  A*(Aepsinv(x-P(x))) + Q(x);  
+    APH =    @(x)  AepsHinv(A'*x) - PH(AepsHinv(A'*x)) + QH(x);
+   
     
     fprintf('beginning computation of fov for k=%d \n', k);
     tic
@@ -200,7 +208,6 @@ for i=1:length(kk)
     set(x,'Interpreter','latex')
     y=ylabel('$\mathrm{Im}(z)$','interpreter','latex'); % x-axis label
     set(y,'Interpreter','latex')
-    figure(1)
     
     wn  = num2str(kk(i));
     pts   = num2str(ppw);

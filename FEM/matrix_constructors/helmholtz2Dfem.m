@@ -73,8 +73,8 @@ tic;  % record assembling time
 % Delta is the negative Laplacian
 % k2M is the squared wavenumber times the mass matrix
 % M is the mass matrix
-Delta = sparse(Ndof,Ndof);
-M   = sparse(Ndof,Ndof);
+Delta   = sparse(Ndof,Ndof);
+M       = sparse(Ndof,Ndof);
 k2iepsM = sparse(Ndof,Ndof);
 
 for i = 1:3
@@ -96,7 +96,7 @@ for i = 1:3
             k2     = (pde.k(center))^2;
             k2ieps = (pde.k(center))^2 + 1i*factoreps*pde.k(center)^poweps;
         end
-        k2iepsMij = k2ieps.*area*((i==j)+1)/12;
+        k2iepsMij = k2ieps*area*((i==j)+1)/12;
         Mij = area.*((i==j)+1)/12;
         if (j==i)
             k2iepsM = k2iepsM + sparse(elem(:,i),elem(:,j),k2iepsMij,Ndof,Ndof);

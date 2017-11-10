@@ -30,9 +30,9 @@ eigvA = 0;
 opts.tol    = 1e-8;
 opts.isreal = 0;
 opts.disp   = 0;
-opts.maxit  = 50;
+opts.maxit  = 100;
 opts.p      = min(N,20);
-opts.issym  = true;
+opts.issym  = false;
 
 parfor j=1:k
     
