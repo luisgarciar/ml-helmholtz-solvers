@@ -1,22 +1,22 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
-% 2-D Example, Sommerfeld boundary conditions, variable wavenumber
+% 2-D Example, Dirichlet boundary conditions
 clc
 clear global;
 close all;
 
-npc = 5;    %number of interior points in coarsest grid in one dim 
+npc = 1;    %number of interior points in coarsest grid in one dim 
 bc  = 'som'; dim = 2; %boundary conditions, dimension
 
 %variable wavenumber and imaginary shift of shifted Laplacian
-kref      = 80; eps = 0.6;
-kvar      = @(x,y) klay(x,y,kref);
-epsvar    = @(x,y) eps*(klay(x,y,kref).^2); 
-zero      = @(x,y) 0*x;
-ppw       = 12;                           %number of points per wavelength
+kref    = 80; eps = 0.5;
+kvar    = @(x,y) klay(x,y,kref);
+epsvar  = @(x,y) eps*(klay(x,y,kref).^2); 
+zero    = @(x,y) 0*x;
+ppw     = 12;                          %number of points per wavelength
 [npf,lev] = fd_npc_to_npf(npc,kref,ppw);  %number of points in finest grid (1D)
 
 %Grid for plotting
-npx = npf; npy=npf; hx = 1/(npx+1); hy = 1/(npy+1);
+npx   = npf; npy=npf; hx=1/(npx+1); hy=1/(npy+1);
 xgrid = hx*(1:1:npx); ygrid = hy*(1:1:npy);
 np    = npx*npy;
 [X,Y] = meshgrid(xgrid,ygrid);
@@ -56,19 +56,19 @@ setup_time=toc;
 %Parameters of V-cycle and Jacobi iteration
 b    = zeros(length(A),1); b(ceil(length(A)/2),1) = 1/(hx*hy);
 x0   = zeros(length(A),1);
-npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
+npre = 1; npos = 1; w = 0.6; smo = 'wjac'; numcycles = 1;
 Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
                             interp,x0,v,npre,npos,w,smo,numcycles);
 
 Minv_vmg = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,...
                             interp,x0,v,npre,npos,w,smo,numcycles);
-                                               
-[L,U]=lu(M);                        
-Minv_lu=  @(v) (L\(U\v));                   
-                        
+
+Minv_wmg = @(v)feval(@Wcycle,galerkin_matrices,galerkin_split,restrict,...
+                            interp,x0,v,npre,npos,w,smo,numcycles);
+                                                
 %Parameters of GMRES iteration
 tol   = 1e-8;
-maxit = 200;
+maxit = 300;
 
 %GMRES iteration without preconditioner (too slow for large wavenumbers)
 % tic
@@ -76,27 +76,37 @@ maxit = 200;
 % time1 = toc;
  
 % GMRES iteration with V cycle preconditioner
- AMinv_vmg = @(v) A*feval(Minv_vmg,v);
- tic
- [x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_vmg,b,[],tol,maxit);
- time_v = toc;
+AMinv_vmg = @(v) A*feval(Minv_vmg,v);
+tic
+[xv,flagv,relresv,iterv,resvecv] = gmres(AMinv_vmg,b,[],tol,maxit);
+time_v = toc;
 
-% GMRES iteration with right SL preconditioner
+% GMRES iteration with F cycle preconditioner
 AMinv_fmg = @(v) A*feval(Minv_fmg,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv_fmg,b,[],tol,maxit);
+[xf,flagf,relresf,iterf,resvecf] = gmres(AMinv_fmg,b,[],tol,maxit);
 time_f = toc;
+
+% GMRES iteration with W cycle preconditioner
+AMinv_wmg =  @(v) A*feval(Minv_wmg,v);
+tic
+[xw,flagw,relresw,iterw,resvecw] = gmres(AMinv_wmg,b,[],tol,maxit);
+time_w = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
 %hold on
 figure(1)
-semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
+semilogy(1:(iterv(2)+1),resvecv'/resvecv(1),'r-+');
 hold on
-semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
-legend('Vcycle preconditioner','Fcycle preconditioner')
+semilogy(1:(iterf(2)+1),resvecf'/resvecf(1),'k-*');
+semilogy(1:(iterw(2)+1),resvecw'/resvecw(1),'b-*');
+
+legend('Vcycle preconditioner','Fcycle preconditioner',...
+        'Wcycle preconditioner');
 
 time_v
 time_f
+time_w
 
 
 % figure(2)

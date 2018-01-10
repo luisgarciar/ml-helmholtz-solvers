@@ -86,23 +86,24 @@ factor_som = relres_som(2:length(relres_som))./relres_som(1:length(relres_som)-1
 %% Test of MG + GMRES (Shifted Laplacian + Helmholtz)
 
 %% Dirichlet problem
-% A_dir      = helmholtz2(k,0,npf,npf,bc);
-% %ex_sol_dir = ones(length(A_dir),1);
-% %b_dir      = A_dir*ex_sol_dir;
-% b_dir = zeros(length(M_dir),1); 
-% m = floor(length(M_dir)/2);
-% b_dir(m,1) = 1;
-% x0         = zeros(length(A_dir),1);
-% numcycles  = 1;
-% Minv_dir   = @(v)feval(@Vcycle,mg_mat_dir,mg_split_dir,restrict_dir,interp_dir,x0,v,npre,npos,w,smo,numcycles);
-% %[L_dir, U_dir] = lu(M_dir);
-% %Minv_dir = @(v) U_dir\(L_dir\v);
-% AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
-% 
-% %GMRes parameters
-% tol   = 1e-6;
-% maxit = min(300,length(A_dir));
-% 
+A_dir      = helmholtz2(k,0,npf,npf,bc);
+%ex_sol_dir = ones(length(A_dir),1);
+%b_dir      = A_dir*ex_sol_dir;
+b_dir = zeros(length(M_dir),1); 
+m = floor(length(M_dir)/2);
+b_dir(m,1) = 1;
+x0         = zeros(length(A_dir),1);
+numcycles  = 2;
+Minv_dir   = @(v)feval(@Vcycle,mg_mat_dir,mg_split_dir,restrict_dir,interp_dir,x0,v,npre,npos,w,smo,numcycles);
+%[L_dir, U_dir] = lu(M_dir);
+%Minv_dir = @(v) U_dir\(L_dir\v);
+AMinv_dir = @(v)A_dir*feval(Minv_dir,v);
+
+
+%GMRes parameters
+tol   = 1e-8;
+maxit = min(300,length(A_dir));
+
 % profile on
 % tic
 % [x_lgdir,flag_lgdir,relres_lgdir,iter_lgdir,resvec_lgdir] = gmres(A_dir,b_dir,[],tol,maxit,Minv_dir);
@@ -151,7 +152,7 @@ ylabel('relative residual')
 xlabel('iteration')
 
 legend('Sommerfeld BCs', 'Dirichlet BCs')
-title(['2D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
+title(['1D Helmholtz with right CSL-preconditioner (k=',num2str(k),')'])
 
 iter_rgsom
 %iter_rgdir
@@ -178,4 +179,16 @@ time_rgsom
 % 
 % time_lgsom
 % time_lgdir
+
+legend('Sommerfeld BCs', 'Dirichlet BCs')
+title(['2D Helmholtz with left CSL-preconditioner (k=',num2str(k),')'])
+
+iter_lgsom
+iter_lgdir
+
+resvec_lgsom(end)/resvec_lgsom(1)
+resvec_lgdir(end)/resvec_lgdir(1)
+
+time_lgsom
+time_lgdir
 
