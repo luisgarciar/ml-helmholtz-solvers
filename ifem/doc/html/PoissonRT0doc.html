@@ -1,0 +1,209 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>PoissonRT0doc</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-26"><meta name="DC.source" content="PoissonRT0doc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Equation: Poisson Equation Discretized by <img src="PoissonRT0doc_eq02463106176749853274.png" alt="$RT_0$"> Element in 2D</a></li><li><a href="#2">Data Structure</a></li><li><a href="#5">Local bases of RT0 element</a></li><li><a href="#6">Local bases of P0 element</a></li><li><a href="#7">Mass Matrix</a></li><li><a href="#8">Matrix for divergence operator</a></li><li><a href="#9">Right hand side</a></li><li><a href="#10">Boundary condition</a></li></ul></div><h2>Equation: Poisson Equation Discretized by <img src="PoissonRT0doc_eq02463106176749853274.png" alt="$RT_0$"> Element in 2D<a name="1"></a></h2><p>We explain the assembling of the matrix equation for the lowest order Raviart-Thomas element discretization of Poisson equation.</p><p>[u,sigma] = PoissonRT0(node,elem,bdEdge,f,g_D,varargin)</p><p>Created by Ming Wang at Jan 2. 2011 and revised to asecnd ordering system by Long Chen. Further clearn up by Ming Wang.</p><p>Copyright (C) Long Chen. See COPYRIGHT.txt for details.</p><pre class="codeinput">[node,elem] = squaremesh([0 1 0 1], 0.5);
+</pre><h2>Data Structure<a name="2"></a></h2><p>We use ascend ordering system. Note that the signed area of some triangles could be negative.</p><pre class="codeinput">bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+[elem,bdFlag] = sortelem(elem,bdFlag);
+showmesh(node,elem);
+findnode(node);
+findelem(node,elem);
+display(elem);
+</pre><pre class="codeoutput">
+elem =
+
+     1     4     5
+     2     5     6
+     4     7     8
+     5     8     9
+     1     2     5
+     2     3     6
+     4     5     8
+     5     6     9
+
+</pre><img vspace="5" hspace="5" src="PoissonRT0doc_01.png" alt=""> <p>The three local edges are <tt>locEdge = [2 3; 1 3; 1 2]</tt>. The pointer from local to global index map can be constructured by</p><pre class="codeinput">[elem2dof,edge] = dofedge(elem);
+findedge(node,edge);
+display(elem2dof);
+</pre><pre class="codeoutput">
+elem2dof =
+
+           8           3           2
+          11           6           5
+          15          10           9
+          16          13          12
+           5           3           1
+           7           6           4
+          12          10           8
+          14          13          11
+
+</pre><img vspace="5" hspace="5" src="PoissonRT0doc_02.png" alt=""> <p>The global and local orientation of edges are induced from the ascend ordering of vertices. Thanks to the ascend ordering, the local and global orientation are consistent.</p><p>However the ordering orientation is not consistent with the induced orientation. More specially the second edge would be [3 1] for consistent orientation. So <tt>[1 -1 1]</tt> is used in the construction of div operator.</p><h2>Local bases of RT0 element<a name="5"></a></h2><p>Suppose [i,j] is the k-th edge. The two dimensional curl is a rotated graident defined as <img src="PoissonRT0doc_eq09126079959971099579.png" alt="$\nabla^{\bot} f = (-\partial_y f, \partial _x f).$"> The basis of this edge along with its divergence are given by</p><p><img src="PoissonRT0doc_eq05733525994056128625.png" alt="$$ \Phi_k = \lambda_i \nabla^{\bot} \lambda_j - \lambda_j \nabla^{\bot} \lambda_i. $$"></p><p>Inside one triangular, the 3 bases along with their divergence (<b>where is the divergence?</b>) corresponding to 3 local edges [2 3; 1 3; 1 2] are:</p><p><img src="PoissonRT0doc_eq01396368838789569273.png" alt="$$ \Phi_1 = \lambda_2 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_2. $$"></p><p><img src="PoissonRT0doc_eq07675162837820788190.png" alt="$$ \Phi_2 = \lambda_1 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_1. $$"></p><p><img src="PoissonRT0doc_eq02715474303232224125.png" alt="$$ \Phi_3 = \lambda_1 \nabla^{\bot} \lambda_2 - \lambda_2 \nabla^{\bot} \lambda_1. $$"></p><p>The dual basis is the line integral over an orientated edge</p><p><img src="PoissonRT0doc_eq16446563717737057529.png" alt="$$\int_{e_i} \phi_j de_i = \delta(i,j).$$"></p><h2>Local bases of P0 element<a name="6"></a></h2><p>For triangle t, the basis for the constant function space is p = 1. So in the computation of divergence operator, elemSign should be used.</p><h2>Mass Matrix<a name="7"></a></h2><p>We use the integral formula</p><p><img src="PoissonRT0doc_eq15445112287769000132.png" alt="$$ \int_T&#xA;\lambda_1^{\alpha_1}\lambda_2^{\alpha_2}\lambda_3^{\alpha_3}&#xA;dx = \frac{\alpha_1!\alpha_2!\alpha_3!2!}{(\sum _{i=1}^3\alpha_i&#xA;+ 2)!}\;|T|,$$"></p><p>to get</p><p><img src="PoissonRT0doc_eq07274201008729298311.png" alt="$$ \int _T\lambda_i\lambda_j dx = (1+(i==j))|T|/12. $$"></p><p>For two local bases <img src="PoissonRT0doc_eq17216308745806660308.png" alt="$\Phi_i$"> and <img src="PoissonRT0doc_eq08707388863355140027.png" alt="$\Phi_j$"> corresponding to the ith and jth local edges, suppose i = [i1 i2], j = [j1 j2].</p><p><img src="PoissonRT0doc_eq06882723204775515544.png" alt="$$\int_T \Phi_i \Phi_j dx = \int_T (&#xA; \lambda_{i1} \nabla^{\bot} \lambda_{i2}\cdot\lambda_{j1} \nabla^{\bot} \lambda_{j2}&#xA;-\lambda_{i2} \nabla^{\bot} \lambda_{i1}\cdot\lambda_{j1} \nabla^{\bot} \lambda_{j2}&#xA;-\lambda_{i1} \nabla^{\bot} \lambda_{i2}\cdot\lambda_{j2} \nabla^{\bot} \lambda_{j1}&#xA;+\lambda_{i2} \nabla^{\bot} \lambda_{i1}\cdot\lambda_{j2} \nabla^{\bot} \lambda_{j1})dx&#xA;$$"></p><h2>Matrix for divergence operator<a name="8"></a></h2><p>More here.</p><pre class="codeinput">[Dlambda,area,elemSign] = gradbasis(node,elem);
+B = icdmat(double(elem2dof),elemSign*[1 -1 1]);
+</pre><h2>Right hand side<a name="9"></a></h2><pre>The basis for pressure contains a sign.</pre><h2>Boundary condition<a name="10"></a></h2><p>use bdFlag to find boundary edges and compute edgeinterpolate with normal direction.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Equation: Poisson Equation Discretized by $RT_0$ Element in 2D
+% We explain the assembling of the matrix equation for the lowest order 
+% Raviart-Thomas element discretization of Poisson equation. 
+%
+% [u,sigma] = PoissonRT0(node,elem,bdEdge,f,g_D,varargin)
+%
+% Created by Ming Wang at Jan 2. 2011 and revised to asecnd ordering system
+% by Long Chen. Further clearn up by Ming Wang.
+%
+% Copyright (C) Long Chen. See COPYRIGHT.txt for details. 
+
+[node,elem] = squaremesh([0 1 0 1], 0.5);
+
+%% Data Structure
+%
+% We use ascend ordering system. Note that the signed area of some
+% triangles could be negative.
+bdFlag = setboundary(node,elem,'Dirichlet');
+[elem,bdFlag] = sortelem(elem,bdFlag);
+showmesh(node,elem);
+findnode(node);
+findelem(node,elem);
+display(elem);
+%%
+% The three local edges are |locEdge = [2 3; 1 3; 1 2]|. The pointer from
+% local to global index map can be constructured by
+[elem2dof,edge] = dofedge(elem);
+findedge(node,edge);
+display(elem2dof);
+%%
+% The global and local orientation of edges are induced from the ascend ordering of
+% vertices. Thanks to the ascend ordering, the local and global orientation
+% are consistent.
+%
+% However the ordering orientation is not consistent with the induced
+% orientation. More specially the second edge would be [3 1] for consistent
+% orientation. So |[1 -1 1]| is used in the construction of div operator.
+
+%% Local bases of RT0 element
+%
+% Suppose [i,j] is the k-th edge. The two dimensional curl is a rotated
+% graident defined as $\nabla^{\bot} f = (-\partial_y f, \partial _x f).$
+% The basis of this edge along with its divergence are given by
+% 
+% $$ \Phi_k = \lambda_i \nabla^{\bot} \lambda_j - \lambda_j \nabla^{\bot} \lambda_i. $$
+%
+% Inside one triangular, the 3 bases along with their divergence (*where is
+% the divergence?*) corresponding to 3 local edges [2 3; 1 3; 1 2] are:
+%
+% $$ \Phi_1 = \lambda_2 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_2. $$ 
+%
+% $$ \Phi_2 = \lambda_1 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_1. $$
+%
+% $$ \Phi_3 = \lambda_1 \nabla^{\bot} \lambda_2 - \lambda_2 \nabla^{\bot} \lambda_1. $$
+%
+% The dual basis is the line integral over an orientated edge
+%
+% $$\int_{e_i} \phi_j de_i = \delta(i,j).$$ 
+
+%% Local bases of P0 element
+%
+% For triangle t, the basis for the constant function space is p = 1. So in
+% the computation of divergence operator, elemSign should be used.
+
+%% Mass Matrix
+%
+% We use the integral formula 
+%  
+% $$ \int_T
+% \lambda_1^{\alpha_1}\lambda_2^{\alpha_2}\lambda_3^{\alpha_3}
+% dx = \frac{\alpha_1!\alpha_2!\alpha_3!2!}{(\sum _{i=1}^3\alpha_i
+% + 2)!}\;|T|,$$
+%
+% to get 
+%
+% $$ \int _T\lambda_i\lambda_j dx = (1+(i==j))|T|/12. $$
+%
+% For two local bases $\Phi_i$ and $\Phi_j$ corresponding to the ith and
+% jth local edges, suppose i = [i1 i2], j = [j1 j2].
+%
+% $$\int_T \Phi_i \Phi_j dx = \int_T (
+%  \lambda_{i1} \nabla^{\bot} \lambda_{i2}\cdot\lambda_{j1} \nabla^{\bot} \lambda_{j2}
+% -\lambda_{i2} \nabla^{\bot} \lambda_{i1}\cdot\lambda_{j1} \nabla^{\bot} \lambda_{j2}
+% -\lambda_{i1} \nabla^{\bot} \lambda_{i2}\cdot\lambda_{j2} \nabla^{\bot} \lambda_{j1}
+% +\lambda_{i2} \nabla^{\bot} \lambda_{i1}\cdot\lambda_{j2} \nabla^{\bot} \lambda_{j1})dx
+% $$
+
+%% Matrix for divergence operator
+% More here.
+[Dlambda,area,elemSign] = gradbasis(node,elem);
+B = icdmat(double(elem2dof),elemSign*[1 -1 1]);
+
+%% Right hand side
+%
+%  The basis for pressure contains a sign. 
+
+%% Boundary condition
+%
+% use bdFlag to find boundary edges and compute edgeinterpolate with normal
+% direction.
+
+##### SOURCE END #####
+--></body></html>

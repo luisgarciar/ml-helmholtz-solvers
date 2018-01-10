@@ -1,0 +1,134 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project: MAC Scheme for Stokes Equations</title><meta name="generator" content="MATLAB 7.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-03-14"><meta name="DC.source" content="projectStokesMAC.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+
+  </style></head><body><div class="content"><h1>Project: MAC Scheme for Stokes Equations</h1><!--introduction--><p>The purpose of this project is to implement the simple and popular MAC scheme for solving Stokes equations in two dimensions. The instruction can be found  <a href="http://math.uci.edu/~chenlong/226/MACcode.pdf">Progamming of MAC for Stokes equations</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Test Example</a></li><li><a href="#2">Step 1: Gauss-Seidel relaxation of velocity</a></li><li><a href="#3">Step 2: Distributive relaxation of velocity and pressue</a></li><li><a href="#4">Step 3: Two level method</a></li><li><a href="#5">Step 4: Vcycle multigrid method</a></li></ul></div><h2>Test Example<a name="1"></a></h2><div><ul><li>Analytic solution. We use a simple model of colliding flow with analytic solutions to test the code. The domain is [-1,1]^2 and the analytic solution is:</li></ul></div><p><img src="projectStokesMAC_eq16397.png" alt="$$u = 20xy^3; v = 5x^4 - 5y^4; p = 60x^2y - 20y^3 + constant.$$"></p><p>Compute the data <tt>f</tt> and Dirichlet boundary condition <tt>g_D</tt>.</p><div><ul><li>Driven cavity problem. The domain is [-1,1]^2. Stokes equation with zero Dirichlet boundary condition except on the top:</li></ul></div><p><img src="projectStokesMAC_eq85753.png" alt="$$ \{ y=1; -1 <= x <= 1 | u = 1, v = 0 \} $$"></p><h2>Step 1: Gauss-Seidel relaxation of velocity<a name="2"></a></h2><p>Given a pressure approximation, relax the momentum equation to update velocity. See <a href="http://www.math.uci.edu/~chenlong/iFEM/doc/project/html/projectMG.html">Multigrid</a> project on the matrix free implemenation of G-S relaxation. Note that the boundary or near boundary dof should be updated diffeently. The stencil should be changed according to different boundary conditions.</p><h2>Step 2: Distributive relaxation of velocity and pressue<a name="3"></a></h2><div><ol><li>form the residual for the continuity equation: rc = div u.</li><li>solve the Poisson equation for pressure Ap*dq = rc by one G-S.</li><li>distribute the correction to velocity by u = u + grad dq;</li><li>update the pressure by p = p - Ap*dq;</li></ol></div><p>Every step can be implemented in a matrix-free version; see <a href="http://math.uci.edu/~chenlong/226/MACcode.pdf">Progamming of MAC for Stokes equations</a></p><p>Use DGS as an iterative method to solve the Stokes equation. The iteration steps could be very big but make sure it converges.</p><h2>Step 3: Two level method<a name="4"></a></h2><p>The two level method is</p><div><ol><li>Presmoothing by DGS</li><li>form residual for momentum and continunity equation</li><li>restrict the residual to the coarse grid</li><li>call DGS in the coarse grid till converge</li><li>prolongate the correction to the fine grid</li><li>Postsmoothing by DGS</li></ol></div><p>Note: the index map between coarse and fine grids are slightly different for u,v,p; see <a href="http://math.uci.edu/~chenlong/226/MACcode.pdf">Progamming of MAC for Stokes equations</a></p><p>Plus presmoothing and one postsmoothing using DGS, you get two level methods. Test your two level methods for different levels. It should convergence in less than 20 steps and indepedent of the number of levels.</p><h2>Step 4: Vcycle multigrid method<a name="5"></a></h2><p>Recrusively apply the two-level method to the coarse grid problem in the previous step to get a V-cycle method.</p><div><ol><li>Test the convergence of Vcycle method. Namely the iteration steps to push the relative residual smaller than a tolerance.</li><li>Compute the error between computed approximation to the exact solution and show the convergence rate in terms of mesh size h.</li></ol></div><p class="footer"><br>
+      Published with MATLAB&reg; 7.14<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Project: MAC Scheme for Stokes Equations
+%
+% The purpose of this project is to implement the simple and popular MAC
+% scheme for solving Stokes equations in two dimensions. The instruction
+% can be found  <http://math.uci.edu/~chenlong/226/MACcode.pdf Progamming
+% of MAC for Stokes equations>
+
+%% Test Example
+%
+% * Analytic solution. We use a simple model of colliding flow with
+% analytic solutions to test the code. The domain is [-1,1]^2 and the
+% analytic solution is:
+%
+% $$u = 20xy^3; v = 5x^4 - 5y^4; p = 60x^2y - 20y^3 + constant.$$
+%
+% Compute the data |f| and Dirichlet boundary condition |g_D|.
+%
+% * Driven cavity problem. The domain is [-1,1]^2. Stokes equation with
+% zero Dirichlet boundary condition except on the top:
+%
+% $$ \{ y=1; -1 <= x <= 1 | u = 1, v = 0 \} $$
+
+%% Step 1: Gauss-Seidel relaxation of velocity
+% Given a pressure approximation, relax the momentum equation to update
+% velocity.
+% See
+% <http://www.math.uci.edu/~chenlong/iFEM/doc/project/html/projectMG.html Multigrid> project on the matrix free implemenation of G-S relaxation.
+% Note that the boundary or near boundary dof should be updated diffeently.
+% The stencil should be changed according to different boundary conditions.
+
+%% Step 2: Distributive relaxation of velocity and pressue 
+%
+% # form the residual for the continuity equation: rc = div u.
+% # solve the Poisson equation for pressure Ap*dq = rc by one G-S.
+% # distribute the correction to velocity by u = u + grad dq;
+% # update the pressure by p = p - Ap*dq;
+%
+% Every step can be implemented in a matrix-free version; see
+% <http://math.uci.edu/~chenlong/226/MACcode.pdf Progamming of MAC for Stokes equations>
+%
+% Use DGS as an iterative method to solve the Stokes equation. The
+% iteration steps could be very big but make sure it converges.
+
+%% Step 3: Two level method
+%
+% The two level method is
+%
+% # Presmoothing by DGS
+% # form residual for momentum and continunity equation
+% # restrict the residual to the coarse grid
+% # call DGS in the coarse grid till converge
+% # prolongate the correction to the fine grid
+% # Postsmoothing by DGS
+%
+% Note: the index map between coarse and fine grids are slightly different
+% for u,v,p; see <http://math.uci.edu/~chenlong/226/MACcode.pdf
+% Progamming of MAC for Stokes equations>
+%
+% Plus presmoothing and one postsmoothing using DGS, you get two level
+% methods. Test your two level methods for different levels. It should
+% convergence in less than 20 steps and indepedent of the number of levels.
+
+%% Step 4: Vcycle multigrid method
+%
+% Recrusively apply the two-level method to the coarse grid problem
+% in the previous step to get a V-cycle method.
+%
+% # Test the convergence of Vcycle method. Namely the iteration steps to
+% push the relative residual smaller than a tolerance.
+% # Compute the error between computed approximation to the exact solution
+% and show the convergence rate in terms of mesh size h. 
+
+##### SOURCE END #####
+--></body></html>

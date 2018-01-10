@@ -1,0 +1,199 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Kellogg</title><meta name="generator" content="MATLAB 7.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-01-30"><meta name="DC.source" content="Kellogg.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">KEOLLOGG Problem</a></li><li><a href="#2">Problem setting</a></li><li><a href="#3">Parameters</a></li><li><a href="#4">Generate an initial mesh</a></li><li><a href="#5">Set up PDE data</a></li><li><a href="#6">Adaptive Finite Element Method</a></li><li><a href="#7">Plot convergent rates in energy norm</a></li></ul></div><h2>KEOLLOGG Problem<a name="1"></a></h2><p>KELLOGG solves a diffusion equation with jump coefficients with AFEM.</p><p>KELLOGG solves the problem within maxN number of vertices. The input argument theta is a parameter used in the marking step.</p><p>The KELLOGG command, if no input arguments, use maxN = 5e3 and theta = 0.5.</p><p>EXAMPLE</p><pre>  Kellogg</pre><p>See also  crack, Lshape</p><p>TODO: rewrite M-lint</p><p>Created by Chen-Song Zhang. Modified by Long Chen.</p><p>Copyright (C) Long Chen. See COPYRIGHT.txt for details.</p><pre class="codeinput">close <span class="string">all</span>
+</pre><h2>Problem setting<a name="2"></a></h2><p><img src="Kellogg_eq37819.png" alt="$$-\nabla\cdot(d\nabla u) = 0  \quad \Omega = (-1,1)\times (-1,1)$$"></p><p><img src="Kellogg_eq23722.png" alt="$$u = g_D \quad \partial \Omega$$"></p><p>The diffusion constant is discontinous; see the figure below. We set a2  = 1; a1 = 161.4476387975881 and choose boundary condition g_D such that the exact solution is <img src="Kellogg_eq95446.png" alt="$z = r^{0.1}\mu(\theta)$"> in the poloar coordinate, where the formula of mu can be found in exactu function.</p><pre class="codeinput">[x,y] = meshgrid(-1:1:1,-1:1:1);
+z = 0*x;
+surf(x,y,z,<span class="string">'linewidth'</span>,2); view(2);
+axis <span class="string">equal</span>; axis <span class="string">tight</span>;
+text(0.5,0.5,<span class="string">'a1'</span>,<span class="string">'FontSize'</span>,12,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+text(-0.5,-0.5,<span class="string">'a1'</span>,<span class="string">'FontSize'</span>,12,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+text(-0.5,0.5,<span class="string">'a2'</span>,<span class="string">'FontSize'</span>,12,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+text(0.5,-0.5,<span class="string">'a2'</span>,<span class="string">'FontSize'</span>,12,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+</pre><img vspace="5" hspace="5" src="Kellogg_01.png" alt=""> <h2>Parameters<a name="3"></a></h2><pre class="codeinput">maxN = 3e3;     theta = 0.2;    maxIt = 1000;
+N = zeros(maxIt,1);     uIuhErr = zeros(maxIt,1);
+errH1 = zeros(maxIt,1);
+</pre><h2>Generate an initial mesh<a name="4"></a></h2><pre class="codeinput">[node,elem] = squaremesh([-1 1 -1 1], 0.25);
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+</pre><h2>Set up PDE data<a name="5"></a></h2><pre class="codeinput">pde = Kelloggdata;
+</pre><h2>Adaptive Finite Element Method<a name="6"></a></h2><p><b>SOLVE</b> -&gt; <b>ESTIMATE</b> -&gt; <b>MARK</b> -&gt; <b>REFINE</b></p><pre class="codeinput"><span class="keyword">for</span> k = 1:maxIt
+    <span class="comment">% Step 1: SOLVE</span>
+    [u,Du,eqn] = Poisson(node,elem,pde);
+    <span class="comment">% Plot mesh and solution</span>
+    figure(1);  showresult(node,elem,u,[27,26]);
+    <span class="comment">% Step 2: ESTIMATE</span>
+<span class="comment">%    eta = estimaterecovery(node,elem,u);            % recovery type</span>
+    eta = estimateresidual(node,elem,u,pde);    <span class="comment">% residual type</span>
+    <span class="comment">% Record error and number of vertices</span>
+    uI = pde.exactu(node);
+    uIuhErr(k) = sqrt((uI-u)'*eqn.A*(uI-u));
+    errH1(k) = getH1error(node,elem,@pde.Du,Du);
+    N(k) = size(node,1);
+    <span class="keyword">if</span> (N(k)&gt;maxN), <span class="keyword">break</span>; <span class="keyword">end</span>
+    <span class="comment">% Step 3: MARK</span>
+    markedElem = mark(elem,eta,theta);
+    <span class="comment">% Step 4: REFINE</span>
+    [node,elem,bdFlag] = bisect(node,elem,markedElem,bdFlag);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2132,  #nnz:    12344, iter:  8,   err = 5.8395e-09,   time = 0.18 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2242,  #nnz:    12986, iter:  8,   err = 3.1593e-09,   time = 0.21 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2412,  #nnz:    13940, iter:  8,   err = 3.3831e-09,   time = 0.18 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2535,  #nnz:    14631, iter:  8,   err = 4.2176e-09,   time = 0.17 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2730,  #nnz:    15708, iter:  8,   err = 6.8518e-09,   time = 0.19 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2880,  #nnz:    16522, iter:  8,   err = 6.7943e-09,   time = 0.19 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3102,  #nnz:    17692, iter:  8,   err = 6.1075e-09,   time = 0.22 s
+</pre><img vspace="5" hspace="5" src="Kellogg_02.png" alt=""> <h2>Plot convergent rates in energy norm<a name="7"></a></h2><pre class="codeinput">N = N(1:k);
+uIuhErr = uIuhErr(1:k);
+errH1 = errH1(1:k);
+figure(2)
+showrate2(N,uIuhErr,10,<span class="string">'-*'</span>,<span class="string">'||Du_I-Du_h||'</span>,<span class="keyword">...</span>
+          N,errH1,10,<span class="string">'k-.'</span>,<span class="string">'||Du-Du_h||'</span>);
+</pre><img vspace="5" hspace="5" src="Kellogg_03.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.14<br></p></div><!--
+##### SOURCE BEGIN #####
+%% KEOLLOGG Problem
+%
+% KELLOGG solves a diffusion equation with jump coefficients with AFEM.
+%
+% KELLOGG solves the problem within maxN number of vertices. The
+% input argument theta is a parameter used in the marking step. 
+%
+% The KELLOGG command, if no input arguments, use maxN = 5e3 and theta = 0.5. 
+%
+% EXAMPLE
+%
+%    Kellogg 
+%
+% See also  crack, Lshape
+%
+% TODO: rewrite M-lint
+%
+% Created by Chen-Song Zhang. Modified by Long Chen.
+%
+% Copyright (C) Long Chen. See COPYRIGHT.txt for details.
+
+close all
+%% Problem setting
+% $$-\nabla\cdot(d\nabla u) = 0  \quad \Omega = (-1,1)\times (-1,1)$$ 
+%
+% $$u = g_D \quad \partial \Omega$$
+%
+% The diffusion constant is discontinous; see the figure below. We set a2  = 
+% 1; a1 = 161.4476387975881 and choose boundary condition g_D such that the
+% exact solution is $z = r^{0.1}\mu(\theta)$ in the poloar coordinate, where
+% the formula of mu can be found in exactu function.
+
+[x,y] = meshgrid(-1:1:1,-1:1:1); 
+z = 0*x;
+surf(x,y,z,'linewidth',2); view(2);
+axis equal; axis tight;
+text(0.5,0.5,'a1','FontSize',12,'FontWeight','bold');
+text(-0.5,-0.5,'a1','FontSize',12,'FontWeight','bold');
+text(-0.5,0.5,'a2','FontSize',12,'FontWeight','bold');
+text(0.5,-0.5,'a2','FontSize',12,'FontWeight','bold');
+
+%% Parameters
+maxN = 3e3;     theta = 0.2;    maxIt = 1000; 
+N = zeros(maxIt,1);     uIuhErr = zeros(maxIt,1);
+errH1 = zeros(maxIt,1);
+
+%%  Generate an initial mesh
+[node,elem] = squaremesh([-1 1 -1 1], 0.25);
+bdFlag = setboundary(node,elem,'Dirichlet');
+
+%% Set up PDE data
+pde = Kelloggdata;
+
+%%  Adaptive Finite Element Method
+% *SOLVE* -> *ESTIMATE* -> *MARK* -> *REFINE*
+
+for k = 1:maxIt
+    % Step 1: SOLVE
+    [u,Du,eqn] = Poisson(node,elem,pde);
+    % Plot mesh and solution
+    figure(1);  showresult(node,elem,u,[27,26]);    
+    % Step 2: ESTIMATE
+%    eta = estimaterecovery(node,elem,u);            % recovery type
+    eta = estimateresidual(node,elem,u,pde);    % residual type
+    % Record error and number of vertices
+    uI = pde.exactu(node);
+    uIuhErr(k) = sqrt((uI-u)'*eqn.A*(uI-u));
+    errH1(k) = getH1error(node,elem,@pde.Du,Du);
+    N(k) = size(node,1);
+    if (N(k)>maxN), break; end        
+    % Step 3: MARK
+    markedElem = mark(elem,eta,theta);
+    % Step 4: REFINE
+    [node,elem,bdFlag] = bisect(node,elem,markedElem,bdFlag);
+end
+
+%%  Plot convergent rates in energy norm
+N = N(1:k); 
+uIuhErr = uIuhErr(1:k);
+errH1 = errH1(1:k);
+figure(2)
+showrate2(N,uIuhErr,10,'-*','||Du_I-Du_h||',...
+          N,errH1,10,'k-.','||Du-Du_h||');
+##### SOURCE END #####
+--></body></html>

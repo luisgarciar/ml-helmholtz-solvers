@@ -7,8 +7,7 @@ function pde = helmholtz2Dconstantwndata(k,factoreps,poweps)
 % the Helmholtz/shifted Laplace problem
 %   
 %  -div(grad u)-(k^2 + i*eps)u = 0 in Omega= (0,1)x(0,1)
-%  grad(u) dot n - i*ku = g in bd(Omega) 
-%
+%         grad(u) dot n - i*ku = g in bd(Omega) 
 %
 %  Usage:  
 %  Input: wavenumber k, factoreps, poweps 

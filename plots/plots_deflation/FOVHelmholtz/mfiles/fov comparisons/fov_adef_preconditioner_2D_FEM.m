@@ -117,7 +117,6 @@ for i=1:length(kk)
     opts.issym = 1;
     %opts.v0 = vmaxA;
     
-    
     fprintf('beginning computation of max eigvalue of H for k = %d  \n', k);
     tic
     %[vmaxH, eigmaxH] =  eigs(H,N,1,'LR',opts);
@@ -171,15 +170,15 @@ for i=1:length(kk)
     %APH =    @(x)  sqrtM*(AepsHinv(sqrtM*x)- Z*AcHinv(Z'*A'*AepsHinv(sqrtM*x)));
     
     %FOV in the Euclidean inner product
-    %AP  =  @(x)  M*Aepsinv(x-feval(P,x));
-    %APH =  @(x)  AepsHinv(M*x)- feval(PH,AepsHinv(M*x));
+    AP  =  @(x)  M*Aepsinv(x-feval(P,x));
+    APH =  @(x)  AepsHinv(M*x)- feval(PH,AepsHinv(M*x));
     
     Q  = @(x) Z*(Acinv(Z'*x));
     QH = @(x) Z*AcHinv(Z'*x);
     
     %Modified FOV in the Euclidean inner product 
-    AP  =    @(x)  A*(Aepsinv(x-P(x))) + Q(x);  
-    APH =    @(x)  AepsHinv(A'*x) - PH(AepsHinv(A'*x)) + QH(x);
+    %AP  =    @(x)  A*(Aepsinv(x-P(x))) + Q(x);  
+    %APH =    @(x)  AepsHinv(A'*x) - PH(AepsHinv(A'*x)) + QH(x);
    
     
     fprintf('beginning computation of fov for k=%d \n', k);
