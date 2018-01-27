@@ -10,7 +10,7 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup list of wavenumbers and shifts
 dim = 1;
 poweps    = 2;
-factoreps    = [1 2 10];
+factoreps = [1 2 10];
 %Wavenumber
 kk      = [20 40 60 80 100 150 200];
 %kk = 200;
@@ -103,13 +103,14 @@ end %end of wavenum loop
 figure(2)
 
 %plot iteration counts 
-%preconditioned problem 
+%preconditioned problem
 plot(kk, iter_adef(:,1),'*','Color',color(1,:),'Markersize',10);
 hold on
 if strcmp(plot_csl_defcsl, 'yes')
     plot(kk, iter_csl(:,1),'Color',color(1,:),...
     'linestyle','-','Linewidth',3);
 end
+
 %preconditioned problem
 for j=2:length(factoreps)
 plot(kk, iter_adef(:,j),'*','Color',color(j,:));
@@ -130,9 +131,12 @@ hold off
 ylabel('Number of GMRES iterations','fontsize',25)
 xlabel('Wavenumber','fontsize',25)
 %legend('No Prec.', ... 
-legend('\epsilon=k^2', ...
-       '\epsilon=2k^2',...
-       '\epsilon=10k^2',... 
+legend('eps=k^2, ADEF', ...
+       'eps=k^2, CSL',...
+       'eps=2k^2, ADEF', ...
+       'eps=2k^2, CSL',...
+       'eps=10k^2, ADEF', ...
+       'eps=10k^2, CSL',...
        'Location','NorthEast')
 %title(['1D Helmholtz with CSL-preconditioner and poly. accel., deg=',...
 %num2str(deg)])

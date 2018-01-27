@@ -5,10 +5,10 @@
 % preconditoned with the shifted Laplacian (SL)
 % and the deflated SL
 %
-% We compare iteration numbers for solving
-% A inv(Aeps)x = b
+% We compare iteration numbers for solving with GMRES
+% AAeps^{-1}x = b and
 % ABx=b, where B is the deflated shifted Laplacian
-% with gmres,
+% 
 %
 %% Construction of the matrices
 close all
@@ -22,7 +22,7 @@ poweps    = 2;
 factoreps = [0.5 1];
 
 %Wavenumber
-kk      = [10];
+kk      = [10 20 40 60];
 %kk = 10;
 
 bc = 'som';
@@ -43,9 +43,9 @@ pollution = 'no';
 iter_adef = zeros(length(kk),length(factoreps));
 iter_csl  = zeros(length(kk),length(factoreps));
 
-%% Plot of FOV of Shifted Laplace problems
+%% Comparison of GMRES with Shifted Laplace and deflated SL problems
 for i=1:length(kk)
-    k   = kk(i);
+    k   = kk(i);  
     for j=1:length(factoreps)
         eps = factoreps(j)*k^poweps;
         
@@ -74,7 +74,6 @@ for i=1:length(kk)
         bdFlag = setboundary(node,elem,'ABC');
         bdFlag1 = setboundary(node1,elem1,'ABC');
 
-        
         %The structures pde(helm,SL) contain data for the Helmholtz and
         %shifted Laplace problems
         pdehelm = helmholtz2Dconstantwndata(k,0,1);
@@ -87,8 +86,7 @@ for i=1:length(kk)
         [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
         [eqncoarse,~] = helmholtz2Dfem(node1,elem1,pdehelm,bdFlag1,bdEdge1);
     
-    
-
+  
         %Helmholtz and shifted Laplace matrices
         A    = eqn1.A;
         Aeps = eqn2.A;
@@ -98,7 +96,7 @@ for i=1:length(kk)
         fprintf('finished computation of fem matrices  for k=%d  \n', k);
         fprintf('size of fem matrices for k=%d: %d \n', k, length(eqn1.A));
         
-      
+  
         option.twolevel = true;
         numlev = 2;
         [mg_mat,~,R,~] = mg_setupfem_2D(npc,numlev,pdehelm,option);

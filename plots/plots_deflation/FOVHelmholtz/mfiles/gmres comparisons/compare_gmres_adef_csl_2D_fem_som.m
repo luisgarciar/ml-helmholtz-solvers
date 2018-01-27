@@ -15,12 +15,12 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 
 % Setup parameters
 % Setup list of wavenumbers and shifts
-dim = 2;
+dim       = 2;
 poweps    = 2;
 factoreps = [1 2 10];
 
 %Wavenumber
-kk      = [20 40 60 80];
+kk  = [20 40 60 80];
 %kk = 200;
 
 bc = 'som';
@@ -157,7 +157,7 @@ if ( save_flag == 1 )
                 ['xlabel style={font=\LARGE},', ...
                  'ylabel style={font=\LARGE},']);
     
-    %Save the plot as .eps
+   %Save the plot as .eps
    % plot_iter_eps = strcat('comp_iter_vs_k_eps_1D_som.eps');
    % plot_file_eps = fullfile(path,plot_iter_eps);
    % print('-depsc2',plot_file_eps)
