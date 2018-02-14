@@ -81,15 +81,16 @@ for i=1:length(kk)
         
         option.tol = 1e-8;
         fprintf('beginning computation of fem matrices for k=%d  \n', k);
+        
         tic
-        [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
-        [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
+        [eqn1,~]      = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
+        [eqn2,~]      = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
         [eqncoarse,~] = helmholtz2Dfem(node1,elem1,pdehelm,bdFlag1,bdEdge1);
     
   
         %Helmholtz and shifted Laplace matrices
-        A    = eqn1.A;
-        Aeps = eqn2.A;
+        A       = eqn1.A;
+        Aeps    = eqn2.A;
         Acoarse = eqncoarse.A; 
         
         
