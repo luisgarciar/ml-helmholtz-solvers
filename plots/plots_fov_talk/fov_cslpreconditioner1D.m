@@ -5,26 +5,22 @@
 clear all
 close all
 
-dim = 2;
+dim       = 1;
 poweps    = 2;
 factoreps = 1;
-bc = 'som';
+bc        = 'som';
 
 %Wavenumber
-%kk = 200;
-kk = 10;
-%kk      = [20 50 100 150];
+kk = 100;
+%kk     = [20 40 60 80 100];
 iter_SL = zeros(length(kk),2);
 
-%Colors for plots
-hexcolor   = ['#332288'; '#88CCEE'; '#44AA99'; '#117733'; '#999933'; ...
-    '#DDCC77'; '#CC6677'; '#882255'; '#AA4499'];
-rgbcolor1  = hex2rgb(hexcolor);
-%rgbcolor2 = linspecer(9);
-
 minfov  = zeros(length(kk),1);
-linetyp = {'-','.','--','-'};
-color   = {'m','b','g','k'};
+%Line colors and types for plots
+linetyp = {'-','-.',':','--','-'};
+color   = {'r','b','g','k'};
+color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0];
+
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
 %str2={'k','k.-','k--','b*-'};
@@ -35,7 +31,7 @@ ppw = 0.5;
 
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
 pollution = 'no';
-fvpts = 50;
+fvpts = 60;
 
 %gmres parameters
 restart = [];
@@ -55,71 +51,29 @@ for i=1:length(kk)
         npf = ceil(k^(3/2));
     end
     
-    if (mod(npf,2)==0)  %set an odd number of interior points in 1D
+    if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
         npf = npf+1;
     end
-    npc = (npf-1)/2;
     
-    H = 1/(npc+1);
-                              
-    [node,elem] = squaremesh([0,1,0,1],H);  %coarse mesh
-    [node,elem] = uniformrefine(node,elem); %fine mesh (uniformly refined)
+    npc  = (npf-1)/2;
+    A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
+    Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
+    M    = mass(npf,bc);
     
-    %Find boundary nodes
-    [bdNode,bdEdge,isBdNode] = findboundary(elem);
-    
-    %Sets Sommerfeld boundary conditions on all boundary edges
-    bdFlag = setboundary(node,elem,'ABC');
-    
-    %The structures pde(helm,SL) contain data for the Helmholtz and
-    %shifted Laplace problems
-    pdehelm = helmholtz2Dconstantwndata(k,0,1);
-    pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
-    
-    option.tol = 1e-12;
-    fprintf('beginning computation of fem matrices for k=%d  \n', k);
-    tic
-    [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
-    [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
-    time_fem = toc;
-
-    fprintf('finished computation of fem matrices  for k=%d  \n', k);
-    fprintf('time fem: %f  \n', time_fem);
-    fprintf('size of fem matrices for k=%d: %d \n', k, length(eqn1.A));
-    
-    %Helmholtz and shifted Laplace matrices
-    A    = eqn1.A;
-    Aeps = eqn2.A;
-    
-    %We compute FOV(MAepsinv), since FOV(AAepsinv) = 1+ FOV(MAepsinv)
-    %fprintf('press any key to continue \n');
-    %pause;
-    tic
-    fprintf('beginning computation of lu of Aeps for k=%d  \n', k);
     [L,U] = lu(Aeps);
-    time_lu = toc;
-    fprintf('lu factorization for k=%d finished \n', k);
-    fprintf('time lu: %f  \n', time_lu);
-
     LH = U'; UH = L';
     N  = length(A);
     
     %Let C = MAepsinv
-    M = eqn1.M;
     C    = @(x) M*(U\(L\x));
     CH   = @(x) UH\(LH\(M*x));
     HerC = @(x) 0.5*(feval(C,x) + feval(CH,x)); %Hermitian part of C
     
-    %Compute first the maximum eigenvalue of A
-%   [eigvecA, eigvalA] =  eig(full(A));
-%   [eigvalmaxA,ind] = max(diag(eigvalA));
-%   vmaxA = eigvecA(:,ind);
-         
-    %Compute the maximum eigenvalue of the Hermitian part of A
+    
     opts.isreal = 0;
-    opts.p      = 30;
+    opts.p      = 60;
     opts.issym  = true;
-    opts.tol    = 1e-6;  
+    opts.tol    = 1e-10;
     opts.v0     = rand(N,1);
     fprintf('beginning computation of max eigvalue of H(C) for k = %d  \n', k);
     tic
@@ -128,36 +82,54 @@ for i=1:length(kk)
     fprintf('computation of max eigenvalue of H(C) for k=%d finished \n', k);
     fprintf('time maxeigv: %f  \n', time_maxeigv);
     
-    %Use the maximum eigenvalue of the Hermitian part of A
+    
+    %Use the maximum eigenvalue of the Hermitian part of C
     %to initiate computation of fovC
     fprintf('beginning computation of fov for k=%d \n', k);
     tic
-    [fovC,~,~] = sfov(C,CH,vmaxHerC,N,50);
+    [fovC,~,~] = sfov(C,CH,vmaxHerC,N,60);
     time_fov = toc;
     fprintf('time fov: %f  \n', time_fov);
     
     fovAhat = 1+1i*eps*fovC;
     reFOV  = real(fovAhat); imFOV = imag(fovAhat);
+    cvh    = convhull(reFOV,imFOV);
     
-    cvh = convhull(reFOV,imFOV);
+    
+
     
     %plotting the fov
-    label       = strcat('k = ',num2str(k));
-    fovplot(i)  = plot(reFOV(cvh),imFOV(cvh),'Color',rgbcolor1(i,:),...
-        'LineWidth',3,'DisplayName',label);
+    label       = strcat('$k = ',num2str(k),'$');
+    fovplot(i)  = plot(reFOV,imFOV,'Color',color1(i,:),...
+        'LineWidth',2.5,'linestyle',linetyp{i},...
+        'DisplayName',label);
+    
+    % fovplot(i)  = plot(reFOV(cvh),imFOV(cvh),'Color',color1(i,:),...
+    %                'LineWidth',2,...
+    %               'DisplayName',label);
+    
     hold on
+    
     plot(0,0,'k*','Markersize',10,'LineWidth',2);
+    plot(1,0,'b*','Markersize',10,'LineWidth',2);
     axis equal
     axis([-0.2 1.2 -0.7 0.7]);
-    xlabel('Re(z)','FontSize',18);
-    ylabel('Im(z)','FontSize',18);
-    set(gca,'Xtick',[0 0.5 1],'FontSize',18);
-    set(gca,'Ytick',[-0.5 0 0.5 1],'FontSize',18);
+    xlabel('Re(z)','FontSize',30,'Interpreter','latex');
+    ylabel('Im(z)','FontSize',30,'Interpreter','latex');
+    h=gca;
+    % [hx,hy] = format_ticks(gca,{'$0$','$0.5$','$1$'},...
+    %                      {'$-0.5$','$0$','$0.5$'},...
+    %                        [0 0.5 1],[-0.5 0 0.5]);
+    %
+    
+    set(gca,'Xtick',[0 0.5 1],'FontSize',30);
+    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',30);
+    %set(gca,'TickLabelInterpreter', 'tex');
+    
     
 end
-
-
-legend(fovplot);
+L=legend(fovplot);
+set(L,'Interpreter','latex','FontSize',40);
 
 %Filename format:
 %1d_fov_csl_kmin_kmax_pointswavelength_realshift_imagshift.tex
@@ -171,10 +143,10 @@ factorshift = num2str(10*factoreps);
 
 %Tikz Axis formatting
 x = xlabel('$\mathrm{Re}(z)$');
-% x-axis label
-set(x,'Interpreter','latex')
-y=ylabel('$\mathrm{Im}(z)$','interpreter','latex'); % x-axis label
-set(y,'Interpreter','latex')
+%x-axis label
+set(x,'Interpreter','latex','fontsize',30)
+y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',30); % x-axis label
+set(y,'Interpreter','latex','fontsize',30)
 figure(1)
 name1 = strcat('1d_fov_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
     '_pshift_',powershift,'_fshift_',factorshift,'.tex');
@@ -183,7 +155,14 @@ if strcmp(pollution,'no')
     name1 = strcat('1d_fov_csl_kmin',kmin,'_kmax',kmax,'nopoll',pts, ...
         '_pshift_',powershift,'_fshift_',factorshift,'.tex');
 end
-matlab2tikz('filename',name1,'standalone',true); %save .tex file of tikz figure%
+
+%save .tex file of tikz figure%
+matlab2tikz('filename',name1,'standalone',true,...
+    'interpretTickLabelsAsTex',true,...
+    'extraaxisoptions',['xlabel style={font=\LARGE},'...
+    'ylabel style={font=\LARGE},',...
+    'legend style={font=\LARGE},',...
+    'ticklabel style={font=\HUGE}']);
 %close all;
 
 

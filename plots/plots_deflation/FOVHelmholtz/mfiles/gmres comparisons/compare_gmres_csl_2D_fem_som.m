@@ -2,17 +2,19 @@
 % We compare timing and the iteration numbers for solving
 %    A M^{-1}x = b
 % with gmres, for different implementations of A*M^{-1}*x:
-%  - no prec, M=I
 %  - eps = k
 %  - eps = k^2
-%
+
 clear all;
 save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 
 % Setup parameters
 % Setup list of wavenumbers and shifts
-wavenum   = 20:20:100 ;
-poweps    = [1 1.5 2];
+wavenum = [10 20 40 60];
+poweps = 1;
+
+%wavenum = 20;
+%poweps  = [1 1.5 2];
 
 %wavenum = 50; %% run this when testing changes in the code
 %number of interior points in coarsest grid in one dim
@@ -54,12 +56,12 @@ for kk = 1:length(wavenum)
         end
         npc = (npf-1)/2;
         
-       
         %2D
         dim  = 2;
         A    = helmholtz2(k,0,npf,npf,bc);
         Aeps = helmholtz2(k,eps,npf,npf,bc);
         op_type = 'gal';
+        numlev = 2;
         [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
         
         b  = ones(length(A),1);

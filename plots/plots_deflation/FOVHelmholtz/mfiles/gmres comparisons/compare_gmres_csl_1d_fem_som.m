@@ -11,8 +11,12 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 
 % Setup parameters
 % Setup list of wavenumbers and shifts
-wavenum   = 20:20:100 ;
-poweps    = [1 1.5 2];
+%wavenum   = 20:20:100 ;
+%poweps    = [1 1.5 2];
+
+wavenum   = 20:10:200;
+poweps    = 1.5;
+
 
 %wavenum = 50; %% run this when testing changes in the code
 %number of interior points in coarsest grid in one dim
@@ -58,13 +62,7 @@ for kk = 1:length(wavenum)
         A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
         Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
         
-        %2D
-        %dim  = 2;
-        %A    = helmholtz2(k,0,npf,npf,bc);
-        %Aeps = helmholtz2(k,eps,npf,npf,bc);
-        %op_type = 'gal';
-        %[mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
-        
+          
         b  = ones(length(A),1);
         x0 = zeros(size(b));
                 
@@ -100,22 +98,34 @@ plot(wavenum, iter_num(:,j), 'Color',color(j,:),...
 end
 
 %set(gca,'Xtick',[0 0.5 1],'FontSize',30);
-%set(gca,'Ytick',[-0.5 0 0.5],'FontSize',30);
-
+%set(gca,'Ytick',[0 2 4 6 8 10],'FontSize',30);
 
 hold off
 ylabel('Number of GMRES iterations','fontsize',25)
 xlabel('Wavenumber','fontsize',25)
 %legend('No Prec.', ... 
-legend('\epsilon=k', ...
-     '\epsilon=k^{3/2}',...
-     '\epsilon=k^2',... 
-     'Location','NorthEast')
+%leg1 = legend('$\varepsilon=k^2$', ...
+%     '$\varepsilon=k^{3/2}$',...
+%     '$\varepsilon=k^2$',... 
+%     'Location','NorthWest');
+
+ 
+leg1 = legend('$\varepsilon=k^{1.5}$','Location','NorthWest');
+
+set(leg1,'Interpreter','latex');
+set(leg1,'FontSize',30); 
+ 
+
+
+
+
 %title(['1D Helmholtz with CSL-preconditioner and poly. accel., deg=',...
 %num2str(deg)])
-FS = 25; % font size
+FS = 30; % font size
 set(gca,'LooseInset',get(gca,'TightInset'))
 set(gca,'FontSize',FS)
+
+
 
 plot_iter_tex = strcat('comp_iter_vs_k_eps_1D_som.tex');
 

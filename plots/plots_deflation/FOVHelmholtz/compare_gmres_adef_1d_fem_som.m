@@ -56,7 +56,6 @@ for i=1:length(kk)
         A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
         Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
         
-        
         %% Sparse FOV of Deflated shifted Laplacian
         R  = fwrestrictionfem(npf,dim,bc);
         Z  = R';             %Prolongation. Deflation subspace: columns of Z

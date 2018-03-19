@@ -23,7 +23,7 @@ function [M] = mass(np,bc)
 %      bc: 'mix' or 'som'
 %
 % Output:
-%   M: mass matrix
+%   M = mass matrix
 %   size(M) = (np+2,np+2) if bc = 'som'  
 %   size(M) = (np+1,np+1) if bc = 'mix' 
 %

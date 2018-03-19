@@ -33,14 +33,14 @@ H        = @(x) 0.5*(feval(Ahat,x) + feval(AhatH,x)); %Hermitian part of Ahat
 %Compute first the maximum eigenvalue of A (sparsely)
 %opts.p      = 30;
 opts.p      = 60;
-opts.tol    = 1e-4;
+opts.tol    = 1e-8;
 opts.isreal = 0;
 [vmaxA,~]   = eigs(A,1,'lr',opts);
 
 
 %Compute now the maximum eigenvalue of the Hermitian part of A
 opts.p      = 30;
-opts.tol    = 1e-6;
+opts.tol    = 1e-10;
 opts.isreal = 0;
 opts.v0     = vmaxA;
 [vmaxH,~]   = eigs(H,N,1,'LM',opts);

@@ -1,5 +1,5 @@
 
-%% Solution of 2D Helmholtz equation for k=20 and point source
+%% Solution of 2D Helmholtz equation for k=40 and point source
 
 %% Construction of the matrices
 clear all
@@ -9,9 +9,12 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup parameters
 % Setup list of wavenumbers and shifts
 
+k   =  40; %Wavenumber
+factoreps = 1;
+poweps = 1;
 
-k  = 60; %Wavenumber
-bc = 'som'; % boundary conditions
+
+bc  = 'som'; % boundary conditions
 npf = ceil(k^(3/2)); %number of gridpoints (no pollution)
 
 if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
@@ -24,7 +27,7 @@ h = 1/(npf+1);
 [bdNode,bdEdge,isBdNode] = findboundary(elem);
 
 bdFlag = setboundary(node,elem,'ABC');
-pdehelm = helmholtz2Dconstantwndata(k,0,1);
+pdehelm = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
 option.tol = 1e-8;
 [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);

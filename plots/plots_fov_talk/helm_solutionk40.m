@@ -1,5 +1,5 @@
 
-%% Solution of 2D Helmholtz equation for k=20 and point source
+%% Solution of 2D Helmholtz equation for k=40 and point source
 
 %% Construction of the matrices
 clear all
@@ -9,9 +9,8 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup parameters
 % Setup list of wavenumbers and shifts
 
-
-k  = 60; %Wavenumber
-bc = 'som'; % boundary conditions
+k   =  40; %Wavenumber
+bc  = 'som'; % boundary conditions
 npf = ceil(k^(3/2)); %number of gridpoints (no pollution)
 
 if (mod(npf+1,2)==1)  %set an even number of interior points in 1D

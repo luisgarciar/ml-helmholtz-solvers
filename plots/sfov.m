@@ -43,13 +43,13 @@ for j=1:k
      fprintf('\n step %d of %d in fov computation %d \n\n',j,k);
 
      %opts.issym  = true;
-     opts.tol    = 1e-20;  
+     opts.tol    = 1e-6;  
      opts.isreal = 0;
      opts.disp   = 0;
      opts.v0     = vinit;
      opts.maxit  = 50;
-     opts.p      = min(N,20);
-     [vmaxHt,~,flag1] = mpeigs(Ht,N,1,'LM',opts);
+     opts.p      = min(N,80);
+     [vmaxHt,~,flag1] = eigs(Ht,N,1,'LR',opts);
      
      %fprintf('convergence flag step %d: %d  \n', j, flag);
      

@@ -10,7 +10,7 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup list of wavenumbers and shifts
 
 
-k  = 60; %Wavenumber
+k  = 40; %Wavenumber
 bc = 'som'; % boundary conditions
 npf = ceil(k^(3/2)); %number of gridpoints (no pollution)
 

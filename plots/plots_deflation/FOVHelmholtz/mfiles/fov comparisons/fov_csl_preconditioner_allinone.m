@@ -6,7 +6,7 @@ clear all
 close all
 
 dim       = 1;
-poweps    = 2;
+poweps    = 1.5;
 factoreps = 1;
 bc        = 'som';
 
@@ -15,15 +15,13 @@ bc        = 'som';
 kk      = [20 40 60 80 100];
 iter_SL = zeros(length(kk),2);
 
-
-
 minfov  = zeros(length(kk),1);
 %Line colors and types for plots
-linetyp = {'-','-.',':','--','-'};
+linetyp  = {'-','-.',':','--','-'};
+linetyp2 = {'-','-','-','-','-'};
+
 color   = {'r','b','g','k'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0];
-
-
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
 %str2={'k','k.-','k--','b*-'};
@@ -40,7 +38,6 @@ fvpts = 60;
 restart = [];
 tol     = 1e-8;
 maxit   = 100;
-
 
 %% Plot of FOV of Shifted Laplace problems
 for i=1:length(kk)    
@@ -59,18 +56,17 @@ for i=1:length(kk)
     end
     npc = (npf-1)/2;
     
-    A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
-    Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
+    A    = helmholtzfem(k,npf,0,bc);             %Helmholtz matrix
+    Aeps = helmholtzfem(k,npf,eps,bc);           %Shifted Laplace matrix
     
    [fovAhat,minfov(i)] = slapfov(A,Aeps,fvpts);   %field of values (complex valued vector)  
    reFOV  = real(fovAhat); imFOV = imag(fovAhat);
    cvh    = convhull(reFOV,imFOV);
    
-   
    %plotting the fov
    label       = strcat('$k = ',num2str(k),'$');
    fovplot(i)  = plot(reFOV(cvh),imFOV(cvh),'Color',color1(i,:),...
-                   'LineWidth',2.5,'linestyle',linetyp{i},...
+                   'LineWidth',2.5,'linestyle',linetyp2{i},...
                   'DisplayName',label);
                 
    % fovplot(i)  = plot(reFOV(cvh),imFOV(cvh),'Color',color1(i,:),...
@@ -83,8 +79,8 @@ for i=1:length(kk)
    plot(1,0,'b*','Markersize',10,'LineWidth',2);
    axis equal
    axis([-0.2 1.2 -0.7 0.7]);
-   xlabel('Re(z)','FontSize',30,'Interpreter','latex');
-   ylabel('Im(z)','FontSize',30,'Interpreter','latex');
+   xlabel('Re(z)','FontSize',10,'Interpreter','latex');
+   ylabel('Im(z)','FontSize',10,'Interpreter','latex');
    h=gca;
   % [hx,hy] = format_ticks(gca,{'$0$','$0.5$','$1$'},...
    %                      {'$-0.5$','$0$','$0.5$'},...
@@ -109,7 +105,6 @@ pts   = num2str(ppw);
 powershift  = num2str(poweps);
 factorshift = num2str(10*factoreps);
 
-
 %Tikz Axis formatting
  x = xlabel('$\mathrm{Re}(z)$');
  %x-axis label
@@ -121,7 +116,7 @@ name1 = strcat('1d_fov_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
         
 if strcmp(pollution,'no')
-name1 = strcat('1d_fov_csl_kmin',kmin,'_kmax',kmax,'nopoll',pts, ...
+name1 = strcat('1d_fov_csl_kmin',kmin,'_kmax',kmax,'nopoll', ...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
 end
 
@@ -133,8 +128,6 @@ matlab2tikz('filename',name1,'standalone',true,...
                        'legend style={font=\LARGE},',...
                        'ticklabel style={font=\HUGE}']);
 %close all;
-
-
 if(strcmp(plot_gmres,'yes'))
     
     for i=1:length(kk)
@@ -158,8 +151,7 @@ if(strcmp(plot_gmres,'yes'))
         
         [L, U] = lu(Aeps);
         Ahat   = @(x) A*(U\(L\x));
-        [~,~,~,iter_SL(i,:),resvec] = gmres(Ahat,b,restart,tol,maxit);
-        
+        [~,~,~,iter_SL(i,:),resvec] = gmres(Ahat,b,restart,tol,maxit);       
     end
     
     close all

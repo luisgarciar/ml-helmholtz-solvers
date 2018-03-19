@@ -51,7 +51,6 @@ for i=1:length(kk)
     A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
     Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
     
-    
     %dim  = 2;
     %A    = helmholtz2(k,0,npf,npf,bc);
     %Aeps = helmholtz2(k,eps,npf,npf,bc);
@@ -178,7 +177,7 @@ for i=1:length(kk)
         
         wn     = num2str(k);  pts = num2str(ppw);
         powershift  = num2str(poweps);
-        factorshift = num2str(10*factoreps);
+        factorshift = num2str(factoreps);
         
         %Filename format:
         %wavenumber_pointswavelength_realshift_imagshift.tex

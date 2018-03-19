@@ -1,5 +1,4 @@
-
-%% Solution of 2D Helmholtz equation for k=20 and point source
+%% FOV plot of Helmholtz Matrix
 
 %% Construction of the matrices
 clear all
@@ -10,7 +9,7 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup list of wavenumbers and shifts
 
 
-k  = 60; %Wavenumber
+k  = 10; %Wavenumber
 bc = 'som'; % boundary conditions
 npf = ceil(k^(3/2)); %number of gridpoints (no pollution)
 
@@ -38,7 +37,11 @@ box off
 set(findobj(gcf, 'type','axes'), 'Visible','off')
 %matlab2tikz('helmholtzk20.tex','standalone', true);
 
+fvA = fv(full(A),1,64);
+eigvA = eig(full(A));
 
-
-
+plot(real(fvA),imag(fvA),'b');
+hold on
+%plot(real(eigvA),imag(eigvA),'k+');
+axis equal
 

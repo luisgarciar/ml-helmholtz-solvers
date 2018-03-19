@@ -15,12 +15,12 @@ save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 
 % Setup parameters
 % Setup list of wavenumbers and shifts
-dim = 1;
+dim       = 1;
 poweps    = 2;
-factoreps    = [1 2 10];
+factoreps = [1 2 10];
 
 %Wavenumber
-kk      = [20 40 60 80 100 150 200];
+kk      = [20 40 80 160 320 640];
 %kk = 200;
 
 bc = 'som';
