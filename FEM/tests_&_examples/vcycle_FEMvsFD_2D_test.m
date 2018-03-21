@@ -2,7 +2,7 @@
 clear global; 
 
 %Parameters of Helmholtz equation and shifted Laplacian
-k          = 100;
+k          = 80;
 factoreps  = 1;
 poweps     = 2;
 eps        = factoreps*k^poweps;   %Imaginary part of shift (for shifted Laplacian)
@@ -24,7 +24,7 @@ pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 Afem = mg_mat_fem{1};
 
 % Parameters of V-cycle and smoother
- npre = 1; npos = 1; w  = 0.7; numit = 20; smo = 'wjac';
+ npre = 2; npos = 2; w  = 0.5; numit = 30; smo = 'wjac';
  u_ex     = randn(length(Afem),1);
  f        = Afem*u_ex;
  u0       = sparse(length(Afem),1);
@@ -71,6 +71,7 @@ x0     = rand(length(A_fd),1);
  profile off
 
  relres_fd
+ relres_fem
  
   
   

@@ -36,8 +36,6 @@ function [mg_mat,mg_split,restrict,interp] = mg_setupfem_2D(npcc,numlev,pde,opti
 %  If option.twolevel = 'true', interp is a matrix of size according to 
 %  finest and coarsest grids, and interp = restrict'
 %
-%
-%
 %  Author:      Luis Garcia Ramos, 
 %               Institut fur Mathematik, TU Berlin
 %               Version 1.0 Sep 2017
