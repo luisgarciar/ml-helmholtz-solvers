@@ -1,6 +1,6 @@
 function Z = lininterpol(npc,dim,bc)
 %% LININTERPOL Constructs the matrix corresponding to the (bi)linear 
-%interpolation operator from a coarse grid with npc interior points.
+%  interpolation operator from a coarse grid with npc interior points.
 %  
 %   Use:    Z = lininterpol_som(npc,dim,bc)  
 %
@@ -65,6 +65,25 @@ switch dim
                 Z   = kron(Z,Z);  %2D operator 
                 
             case 'som'               
+               %modify this lines later to add option for
+               %diff. number of points on x and y
+               npcix  = npc; npciy = npc;
+               npccx = npcix+2; npccy= npciy+2;
+               npffx = 2*npccx-1; npffy = 2*npccy-1; 
+               
+               u = 0.5*ones(npccx,1);
+               odd = (1:2:npffx);  %indices of coarse grid points
+               even= (2:2:npffx-1);
+               
+               %interpolation in 1D
+               Zx  = sparse(npffx,npccx); 
+               Z1 = spdiags([u u],[1 0],npccx-1,npccx);
+               Zx(odd,:) = speye(npccx); %coarse grid points
+               Zx(even,:) = Z1;
+                             
+               Z = kron(Zx,Zx); %2D Operator
+               
+               case 'som1'               
                %modify this lines later to add option for
                %diff. number of points on x and y
                npcix  = npc; npciy = npc;
