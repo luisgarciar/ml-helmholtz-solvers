@@ -75,8 +75,8 @@ assert(length(Ai)==numlev, 'error: incorrect number of levels');
 
 mg_mat = flip(Ai);
 
-restrict = flip(Res); restrict  = restrict(1:numlev-1);
-interp  = flip(Pro);  interp = interp(2:numlev);
+restrict = flip(Res);  restrict  = restrict(1:numlev-1);
+interp   = flip(Pro);  interp    = interp(2:numlev);
 
 mg_split = cell(numlev,1);    
 
@@ -85,7 +85,7 @@ for i=1:numlev
     %matrix splitting of mg_mat{i}
     mg_split{i}.U = sparse(triu(mg_mat{i},1));  
     mg_split{i}.L = sparse(tril(mg_mat{i},-1));
-    %mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
+    mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
     mg_split{i}.P = speye(length(mg_mat{i}));
 
 end

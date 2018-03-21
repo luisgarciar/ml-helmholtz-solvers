@@ -13,8 +13,10 @@ bc         = 'som';
 
 %Number of points according to discretization rules
 [~,numlev] = fd_npc_to_npf(npcc,k,ppw);  %number of points in finest grid (1D)
-pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
+
+
+pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
 %%   Test of V-cycle on shifted Laplace problem
 %We test the multigrid solver on the shifted Laplace problem

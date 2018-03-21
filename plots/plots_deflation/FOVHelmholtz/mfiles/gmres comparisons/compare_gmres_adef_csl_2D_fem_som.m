@@ -93,9 +93,8 @@ for i=1:length(kk)
         fprintf('size of fem matrices for k=%d: %d \n', k, length(eqn1.A));
         
         %Helmholtz and shifted Laplace matrices
-        A    = eqn1.A;
-        Aeps = eqn2.A;
-        
+        A     = eqn1.A;
+        Aeps  = eqn2.A;
         [L,U] = lu(Aeps);
         
         %Set up two-level structure
