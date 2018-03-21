@@ -22,7 +22,8 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 %
 %  bc:        Type of boundary conditions:      
 %             'dir' for homogeneous dirichlet bc's
-%             'som' for sommerfeld bc's 
+%             'som' for sommerfeld bc's
+%             'som1' for sommerfeld bc's with 1st order discretization  
 %
 %  dim:        Dimension (1 or 2)
 %

@@ -161,6 +161,9 @@ switch bc
         NE = sparse(ind,ind+1,Ne,np,np);
         N  = NC+NW+NS+NE;
         A(ind,:)=N(ind,:);
+        
+    case 'som1'
+       A = helmholtz2_ord1(k,eps,npx,npy,'som');
          
     otherwise
         error('invalid boundary conditions')

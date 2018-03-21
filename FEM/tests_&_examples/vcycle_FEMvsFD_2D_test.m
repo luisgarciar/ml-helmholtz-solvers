@@ -2,19 +2,17 @@
 clear global; 
 
 %Parameters of Helmholtz equation and shifted Laplacian
-k          = 50;
-factoreps  = 10;
+k          = 80;
+factoreps  = 0.5;
 poweps     = 2;
 eps        = factoreps*k^poweps;   %Imaginary part of shift (for shifted Laplacian)
-ppw        = 15;                   %number of points per wavelength (fine grid)
-npcc       = 10;                    %number of points in the coarsest grid
+ppw        = 0.5;                  %number of points per wavelength (fine grid)
+npcc       = 4;                    %number of points in the coarsest grid
 op_type    = 'gal';
 bc         = 'som';
 
 %Number of points according to discretization rules
 [~,numlev] = fd_npc_to_npf(npcc,k,ppw);  %number of points in finest grid (1D)
-
-
 
 pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
@@ -22,24 +20,34 @@ pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 %We test the multigrid solver on the shifted Laplace problem
  
 %Matrix hierarchy and right hand side 
-[mg_mat,mg_split,restr,interp]= mg_setupfem_2D(npcc,numlev,pdeSL);
-A = mg_mat{1};
+[mg_mat_fem,mg_split_fem,restr_fem,interp_fem]= mg_setupfem_2D(npcc,numlev,pdeSL);
+Afem = mg_mat_fem{1};
 
 % Parameters of V-cycle and smoother
- npre = 1; npos = 1; w  = 2/3; numit = 20; smo = 'wjac';
- u_ex = ones(length(A),1);
- f    = A*u_ex;
- u0   = sparse(length(A),1);
- r0   = norm(f-A*u0);
- res  = zeros(numit,1); 
+ npre = 1; npos = 1; w  = 0.7; numit = 20; smo = 'wjac';
+ u_ex = randn(length(Afem),1);
+ f    = Afem*u_ex;
+ u0   = sparse(length(Afem),1);
+ r0   = norm(f-Afem*u0);
+ res_fem  = zeros(numit,1); res_fem(1)=r0;
  rat  = zeros(numit,1);
  
+ profile on
   for i=1:numit
-      u_sol    = Vcyclefem(mg_mat,mg_split,restr,...
-                           interp,u0,f,npre,npos,w,smo,1);
+      u_sol    = Wcycle(mg_mat_fem,mg_split_fem,restr_fem,...
+                           interp_fem,u0,f,npre,npos,w,smo,1);
       u0       = u_sol;
-      res(i+1) = norm(f-A*u0);
-      rat(i)   = res(i+1)/res(i);
+      res_fem(i+1) = norm(f-Afem*u0);
+      rat(i)   = res_fem(i+1)/res_fem(i);
   end
-  res
-  rat
+  profile off
+  
+  
+  relres = res_fem/res_fem(1);
+  relres
+
+  
+  
+  
+  
+  

@@ -19,8 +19,8 @@ profile on
 
 %%
 %right hand side and initial guess
-A  = mg_mat{1}; ex_sol = ones(length(A),1); 
-b= A*ex_sol;
+A   = mg_mat{1}; ex_sol = ones(length(A),1); 
+b   = A*ex_sol;
 x0  = rand(length(A),1); 
 
 %Parameters of multigrid solver
