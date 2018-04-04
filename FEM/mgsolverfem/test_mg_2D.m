@@ -12,7 +12,6 @@ pdeSL = helmholtz2Dconstantwndata(k,factoreps,poweps);
 
 %option.twolevel = true;
 option.twolevel = false;
-
 [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pdeSL,option);
 
 % [node,elem] = squaremesh([0 1 0 1],h);

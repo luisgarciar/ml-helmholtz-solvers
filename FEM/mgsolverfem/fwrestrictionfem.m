@@ -11,8 +11,8 @@ function R = fwrestrictionfem(npf,dim,bc)
 %       
 %   Output:
 %       R:  restriction matrix
-%           size(R) = ((npf+1)/2,npf+1) if bc = 'mix'
-%                   = ((npf-1)/2 +2,npf+2) if bc = 'som'
+%           size(R) = ((npf+1)/2,npf+1)    if bc = 'mix'
+%                   = ((npf-1)/2+2,npf+2) if bc = 'som'
 %
 %   Author: Luis Garcia Ramos, 
 %           Institut fur Mathematik, TU Berlin

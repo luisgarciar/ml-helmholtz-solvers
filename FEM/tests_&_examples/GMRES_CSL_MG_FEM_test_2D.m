@@ -12,10 +12,9 @@
 
 
 %% Fixed wavenumber k and variable shift eps
-kk   = [10 20 40 60];
+kk   = [10 20 40];
 itercsl = zeros(length(kk),1);
 time_lu = zeros(length(kk),1);
-
 
 poweps    = 2;
 factoreps = 1;
@@ -24,21 +23,14 @@ for i=1:length(kk)
     k = kk(i);
     dim = 2;
     pollution = 'no';
-    npf = ceil(k^(3/2));
-    
-    if (mod(npf+1,2)==0)  %set an odd number of interior points in 1D
-        npf = npf+1;
-    end
-    npc = (npf-1)/2;
-    
-    
-    
-    [~,numlev] = fd_npc_to_npf(npcc,k,ppw);  %number of points in finest grid (1D)
+    ppw = 0.5;
+    [npf,numlev] = fd_npc_to_npf(npcc,k,0.5);  %number of points in finest grid (1D)
 
     
+    %Construction of the linear system and the preconditioner
     bc = 'som';
     %Construct square mesh of meshsize h
-    h = 1/npf;
+    h = 1/(npf+1);
     [node,elem] = squaremesh([0,1,0,1],h);
       
     %Find boundary nodes
@@ -51,13 +43,17 @@ for i=1:length(kk)
     %shifted Laplace problems
     pdehelm = helmholtz2Dconstantwndata(k,0,1);
     pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
-    
+   
     option.tol = 1e-12;
     [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
-    [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
+     A    = eqn1.A;
+
+    [mg_mat_,mg_split,restr,interp]= mg_setupfem_2D(npcc,numlev,pdeSL);
+    Aeps = mg_mat_{1};
+    
+    assert(length(Aeps)==length(A),'Size of matrices does not match');
     
     %Helmholtz and shifted Laplace matrices
-    A    = eqn1.A;
     Aeps = eqn2.A;
     
     %Parameters for GMRES
@@ -78,16 +74,3 @@ for i=1:length(kk)
     itercsl(i) = iter(2);
     
 end
-
-
-
-
-
-
-
-
-
-
-
-
-

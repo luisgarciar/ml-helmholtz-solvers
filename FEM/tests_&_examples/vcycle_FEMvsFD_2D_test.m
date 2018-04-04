@@ -2,7 +2,7 @@
 clear global; 
 
 %Parameters of Helmholtz equation and shifted Laplacian
-k          = 80;
+k          = 120;
 factoreps  = 1;
 poweps     = 2;
 eps        = factoreps*k^poweps;   %Imaginary part of shift (for shifted Laplacian)
@@ -10,6 +10,7 @@ ppw        = 0.5;                  %number of points per wavelength (fine grid)
 npcc       = 4;                    %number of points in the coarsest grid
 op_type    = 'gal';
 bc         = 'som';
+dim = 2;
 
 %Number of points according to discretization rules
 [~,numlev] = fd_npc_to_npf(npcc,k,ppw);  %number of points in finest grid (1D)
@@ -24,7 +25,7 @@ pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 Afem = mg_mat_fem{1};
 
 % Parameters of V-cycle and smoother
- npre = 2; npos = 2; w  = 0.5; numit = 30; smo = 'wjac';
+ npre = 1; npos = 1; w  = 0.5; numit = 30; smo = 'wjac';
  u_ex     = randn(length(Afem),1);
  f        = Afem*u_ex;
  u0       = sparse(length(Afem),1);
@@ -55,11 +56,11 @@ b      = A_fd*ex_sol;
 x0     = rand(length(A_fd),1); 
 
 % %Running multigrid cycle for shifted Laplacian
- relres_fd = zeros(numcycles+1,1); relres_fd(1)=norm(b-A_fd*x0); 
- relerr_fd = zeros(numcycles+1,1); relerr(1)=norm(ex_sol);
+ relres_fd = zeros(numit+1,1); relres_fd(1)=norm(b-A_fd*x0); 
+ relerr_fd = zeros(numit+1,1); relerr(1)=norm(ex_sol);
 
   
- for i=1:numcycles
+ for i=1:numit
      [x_sol]    = Vcycle(mg_mat_fd,mg_split_fd,restrict_fd,interp_fd,x0,b,npre,npos,w,smo,1);
      relres_fd(i+1)= norm(b-A_fd*x_sol);
      x0=x_sol;

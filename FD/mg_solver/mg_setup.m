@@ -16,7 +16,7 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 %             'rd'  for rediscretized operators on coarse levels
 %             'gal' for Galerkin operators on coarse levels
 %
-%  npcc:       number of interior points on coarsest grid in 1D
+%  npcc:      number of interior points on coarsest grid in 1D
 %
 %  numlev:    Total number of levels (number of coarse grids + 1)
 %
@@ -29,8 +29,8 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 %
 %  Output:
 %
-%  mg_mat:     Cell array with multigrid matrices 
-%                 (mg_mat{i}: matrix at level i)   
+%  mg_mat:     Cell array with  matrices at all levels
+%              (mg_mat{i}: matrix at level i)   
 %
 %  mg_split:   Cell array with splitting of mg_mat matrices
 %              (upper, lower and diagonal part) to be applied in

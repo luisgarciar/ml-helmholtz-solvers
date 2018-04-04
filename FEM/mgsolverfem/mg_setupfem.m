@@ -51,15 +51,15 @@ npf = npc_numlev_to_npf_fem(npcc,numlev); %add this function%
 npc = round(npf/2); %ok for fem discretizations!!
 
 %%
-restr = cell(numlev-1,1);  %restrict{i}: fw restriction grid i to grid i+1 
-prol = cell(numlev-1,1);      %interp{i}: lin interp grid i+1 to grid i
-mg_mat = cell(numlev,1);      %grid_matrices{i}: Galerkin matrix at level i
+restr    = cell(numlev-1,1);  %restrict{i}: fw restriction grid i to grid i+1 
+prol     = cell(numlev-1,1);  %interp{i}: lin interp grid i+1 to grid i
+mg_mat   = cell(numlev,1);    %grid_matrices{i}: Galerkin matrix at level i
 mg_split = cell(numlev,1);    %grid_smoothers{i}: matrix splittings needed for smoothers i
 
 %Level 1 
 mg_mat{1} = helmholtzfem(k,npf,eps,bc);
-restr{1} = fwrestrictionfem(npf,dim);  %fw restriction, grid 1 to grid 2 
-prol{1}   = lininterpolfem(npc,dim);    %lin interp, grid 2 to grid 1
+restr{1}  = fwrestrictionfem(npf,dim);  %fw restriction, grid 1 to grid 2 
+prol{1}   = lininterpolfem(npc,dim);   %lin interp, grid 2 to grid 1
 
 mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of mg_mat{}
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
@@ -75,7 +75,7 @@ npf = npc;   npc = round(npf/2);
 for i=2:numlev-1
     
     if i<numlev      
-        restr{i} = fwrestrictionfem(npf,dim); %fw restriction, grid i to grid i+1
+        restr{i}  = fwrestrictionfem(npf,dim); %fw restriction, grid i to grid i+1
         prol{i}   = lininterpolfem(npc,dim);   %lin interp, grid i+1 to grid i        
     end
     
