@@ -4,12 +4,14 @@ clc
 clear global;
 close all;
 npc = 1;    %number of interior points in coarsest grid in one dim 
-bc  ='dir'; 
+bc  ='som'; 
 dim = 2;    %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 40;  eps = 0.5*k^2; %Helmholtz problem
-ppw = 12;                 %number of points per wavelength
+k   = 60;  
+factoreps = 0.5; poweps =2;
+eps = factoreps*k^poweps; %Helmholtz problem
+ppw = 0.5;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
 %% %Exact solution of Dirichlet problem
@@ -31,21 +33,24 @@ ppw = 12;                 %number of points per wavelength
 % b    = f(X,Y); b = b'; b = reshape(b,[np,1]);  %right hand side
 
 %% Multigrid Setup
-npf = 63; numlev=6;
 profile on
-A       = helmholtz2(k,0,npf,npf,bc);
+A       = helmholtz2_ord1(k,0,npf,npf,bc);
 op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
 [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
+
 
 % Setting the SL preconditioner Minv
 % Parameters of V-cycle and Jacobi iteration
 b    = ones(length(A),1);
 x0   = zeros(size(b));
-npre = 1; npos = 1; w = 2/3; smo = 'gs'; numcycles = 1;
-Minv = @(v)feval(@Wcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
+npre = 1; npos = 1; w = 0.3; smo = 'wjac'; numcycles = 1;
+Aeps_mg  = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
+AAeps_mg = @(v) A*Aeps_mg(v);
 
+%Setting the exact preconditioner
 [L,U]   = lu(mg_mat{1});
-Minv_ex = @(v) U\(L\v);
+Aeps_ex = @(v) U\(L\v);
+AAeps_ex = @(v) A*Aeps_ex(v);
 
 % %Parameters of GMRES iteration
 tol   = 1e-7;
@@ -56,24 +61,30 @@ maxit = 200;
 %[~,flag1,relres1,iter1,resvec1] = gmres(A,b,[],tol,maxit,[]);
 %time1 = toc;
  
-% GMRES iteration with left SL preconditioner
+% GMRES iteration with right MG-SL preconditioner
 tic
-[x2,flag2,relres2,iter2,resvec2] = gmres(A,b,[],tol,maxit,Minv);
+[x2,flag2,relres2,iter2,resvec2] = gmres(AAeps_mg,b,[],tol,maxit);
 profile off
 time2 = toc;
 
-%GMRES iteration with right SL preconditioner
-AMinv = @(v) A*feval(Minv,v);
+%GMRES iteration with right LU-SL preconditioner
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(A,b,[],tol,maxit,Minv_ex);
+[x3,flag3,relres3,iter3,resvec3] = gmres(AAeps_ex,b,[],tol,maxit);
 %x3 = feval(Minv,x3);
 time3=toc;
 
-%semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
-%hold on
 semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
 hold on
 semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
+
+ylabel('Iteration');
+xlabel('Relative Residual');
+legend('CSL (MG)', 'CSL (exact)', 'Location','NorthWest');
+
+FS = 16; % font size
+set(gca,'LooseInset',get(gca,'TightInset'))
+set(gca,'FontSize',FS)
+box on
 
 %relative error with respect to exact solution
 %relerr  = norm(x2-u_ex)/norm(u_ex)
