@@ -8,18 +8,18 @@ clear all;
 save_flag = 0;  % save_flag=1: save plots and table, =0 do not save.
 
 %% Setup parameters
+
 %Setup list of wavenumbers
-%wavenum  = [20:20:120];
-%wavenum   = [5 10 20 40 60 80 100 120 150];
-wavenum = [5 10 20 40 60 80 100 120 160];
+%wavenum = [20:20:120];
+%wavenum = [5 10 20 40 60 80 100 120 150];
+wavenum = [5 10 20];
 
 bc  = 'som1';
-ppw = 0.5;   %pollution free grid
 warning off
 
 %Parameters for GMRES
 restart = [];
-tol     = 1e-10;
+tol     = 1e-6;
 maxit   = 100;
 numruns =  1; %number of runs for every experiment (to average later)
 
@@ -39,34 +39,56 @@ for kk = 1:length(wavenum)
     poweps    = 2;
     eps       = factoreps*k^poweps; 
     npcc      = 4;   %number of points in the coarsest grid in 1D
-    ppw       = 12; %ppw < 1 for pollution free grid
+    ppw       = 0.5; %ppw < 1 for pollution free grid
     
     %number of points in finest grid and number of levels
     [npf,numlev] = fd_npc_to_npf(npcc,k,ppw);
     
-    %Helmholtz matrix in 2D
-    A = helmholtz2(k,0,npf,npf,bc);
+    %Construction of the linear system and the preconditioner
+    bc = 'som';
+    %Construct square mesh of meshsize h
+    h = 1/(npf+1);
+    [node,elem] = squaremesh([0,1,0,1],h);
+      
+    %Find boundary nodes
+    [bdNode,bdEdge,isBdNode] = findboundary(elem);
     
-    %Multigrid structure for shifted Laplacian
-    op_type = 'gal';
-    [mg_mat_SL,mg_split,restr,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim);
+    %Sets Sommerfeld boundary conditions on all boundary edges
+    bdFlag = setboundary(node,elem,'ABC');
     
-    %Shifted Laplace matrix
+    %The structures pde(helm,SL) contain data for the Helmholtz and 
+    %shifted Laplace problems
+    pdehelm = helmholtz2Dconstantwndata(k,0,1);
+    pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
+   
+    option.tol = 1e-12;
+    [eqn1,~]   = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
+    [mg_mat_SL,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pdeSL);
+    
+    %Helmholtz and shifted Laplace matrices
     Aeps = mg_mat_SL{1};
+    A    = eqn1.A;
     
-    %Right hand side
+    %Right hand side vector
     b  = zeros(length(A),1); ind = floor(length(b)/2);  b(ind)=1;
     x0 = zeros(size(b));
-    
-    %multigrid and gmres parameters
-    npre  = 1; npos = 1; w = 0.5; smo = 'wjac'; numcycles = 1;
+
+    %Multigrid and gmres parameters
+    npre  = 1; npos = 1; w = 0.6; smo = 'wjac'; numcycles = 1;
     f_mg  = @(v) A*feval(@Vcycle,mg_mat_SL,mg_split,restr,interp,x0,v,npre,npos,w,smo,1);
+    
+    assert(length(Aeps)==length(A),'Size of matrices does not match');
+    
+    %Parameters for GMRES
+    restart   = [];
+    tol       = 1e-6;
+    maxit     = 200;
       
     for t=1:numruns
         % with f_mg
         tic
         [~,~,~,iter_mg(kk,:),resvec_mg] = gmres(f_mg, b, restart, tol, maxit);
-        time_mg(kk,1) = time_mg(kk,1)+ toc;        
+        time_mg(kk,1) = time_mg(kk,1) + toc;        
     end
     
 end % of going through different wavenumbers
@@ -83,7 +105,7 @@ profile off
 % For LU+FS, iLU+FS, MG+FS, we have ITER * (1+d) multiplications by M^{-1}A and
 % applications of M^{-1}.
 
-mvop_mg     = iter_mg(:,2);
+mvop_mg  = iter_mg(:,2);
 
 %% Plot timings 
 figure(1)
@@ -136,4 +158,3 @@ set(gca,'FontSize',FS);
 % FS = 14; % font size
 % set(gca,'LooseInset',get(gca,'TightInset'))
 % set(gca,'FontSize',FS)
-

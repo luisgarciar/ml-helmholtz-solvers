@@ -8,9 +8,10 @@ clear all;
 save_flag = 0;  % save_flag=1: save plots and table, =0 do not save.
 
 %% Setup parameters
+
 %Setup list of wavenumbers
-%wavenum  = [20:20:120];
-%wavenum   = [5 10 20 40 60 80 100 120 150];
+%wavenum = [20:20:120];
+%wavenum = [5 10 20 40 60 80 100 120 150];
 wavenum = [5 10 20 40 60 80 100 120 160];
 
 bc  = 'som1';
@@ -83,7 +84,7 @@ profile off
 % For LU+FS, iLU+FS, MG+FS, we have ITER * (1+d) multiplications by M^{-1}A and
 % applications of M^{-1}.
 
-mvop_mg     = iter_mg(:,2);
+mvop_mg  = iter_mg(:,2);
 
 %% Plot timings 
 figure(1)
@@ -108,8 +109,6 @@ legend('CSL (MG)','FontSize',FS,'Location','NorthEast')
 FS = 14; % font size
 set(gca,'LooseInset',get(gca,'TightInset'))
 set(gca,'FontSize',FS);
-
-
 
 %% Plot relative GMRES residuals vs number of applications of M^{-1}
 % for fixed wavenumber (the last one). For a different wavenumber: grab the
@@ -136,4 +135,3 @@ set(gca,'FontSize',FS);
 % FS = 14; % font size
 % set(gca,'LooseInset',get(gca,'TightInset'))
 % set(gca,'FontSize',FS)
-

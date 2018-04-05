@@ -3,10 +3,10 @@ clear global;
 
 %Parameters of Helmholtz equation and shifted Laplacian
 k          = 50;
-factoreps  = 10;
+factoreps  = 1;
 poweps     = 2;
 eps        = factoreps*k^poweps;   %Imaginary part of shift (for shifted Laplacian)
-ppw        = 15;                   %number of points per wavelength (fine grid)
+ppw        = 0.5;                   %number of points per wavelength (fine grid)
 npcc       = 10;                    %number of points in the coarsest grid
 op_type    = 'gal';
 bc         = 'som';
