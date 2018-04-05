@@ -2,10 +2,10 @@
 clear global; 
 
 %Parameters of Helmholtz equation and shifted Laplacian
-k          = 50;
+k          = 100;
 factoreps  = 1;
 poweps     = 2;
-eps        = factoreps*k^poweps;   %Imaginary part of shift (for shifted Laplacian)
+eps        = factoreps*k^poweps;    %Imaginary part of shift (for shifted Laplacian)
 ppw        = 0.5;                   %number of points per wavelength (fine grid)
 npcc       = 10;                    %number of points in the coarsest grid
 op_type    = 'gal';
@@ -24,7 +24,7 @@ pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 A = mg_mat{1};
 
 % Parameters of V-cycle and smoother
- npre = 1; npos = 1; w  = 2/3; numit = 20; smo = 'wjac';
+ npre = 1; npos = 1; w  = 0.5; numit = 20; smo = 'wjac';
  u_ex = ones(length(A),1);
  f    = A*u_ex;
  u0   = sparse(length(A),1);
@@ -32,12 +32,20 @@ A = mg_mat{1};
  res  = zeros(numit,1); 
  rat  = zeros(numit,1);
  
+ res(1) = r0;
+
+profile on
+tic 
   for i=1:numit
-      u_sol    = Vcyclefem(mg_mat,mg_split,restr,...
+      u_sol    = Vcycle(mg_mat,mg_split,restr,...
                            interp,u0,f,npre,npos,w,smo,1);
       u0       = u_sol;
       res(i+1) = norm(f-A*u0);
       rat(i)   = res(i+1)/res(i);
   end
-  res
-  rat
+  time_mg = toc
+  profile off
+  
+  
+  res/res(1)
+  

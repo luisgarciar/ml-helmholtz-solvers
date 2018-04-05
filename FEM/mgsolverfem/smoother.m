@@ -44,25 +44,23 @@ switch smo
         
     case  'wjac'
         for i=1:numit
-            %x = w*(D\(-L*x-U*x+b))+(1-w)*x;
-            %x = w*(D\((-L-U)*x)+D\b)+(1-w)*x;
-            x = x + w*D\(b-(D*x+U*x+L*x));
-            %Dinv=(1./D);
-            %x = x + w*D\(b-(D*x);
+            x = w*(D\(-L*x-U*x+b))+(1-w)*x;
+            %x = x + w*D\(b-(D*x+U*x+L*x));
         end
-        
         
     case  'mjac' %modified Jacobi - for complex valued problems
         for i=1:numit
             %N = -(L+U);
             %x0 = w*(D\(N*x0+b))+(1-w)*x0;
-            x0 = x0 + w*abs(D)\(b- D*x0-L*x0-U*x0);
+           % x0 = x0 + w*abs(D)\(b- D*x0-L*x0-U*x0);
+            x = (1-w)*x + w*(D\(-L*x-U*x -D*x + abs(D)*x+b));          
+
         end
                 
     case  'rbgs'
-        x   = P*x0;  Pb=P*b;  %Permuting data
-        PLP = P*L*P'; PUP = P*U*P'; PDP=P*D*P';
-        M   = PDP+PLP;  N = -PUP;
+        x   = P*x0;     Pb = P*b;  %Permuting data
+        PLP = P*L*P';  PUP =  P*U*P'; PDP=P*D*P';
+        M   = PDP+PLP;  N  = -PUP;
         
         for i=1:numit
             x = M\(N*x+Pb);
