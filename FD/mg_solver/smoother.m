@@ -46,24 +46,17 @@ switch smo
     case  'wjac'
         for i=1:numit
             %N = -(L+U); 
-            %x0 = w*(D\(N*x0+b))+(1-w)*x0;
-            x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;          
+             x0 = x0 + w*D\(b-(D*x0+U*x0+L*x0));
+            %x0 = w*(D\(-L*x0-U*x0+b))+(1-w)*x0;          
         end
-        
-        
+         
     case  'mjac' %modified Jacobi - for complex valued problems
         for i=1:numit
             %N = -(L+U); 
             %x0 = w*(D\(N*x0+b))+(1-w)*x0;
             x0 = x0 + w*abs(D)\(b- D*x0-L*x0-U*x0);          
         end
-    
-        
-        
-        
-        
-        
-        
+       
         
     case  'rbgs'
         Mrb = P*(D+L)*P'; Nrb=-P*U*P';       

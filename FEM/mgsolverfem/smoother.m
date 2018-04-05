@@ -44,9 +44,9 @@ switch smo
         
     case  'wjac'
         for i=1:numit
-            x = w*(D\(-L*x-U*x+b))+(1-w)*x;
+            %x = w*(D\(-L*x-U*x+b))+(1-w)*x;
             %x = w*(D\((-L-U)*x)+D\b)+(1-w)*x;
-            
+            x = x + w*D\(b-(D*x+U*x+L*x));
             %Dinv=(1./D);
             %x = x + w*D\(b-(D*x);
         end
