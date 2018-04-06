@@ -45,7 +45,6 @@ Afem = mg_mat_fem{1};
   profile off
   
 relres_fem = res_fem/res_fem(1);
-
 relres_fem
 
   
