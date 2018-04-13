@@ -48,8 +48,8 @@ Aeps_mg  = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,sm
 AAeps_mg = @(v) A*Aeps_mg(v);
 
 %Setting the exact preconditioner
-[L,U]   = lu(mg_mat{1});
-Aeps_ex = @(v) U\(L\v);
+[L,U]    = lu(mg_mat{1});
+Aeps_ex  = @(v) U\(L\v);
 AAeps_ex = @(v) A*Aeps_ex(v);
 
 % %Parameters of GMRES iteration

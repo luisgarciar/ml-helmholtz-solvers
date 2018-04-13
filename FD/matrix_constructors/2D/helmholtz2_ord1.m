@@ -60,7 +60,6 @@ h   = 1/(np+1);
 hx  = 1/(npx+1);  %gridsize in x-direction
 hy  = 1/(npy+1);  %gridsize in y-direction
 
-
 switch bc
     case 'dir'                
           np = npx*npy;
@@ -75,20 +74,13 @@ switch bc
               A(ii+1,ii) = 0;
           end
                     
-    case 'som'
-        
+    case 'som'        
         %2D matrix with Sommerfeld bc's (with boundary points)
         npts = max(npx,npy);
         h    = 1/(npts+1); 
         np   = (npts+2)^2;
         
         %For the construction see the paper in the references
-        
-        %d  = 4/h^2-(k^2+1i*eps)-1i*k/h;
-        %T = gallery('tridiag',npts+2,-1/h^2,d,-1/h^2);
-        %T(1,1) = 3/h^2-(k^2+1i*eps)-1i*k/h;
-        %T(npts+2,npts+2)= 3/h^2-(k^2+1i*eps)-1i*k/h;
-
         d = 4-(k^2+1i*eps)*h^2-1i*k*h; 
         T = gallery('tridiag',npts+2,-1,d,-1);
         T(1,1) = 3-(k^2+1i*eps)*h^2-1i*k*h;

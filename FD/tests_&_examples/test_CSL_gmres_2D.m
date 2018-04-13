@@ -4,10 +4,12 @@ clc
 clear global;
 close all;
 npc = 1;    %number of interior points in coarsest grid in one dim 
-bc  = 'som'; dim = 2; %boundary conditions, dimension
+bc  = 'som1'; dim = 2; %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 120;  eps = 0.5*k^2; %Helmholtz problem
+k   = 50; 
+factoreps = 0.5; poweps = 2;
+eps = factoreps*k^poweps; %Helmholtz problem
 ppw = 12;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
