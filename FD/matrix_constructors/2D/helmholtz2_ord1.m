@@ -44,8 +44,8 @@ function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
 %
 %  Output:
 %  A:      discretization matrix of Helmholtz problem
-%          size(A) = (npx,npy)     for Dirichlet  problems    
-%                  = (npx+2,npy+2) for Sommerfeld problems
+%          size(A) = (npx ,  npy)     for Dirichlet  problems    
+%                  = (npx+2, npy+2) for Sommerfeld problems
 %
 %  Author: Luis Garcia Ramos, 
 %          Institut fur Mathematik, TU Berlin
@@ -94,6 +94,102 @@ switch bc
         
         A = kron(I,T)+kron(alpha*V-J,I);
         
+        %Construction of the 2D matrix (version 2)
+        %2D matrix with Sommerfeld bc's (with boundary points)
+        nx = npx+2;
+        ny = npy+2;
+        np = nx*ny;
+        
+        %Interior points
+        W = -ones(np,1)/hx^2;  E = W; %Dxx
+        N = -ones(np,1)/hy^2;  S = N; %Dyy
+        C = ((2/hx^2) + (2/hy^2)-(k^2+1i*eps))*ones(np,1);
+        A = spdiags([S W C E N],[-nx -1 0 1 nx],np, np);
+          
+        %Corner points
+        %SW Corner: (0,0)
+        A(1,:)     = zeros(np,1)';
+        A(1,1)     = 1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(1,2)     = -1/hx^2;
+        A(1,1+nx)  = -1/hy^2;
+      
+        %SE Corner: (1,0)
+        n=nx;
+        A(n,:)   = zeros(np,1)';
+        A(n,n)   =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n-1) = -1/hx^2;
+        A(n,2*n) = -1/hy^2;
+
+        %NW Corner: (0,1)
+        n = (nx)*(ny-1)+1;
+        A(n,:)    =   zeros(np,1)';
+        A(n,n)    =   1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n+1)  =  -1/hx^2;
+        A(n,n-nx) =  -1/hy^2;
+
+        %NE Corner: (1,1)
+        n = nx*ny;
+        A(n,:)     =  zeros(np,1)';
+        A(n,n)     =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n-1)   = -1/hx^2;
+        A(n,n-nx)  = -1/hy^2;
+     
+        %Noncorner boundary points
+        
+        % Vectorized version
+        %West boundary
+        j   =  1:npy; 
+        ind =  j*nx+1;
+        Wc  =  1/hx^2+2/hy^2-k^2-1i*eps-1i*k/hx;
+        Ws  = -1/hy^2;
+        We  = -1/hx^2;
+        Wn  = -1/hy^2;
+        WC  = sparse(ind,ind,Wc,np,np); 
+        WN  = sparse(ind,ind+nx,Wn,np,np);      
+        WS  = sparse(ind,ind-nx,Ws,np,np);
+        WE  = sparse(ind,ind+1,We,np,np);
+        W   = WC+WN+WS+WE;
+        A(ind,:)= W(ind,:);      
+      
+        %South boundary
+        ind = (1:npx) + 1;
+        Sc  =  2/hx^2 + 1/hy^2 - k^2-1i*eps-1i*k/hy;
+        Sw  = -1/hx^2;
+        Se  = -1/hx^2;
+        Sn  = -1/hy^2;
+        SC  = sparse(ind,ind,Sc,np,np);
+        SE  = sparse(ind,ind+1,Se,np,np);
+        SW  = sparse(ind,ind-1,Sw,np,np);
+        SN  = sparse(ind,ind+nx,Sn,np,np);
+        S   = SC+SE+SW+SN;
+        A(ind,:) = S(ind,:);        
+%          
+        %East boundary
+        j=1:npy; ind = nx*(j+1);
+        Ec = (-k^2-1i*eps-1i*k/hx+1/hx^2+2/hy^2);
+        Ew = -1/hx^2;
+        Es = -1/hy^2;
+        En = -1/hy^2;
+        EC = sparse(ind,ind,Ec,np,np);
+        EW = sparse(ind,ind-1,Ew,np,np);
+        ES = sparse(ind,ind-nx,Es,np,np);
+        EN = sparse(ind,ind+nx,En,np,np);
+        E  = EC+EW+EN+ES;
+        A(ind,:)=E(ind,:);
+                      
+        %North boundary
+        i = 1:npx; ind = (nx)*(npy+1)+(i+1);
+        Nc = 2/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy;
+        Ne = -1/hx^2;
+        Nw = -1/hx^2; 
+        Ns = -1/hy^2;
+        NC = sparse(ind,ind,Nc,np,np);
+        NW = sparse(ind,ind-1,Nw,np,np);
+        NS = sparse(ind,ind-nx,Ns,np,np);
+        NE = sparse(ind,ind+1,Ne,np,np);
+        N  = NC+NW+NS+NE;
+        A(ind,:)=N(ind,:);
+              
     otherwise
         error('invalid boundary conditions')
 end
