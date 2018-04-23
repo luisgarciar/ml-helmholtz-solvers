@@ -14,7 +14,7 @@ function [g_n] = g_north(x,k,t)
 %See Model problem 2 in 
 %'Finite Element Analysis of Acoustic Scattering', Ihlenburg.
 s   = sin(t); c = cos(t); 
-xx = k*(x*c+s);
+xx  = k*(x*c+s);
 g_n = k*(1-s)*(sin(xx)-1i*cos(xx));
 
 

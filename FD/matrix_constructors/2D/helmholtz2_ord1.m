@@ -75,24 +75,24 @@ switch bc
           end
                     
     case 'som'        
-        %2D matrix with Sommerfeld bc's (with boundary points)
-        npts = max(npx,npy);
-        h    = 1/(npts+1); 
-        np   = (npts+2)^2;
-        
-        %For the construction see the paper in the references
-        d = 4-(k^2+1i*eps)*h^2-1i*k*h; 
-        T = gallery('tridiag',npts+2,-1,d,-1);
-        T(1,1) = 3-(k^2+1i*eps)*h^2-1i*k*h;
-        T(npts+2,npts+2)= 3-(k^2+1i*eps)*h^2-1i*k*h;
-        alpha = -1-1i*k*h;          
-       
-        J = gallery('tridiag',npts+2,1,0,1);
-        V = sparse(npts+2,npts+2);
-        V(1,1) = 1; V(npts+2,npts+2) = 1;
-        I = speye(npts+2);
-        
-        A = kron(I,T)+kron(alpha*V-J,I);
+%         %2D matrix with Sommerfeld bc's (with boundary points)
+%         npts = max(npx,npy);
+%         h    = 1/(npts+1); 
+%         np   = (npts+2)^2;
+%         
+%         %For the construction see the paper in the references
+%         d = 4-(k^2+1i*eps)*h^2-1i*k*h; 
+%         T = gallery('tridiag',npts+2,-1,d,-1);
+%         T(1,1) = 3-(k^2+1i*eps)*h^2-1i*k*h;
+%         T(npts+2,npts+2)= 3-(k^2+1i*eps)*h^2-1i*k*h;
+%         alpha = -1-1i*k*h;          
+%        
+%         J = gallery('tridiag',npts+2,1,0,1);
+%         V = sparse(npts+2,npts+2);
+%         V(1,1) = 1; V(npts+2,npts+2) = 1;
+%         I = speye(npts+2);
+%         
+%         A = kron(I,T)+kron(alpha*V-J,I);
         
         %Construction of the 2D matrix (version 2)
         %2D matrix with Sommerfeld bc's (with boundary points)
@@ -134,9 +134,8 @@ switch bc
         A(n,n-1)   = -1/hx^2;
         A(n,n-nx)  = -1/hy^2;
      
-        %Noncorner boundary points
-        
-        % Vectorized version
+        %Noncorner boundary points    
+        %Vectorized version
         %West boundary
         j   =  1:npy; 
         ind =  j*nx+1;
