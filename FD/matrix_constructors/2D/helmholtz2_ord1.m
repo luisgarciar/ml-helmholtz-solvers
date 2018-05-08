@@ -149,7 +149,7 @@ switch bc
       
         %South boundary
         ind = (1:npx) + 1;
-        Sc  =  2/hx^2 + 1/hy^2 - k^2-1i*eps-1i*k/hy;
+        Sc  = -k^2-1i*eps + 2/hx^2 + 1/hy^2 -1i*k/hy;
         Sw  = -1/hx^2;
         Se  = -1/hx^2;
         Sn  = -1/hy^2;
@@ -159,9 +159,9 @@ switch bc
         SN  = sparse(ind,ind+nx,Sn,np,np);
         S   = SC+SE+SW+SN;
         A(ind,:) = S(ind,:);        
-%          
+          
         %East boundary
-        j=1:npy; ind = nx*(j+1);
+        j  = 1:npy; ind = nx*(j+1);
         Ec = (-k^2-1i*eps-1i*k/hx+1/hx^2+2/hy^2);
         Ew = -1/hx^2;
         Es = -1/hy^2;
