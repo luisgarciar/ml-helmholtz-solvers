@@ -9,7 +9,7 @@ function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
 %  or
 %  du/dn-iku = 0 (Sommerfeld)
 %
-% The boundary condition is discretized with 
+% The Sommerfeld boundary condition is discretized with 
 % one-sided differences, and the discretization
 % is O(h).
 %
@@ -28,10 +28,10 @@ function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
 %        of Erlangga et al.
 %
 %  For convergence of multigrid applied to the shifted Laplacian
-%  one needs eps~k^2 (typically eps=0.5*k^2)
+%  one needs eps ~ k^2 (typically eps = 0.5*k^2)
 %
 %  For a number of iterations of preconditioned GMRES independent of k
-%  one needs eps~k (but multigrid will fail for the shifted Laplacian)
+%  one needs eps ~ k (but multigrid will fail for the shifted Laplacian)
 %
 %  Input: 
 %  k:      real wavenumber of Helmholtz equation 
@@ -44,7 +44,7 @@ function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
 %
 %  Output:
 %  A:      discretization matrix of Helmholtz problem
-%          size(A) = (npx ,  npy)     for Dirichlet  problems    
+%          size(A) = (npx ,  npy)   for Dirichlet  problems    
 %                  = (npx+2, npy+2) for Sommerfeld problems
 %
 %  Author: Luis Garcia Ramos, 
@@ -54,19 +54,16 @@ function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
 %%%%%
 
 %% Construction of 2D matrix
-
-np  = max(npx,npy);
-h   = 1/(np+1); 
 hx  = 1/(npx+1);  %gridsize in x-direction
 hy  = 1/(npy+1);  %gridsize in y-direction
 
 switch bc
     case 'dir'                
           np = npx*npy;
-          W = -ones(np,1)/hx^2;  E=W; %Dxx
-          N = -ones(np,1)/hy^2; S=N; %Dyy
-          C = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
-          A = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
+          W  = -ones(np,1)/hx^2;  E = W; %Dxx
+          N  = -ones(np,1)/hy^2;  S = N; %Dyy
+          C  = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
+          A  = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
           
           for i=1:(npy-1)      %Modify points closest to east and west boundaries
               ii=npx*(i-1)+npx;
@@ -114,7 +111,7 @@ switch bc
         A(1,1+nx)  = -1/hy^2;
       
         %SE Corner: (1,0)
-        n=nx;
+        n = nx;
         A(n,:)   = zeros(np,1)';
         A(n,n)   =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
         A(n,n-1) = -1/hx^2;
@@ -139,10 +136,10 @@ switch bc
         %West boundary
         j   =  1:npy; 
         ind =  j*nx+1;
-        Wc  =  1/hx^2+2/hy^2-k^2-1i*eps-1i*k/hx;
+        Wc  =  -k^2 - 1i*eps + 2/hy^2 + 1/hx^2 - 1i*k/hx;
         Ws  = -1/hy^2;
-        We  = -1/hx^2;
         Wn  = -1/hy^2;
+        We  = -1/hx^2;
         WC  = sparse(ind,ind,Wc,np,np); 
         WN  = sparse(ind,ind+nx,Wn,np,np);      
         WS  = sparse(ind,ind-nx,Ws,np,np);
