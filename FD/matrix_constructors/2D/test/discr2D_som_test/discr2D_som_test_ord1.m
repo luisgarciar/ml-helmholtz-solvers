@@ -25,7 +25,7 @@ ppw = 0.5;
 %% gridsize fixed
 npint1D = npf;
 npxint = npint1D; npyint = npint1D; hx = 1/(npxint+1); hy = 1/(npyint+1);
-xgrid  = hx*(0:1:npxint+1); ygrid = hy*(0:1:npxint+1);
+xgrid  = hx*(0:1:npxint+1); ygrid = hy*(0:1:npyint+1);
 npgrid = (npxint+2)*(npyint+2);
 [X,Y]  = meshgrid(xgrid,ygrid);
 u_ex   = u(X,Y); u_ex = u_ex'; u_ex = reshape(u_ex,[npgrid,1]); %exact solution
@@ -73,9 +73,8 @@ end
 %Boundary data has been checked!
 
 A = helmholtz2(k,0,npxint,npyint,bc);
-%b_d = A*u_ex;
-u_d = A\g;
-relerr1 = norm(real(u_d)-real(u_ex),inf)/norm(real(u_ex),inf);
+u_h = A\g;
+relerr1 = norm(real(u_h)-real(u_ex),inf)/norm(real(u_ex),inf);
 
 %Plotting the exact solution
 U_ex = reshape(real(u_ex),[npxint+2,npyint+2]);
@@ -85,7 +84,7 @@ fig1 = figure(1); surf(X,Y,U_ex); title('exact solution');
 
 % Plotting the computed solution
 fig2 = figure(2);
-U_d = reshape(real(u_d),[npxint+2,npyint+2]);
+U_d = reshape(real(u_h),[npxint+2,npyint+2]);
 surf(X,Y,U_d); title('discrete solution')
 %set(fig2, 'units', 'inches', 'position', [1 1 3 2])
 
@@ -164,8 +163,8 @@ for ii=1:length(npt)
     
     %solving the discrete equation and computing error
     A = helmholtz2(k,0,npxint,npyint,bc); 
-    u_d = A\g;
-    relerr(ii) = norm(u_d-u_ex)/norm(u_ex);
+    u_h = A\g;
+    relerr(ii) = norm(u_h-u_ex)/norm(u_ex);
     
 end
 
