@@ -19,9 +19,7 @@ u  = @(x,y) cos(k*x*c + k*y*s) + 1i*sin(k*x*c + k*y*s);
 npcc = 4;
 ppw = 0.5;
 
-[npf,numlev] = fd_npc_to_npf(npcc,k,ppw);
-
-
+[npf,numlev] = fd_npc_to_npf(npcc,100,ppw);
 %% gridsize fixed
 npint1D = npf;
 npxint = npint1D; npyint = npint1D; hx = 1/(npxint+1); hy = 1/(npyint+1);
@@ -79,7 +77,6 @@ relerr1 = norm(real(u_h)-real(u_ex),inf)/norm(real(u_ex),inf);
 %Plotting the exact solution
 U_ex = reshape(real(u_ex),[npxint+2,npyint+2]);
 fig1 = figure(1); surf(X,Y,U_ex); title('exact solution');
-
 %set(fig1, 'units', 'inches', 'position', [1 1 3 2])
 
 % Plotting the computed solution
@@ -88,7 +85,6 @@ U_d = reshape(real(u_h),[npxint+2,npyint+2]);
 surf(X,Y,U_d); title('discrete solution')
 %set(fig2, 'units', 'inches', 'position', [1 1 3 2])
 
-%
 % %Plotting the discrete rhs
 % %b_d = reshape(b_d,[npx,npy]);
 % %figure(3); surf(X,Y,b_d); title('disc rhs')
@@ -96,7 +92,6 @@ surf(X,Y,U_d); title('discrete solution')
 % %Plotting the exact rhs
 % %b = reshape(b,[npx,npy]);
 % %figure(4); surf(X,Y,b); title('ex rhs')
-%
 
 % %Plotting the error solution
 % figure(3);
@@ -106,7 +101,7 @@ surf(X,Y,U_d); title('discrete solution')
 
 %% Refining gridsize, h->0
 
-npt = 2.^(4:1:9);
+npt = 2.^(3:1:10);
 relerr = zeros(length(npt),1);
 
 length(relerr)
@@ -134,7 +129,6 @@ for ii=1:length(npt)
     g(n,1) = g_north(0,k,t)/hy+g_west(1,k,t)/hx;
     %North_East corner (1,1)
     g(npgrid,1) = g_north(1,k,t)/hy+g_east(1,k,t)/hx;
-    
     
     %Noncorner boundary points  
     %West boundary: (0,j*hy)
@@ -164,9 +158,9 @@ for ii=1:length(npt)
     %solving the discrete equation and computing error
     A = helmholtz2(k,0,npxint,npyint,bc); 
     u_h = A\g;
-    relerr(ii) = norm(u_h-u_ex)/norm(u_ex);
+    relerr(ii) = norm(real(u_h)-real(u_ex),inf)/norm(real(u_ex),inf);
     
 end
 
-loglog(npt,relerr)
+semilogy(npt,relerr)
 title('relative error of solution vs number of points')
