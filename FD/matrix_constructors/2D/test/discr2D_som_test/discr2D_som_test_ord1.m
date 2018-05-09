@@ -12,14 +12,14 @@
 % u_ex(x,y)=cos(kxcost + kysint) + 1i*sin(kxcost + kysint)
 %
 clear all; clc; close all;
-k  = 10; %Helmholtz problem
+k  = 40; %Helmholtz problem
 bc = 'som1';
 t  = pi/2; c = cos(t); s = sin(t);
 u  = @(x,y) cos(k*x*c + k*y*s) + 1i*sin(k*x*c + k*y*s);
 npcc = 4;
 ppw = 0.5;
 
-[npf,numlev] = fd_npc_to_npf(npcc,100,ppw);
+[npf,numlev] = fd_npc_to_npf(npcc,40,ppw);
 %% gridsize fixed
 npint1D = npf;
 npxint = npint1D; npyint = npint1D; hx = 1/(npxint+1); hy = 1/(npyint+1);
@@ -77,21 +77,30 @@ relerr1 = norm(real(u_h)-real(u_ex),inf)/norm(real(u_ex),inf);
 %Plotting the exact solution
 U_ex = reshape(real(u_ex),[npxint+2,npyint+2]);
 fig1 = figure(1); surf(X,Y,U_ex); title('exact solution');
+shading interp
 %set(fig1, 'units', 'inches', 'position', [1 1 3 2])
 
 % Plotting the computed solution
 fig2 = figure(2);
 U_d = reshape(real(u_h),[npxint+2,npyint+2]);
 surf(X,Y,U_d); title('discrete solution')
+shading interp
 %set(fig2, 'units', 'inches', 'position', [1 1 3 2])
 
-% %Plotting the discrete rhs
-% %b_d = reshape(b_d,[npx,npy]);
-% %figure(3); surf(X,Y,b_d); title('disc rhs')
-%
-% %Plotting the exact rhs
-% %b = reshape(b,[npx,npy]);
-% %figure(4); surf(X,Y,b); title('ex rhs')
+% %Plotting the error solution
+ figure(3);
+ Err = reshape(real(U_d-U_ex),[npxint+2,npyint+2]);
+ surf(X,Y,Err); title('error of the solution')
+ shading interp
+
+
+% Plotting the discrete rhs
+% b_d = reshape(b_d,[npx,npy]);
+% figure(3); surf(X,Y,b_d); title('disc rhs')
+% 
+% Plotting the exact rhs
+% b = reshape(b,[npx,npy]);
+% figure(4); surf(X,Y,b); title('ex rhs')
 
 % %Plotting the error solution
 % figure(3);
@@ -101,7 +110,7 @@ surf(X,Y,U_d); title('discrete solution')
 
 %% Refining gridsize, h->0
 
-npt = 2.^(3:1:10);
+npt = 2.^(9:1:10);
 relerr = zeros(length(npt),1);
 
 length(relerr)
