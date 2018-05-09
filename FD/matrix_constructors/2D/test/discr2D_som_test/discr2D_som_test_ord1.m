@@ -112,7 +112,6 @@ shading interp
 
 npt = 2.^(9:1:10);
 relerr = zeros(length(npt),1);
-
 length(relerr)
 
 
