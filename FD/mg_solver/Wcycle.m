@@ -14,7 +14,7 @@ function [x_sol] = Wcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
 %       smo:             smoother ('gs' for Gauss-Seidel, 'wjac' for w-Jacobi,'rbgs' for red-black Gauss Seidel in 2D)
 %       npre, npos:      number of pre, post smoothing steps
 %       w:               parameter for Jacobi iteration (set w=1 when using Gauss-Seidel)
-%       numcycles:       number of V-cycles
+%       numcycles:       number of W-cycles
 %
 %   Output       
 %       x_sol:     solution computed with the multigrid V-cycle   
