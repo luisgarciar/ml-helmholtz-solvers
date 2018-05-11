@@ -1,4 +1,4 @@
-function [A] = helmholtz2_ord1(k,eps,npx,npy,bc)
+function [A] = helmholtz2_ord1var(kvar,epsvar,npx,npy,bc)
 %% HELMHOLTZ2_ORD1: Constructs matrices for the 2D Helmholtz and shifted Laplace problems.
 %  Constructs the finite difference matrix corresponding
 %  to the discretization of 
@@ -71,63 +71,55 @@ switch bc
               A(ii+1,ii) = 0;
           end
                     
-    case 'som'        
-%         %2D matrix with Sommerfeld bc's (with boundary points)
-%         npts = max(npx,npy);
-%         h    = 1/(npts+1); 
-%         np   = (npts+2)^2;
-%         
-%         %For the construction see the paper in the references
-%         d = 4-(k^2+1i*eps)*h^2-1i*k*h; 
-%         T = gallery('tridiag',npts+2,-1,d,-1);
-%         T(1,1) = 3-(k^2+1i*eps)*h^2-1i*k*h;
-%         T(npts+2,npts+2)= 3-(k^2+1i*eps)*h^2-1i*k*h;
-%         alpha = -1-1i*k*h;          
-%        
-%         J = gallery('tridiag',npts+2,1,0,1);
-%         V = sparse(npts+2,npts+2);
-%         V(1,1) = 1; V(npts+2,npts+2) = 1;
-%         I = speye(npts+2);
-%         
-%         A = kron(I,T)+kron(alpha*V-J,I);
-        
+    case 'som'                
         %Construction of the 2D matrix (version 2)
         %2D matrix with Sommerfeld bc's (with boundary points)
         nx = npx+2;
         ny = npy+2;
         np = nx*ny;
         
+        %We construct first the matrix of the negative Laplacian 
+        % (without the 0th order term) and add the BCs and the 0th order term
+        %later.
+        
         %Interior points
         W = -ones(np,1)/hx^2;  E = W; %Dxx
         N = -ones(np,1)/hy^2;  S = N; %Dyy
-        C = ((2/hx^2) + (2/hy^2)-(k^2+1i*eps))*ones(np,1);
+        C = ((2/hx^2) + (2/hy^2))*ones(np,1);
+        
+        %A: Negative Laplacian (Helmholtz matrix without the 0-th order term)
         A = spdiags([S W C E N],[-nx -1 0 1 nx],np, np);
           
+        %Boundary conditions
         %Corner points
         %SW Corner: (0,0)
-        A(1,:)     = zeros(np,1)';
-        A(1,1)     = 1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        k = feval(kvar,0,0);
+        A(1,:)     =  zeros(np,1)';
+        A(1,1)     =  1/hx^2+1/hy^2-1i*k/hy-1i*k/hx;
         A(1,2)     = -1/hx^2;
         A(1,1+nx)  = -1/hy^2;
       
         %SE Corner: (1,0)
+        k = feval(kvar,1,0);
         n = nx;
         A(n,:)   = zeros(np,1)';
-        A(n,n)   =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n)   =  1/hx^2+1/hy^2-1i*k/hy-1i*k/hx;
         A(n,n-1) = -1/hx^2;
         A(n,2*n) = -1/hy^2;
 
         %NW Corner: (0,1)
+        k = feval(kvar,0,1);        
         n = (nx)*(ny-1)+1;
         A(n,:)    =   zeros(np,1)';
-        A(n,n)    =   1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n)    =   1/hx^2+1/hy^2-1i*k/hy-1i*k/hx;
         A(n,n+1)  =  -1/hx^2;
         A(n,n-nx) =  -1/hy^2;
 
         %NE Corner: (1,1)
+        k = feval(kvar,1,1);       
         n = nx*ny;
         A(n,:)     =  zeros(np,1)';
-        A(n,n)     =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n)     =  1/hx^2+1/hy^2-1i*k/hy-1i*k/hx;
         A(n,n-1)   = -1/hx^2;
         A(n,n-nx)  = -1/hy^2;
      
@@ -136,7 +128,8 @@ switch bc
         %West boundary
         j   =  1:npy; 
         ind =  j*nx+1;
-        Wc  =  -k^2 - 1i*eps + 2/hy^2 + 1/hx^2 - 1i*k/hx;
+        k   =  feval(kvar,0,j*hy);
+        Wc  =  2/hy^2 + 1/hx^2 - 1i*k/hx;
         Ws  = -1/hy^2;
         Wn  = -1/hy^2;
         We  = -1/hx^2;
@@ -145,11 +138,12 @@ switch bc
         WS  = sparse(ind,ind-nx,Ws,np,np);
         WE  = sparse(ind,ind+1,We,np,np);
         W   = WC+WN+WS+WE;
-        A(ind,:)= W(ind,:);      
+        A(ind,:) = W(ind,:);      
       
         %South boundary
         ind = (1:npx) + 1;
-        Sc  = -k^2-1i*eps + 2/hx^2 + 1/hy^2 -1i*k/hy;
+        k   = feval(kvar,(1:npx)*hx,0);
+        Sc  =  2/hx^2 + 1/hy^2 - 1i*k/hy;
         Sw  = -1/hx^2;
         Se  = -1/hx^2;
         Sn  = -1/hy^2;
@@ -161,8 +155,9 @@ switch bc
         A(ind,:) = S(ind,:);        
           
         %East boundary
-        j  = 1:npy; ind = nx*(j+1);
-        Ec = (-k^2-1i*eps +2/hy^2 +1/hx^2 -1i*k/hx);
+        j  = 1:npy; ind = nx*(j+1);   
+        k  = feval(kvar,1,j*hy);
+        Ec =  2/hy^2 + 1/hx^2 - 1i*k/hx;
         Ew = -1/hx^2;
         Es = -1/hy^2;
         En = -1/hy^2;
@@ -175,6 +170,7 @@ switch bc
                       
         %North boundary
         i  = 1:npx; ind = (nx)*(npy+1)+(i+1);
+        k  = feval(kvar,i*hx,1);       
         Nc = - k^2 -1i*eps+ 2/hx^2 + 1/hy^2 -1i*k/hy;
         Ne = -1/hx^2;
         Nw = -1/hx^2; 
@@ -185,6 +181,21 @@ switch bc
         NS = sparse(ind,ind-nx,Ns,np,np);
         N  = NC+NW+NS+NE;
         A(ind,:)=N(ind,:);
+               
+        %Adding the 0-th order term k^2*u and the imaginary shift ieps*u
+        %Create vector of wavenumbers
+        [x,y] = meshgrid(0:hx:1,0:hy:1);
+        kk    = feval(kvar,x,y);
+        kk    = reshape(kk',[np,1]);
+        Ksq   = spdiags(kk,0,np,np).*spdiags(kk,0,np,np); 
+          
+        %Imaginary shift ieps*u
+        eps   = feval(epsvar,x,y); 
+        eps   = reshape(eps',[np,1]);
+        Ieps  = 1i*spdiags(eps,0,np,np);
+          
+        %A: 2D Helmholtz matrix
+        A = A - Ksq-Ieps;    
               
     otherwise
         error('invalid boundary conditions')
