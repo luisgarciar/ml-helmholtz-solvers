@@ -171,7 +171,7 @@ switch bc
         %North boundary
         i  = 1:npx; ind = (nx)*(npy+1)+(i+1);
         k  = feval(kvar,i*hx,1);       
-        Nc = - k^2 -1i*eps+ 2/hx^2 + 1/hy^2 -1i*k/hy;
+        Nc = 2/hx^2 + 1/hy^2 -1i*k/hy;
         Ne = -1/hx^2;
         Nw = -1/hx^2; 
         Ns = -1/hy^2;
@@ -187,7 +187,7 @@ switch bc
         [x,y] = meshgrid(0:hx:1,0:hy:1);
         kk    = feval(kvar,x,y);
         kk    = reshape(kk',[np,1]);
-        Ksq   = spdiags(kk,0,np,np).*spdiags(kk,0,np,np); 
+        Ksq   = spdiags(kk,0,np,np).^2; 
           
         %Imaginary shift ieps*u
         eps   = feval(epsvar,x,y); 
