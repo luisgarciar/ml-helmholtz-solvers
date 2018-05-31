@@ -58,12 +58,12 @@ function [x_sol] = Fcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
         
             %Calling Fcycle to solve the error equation
             if(levs >2)
-                vc  = Wcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);
+                vc  = Fcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);
                 vc  = Vcycle(mg_mat(2:levs),mg_split(2:levs),restrict(2:levs-1),interp(2:levs-1),vc,fc,npre,npos,w,smo,1);              
                 %size(fc)
                 
             elseif(levs==2)
-                vc = Wcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
+                vc = Fcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
                 vc = Vcycle(mg_mat(2:2),mg_split(2:2),restrict(1:1),interp(1:1),vc,fc,npre,npos,w,smo,1);
             end
         
