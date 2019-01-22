@@ -31,8 +31,8 @@ function [A] = helmholtz2(k,eps,npx,npy,bc)
 %  npx:    number of interior discretization points in the x-direction
 %  npy:    number of interior discretization points in the y-direction
 %  bc:     type of boundary conditions:      
-%          'dir' for homogeneous dirichlet bc's
-%          'som' for 1st order sommerfeld bc's 
+%          'dir' for homogeneous dirichlet BC's
+%          'som' for 1st order sommerfeld BC's 
 %
 %  Output:
 %  A:      discretization matrix of Helmholtz problem
@@ -56,7 +56,7 @@ switch bc
     case 'dir'                
           np = npx*npy;
           W = -ones(np,1)/hx^2;  E=W; %Dxx
-          N = -ones(np,1)/hy^2; S=N; %Dyy
+          N = -ones(np,1)/hy^2;  S=N;  %Dyy
           C = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
           A = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
           

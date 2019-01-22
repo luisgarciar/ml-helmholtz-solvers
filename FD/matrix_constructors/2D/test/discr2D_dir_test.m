@@ -9,8 +9,8 @@
 % f =(-k^2+m^2*pi^2+pi^2*n^2)*sin(m*pi*x).*sin(n*pi*y)
 
 clear all; clc; close all;
-%k=0;  %Poisson problem
-k = 10 %Helmholtz problem
+k=0;  %Poisson problem
+%k = 10 %Helmholtz problem
 m = 2; n=4; 
 bc = 'dir';
 u = @(x,y) sin(m*pi*x).*sin(n*pi*y);

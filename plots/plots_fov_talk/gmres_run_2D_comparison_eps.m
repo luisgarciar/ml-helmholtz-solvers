@@ -1,4 +1,3 @@
-
 %% Experiments with the  Helmholtz equation.
 % preconditoned with the shifted Laplacian (SL)
 % and the deflated SL
@@ -117,12 +116,9 @@ for j=1:length(poweps)
     hold on
 end %End of factoreps for-loop
 
-
 leg1 = legend('No prec.','$\varepsilon=k$','$\varepsilon=k^{1.5}$','$\varepsilon=k^2$');
 set(leg1,'Interpreter','latex');
 set(leg1,'FontSize',20);
-
-
 
 % %% Plot iteration numbers and save as tikz (.tex) and .eps
 % figure(1)

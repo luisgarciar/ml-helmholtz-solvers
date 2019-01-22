@@ -7,7 +7,6 @@
 %
 clear all;
 save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
-
 % Setup parameters
 % Setup list of wavenumbers and shifts
 %wavenum   = [20 40 60] ;
@@ -104,10 +103,8 @@ plot(wavenum(wavenum<=60), iter_num2D60(:,1),'b-*','Linewidth',5);
 
 hold off
 
-
 %set(gca,'Xtick',[0 0.5 1],'FontSize',30);
 %set(gca,'Ytick',[-0.5 0 0.5],'FontSize',30);
-
 FS = 20; % font size
 
 ylabel('Number of GMRES iterations','fontsize',FS)

@@ -10,7 +10,6 @@
 %  -div(grad u)-(k^2 + i*eps) u  = f   in Omega = (0,1)x(0,1)
 %  grad(u) dot n - i*ku = g on boundary(Omega)
 
-
 %% Fixed wavenumber k and variable shift eps
 kk   = [10 20 40];
 itercsl = zeros(length(kk),1);
@@ -23,7 +22,8 @@ for i=1:length(kk)
     k = kk(i);
     dim = 2;
     pollution = 'no';
-    ppw = 0.5;
+    ppw  = 0.5;
+    npcc = 5;
     [npf,numlev] = fd_npc_to_npf(npcc,k,0.5);  %number of points in finest grid (1D)
 
     
@@ -43,18 +43,17 @@ for i=1:length(kk)
     %shifted Laplace problems
     pdehelm = helmholtz2Dconstantwndata(k,0,1);
     pdeSL   = helmholtz2Dconstantwndata(k,factoreps,poweps);
-   
     option.tol = 1e-12;
+    
+    %Helmholtz and shifted Laplace matrices
     [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
-     A    = eqn1.A;
+     A = eqn1.A;
 
     [mg_mat_,mg_split,restr,interp]= mg_setupfem_2D(npcc,numlev,pdeSL);
     Aeps = mg_mat_{1};
     
     assert(length(Aeps)==length(A),'Size of matrices does not match');
     
-    %Helmholtz and shifted Laplace matrices
-    Aeps = eqn2.A;
     
     %Parameters for GMRES
     restart   = [];
