@@ -3,3 +3,6 @@
 *.log
 **./ipynb_checkpoints/
 *.tex
+*.DS_Store
+*.fig
+*.tif
