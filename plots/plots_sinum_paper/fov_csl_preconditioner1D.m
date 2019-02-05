@@ -15,13 +15,13 @@ bc        = 'som';
 kmult  =  [5 10 20 50 100];
 kk     =  kmult*pi;
 iter_SL = zeros(length(kk),2);
-
 minfov  = zeros(length(kk),1);
+
+
 %Line colors and types for plots
 linetyp = {'-','-.',':','--','-'};
 %color   = {'r','b','g','k'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0];
-
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
 %str2={'k','k.-','k--','b*-'};
@@ -46,24 +46,20 @@ for i=1:length(kk)
     eps = factoreps*k^poweps;
     
     %choosing the number of points
-    npf = ceil(ppw*k/(2*pi))-1;
     
     if strcmp(pollution,'no')
-        npf = ceil(k^(3/2));
+        npc = ceil(k^2/2);
     end
     
-    if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
-        npf = npf+1;
-    end
+    npf = 2*npc+1;
     
-    npc  = (npf-1)/2;
     A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
     Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
     M    = mass(npf,bc);
     
     [L,U] = lu(Aeps);
-    LH = U'; UH = L';
-    N  = length(A);
+    LH    = U'; UH = L';
+    N     = length(A);
     
     %Let C = MAepsinv
     C    = @(x) M*(U\(L\x));
@@ -101,11 +97,7 @@ for i=1:length(kk)
     fovplot(i)  = plot(reFOV,imFOV,'Color',color1(i,:),...
         'LineWidth',2.5,'linestyle',linetyp{i},...
         'DisplayName',label);
-    
-    % fovplot(i)  = plot(reFOV(cvh),imFOV(cvh),'Color',color1(i,:),...
-    %                'LineWidth',2,...
-    %               'DisplayName',label);
-    
+      
     hold on
     
     plot(0,0,'k*','Markersize',10,'LineWidth',2);
@@ -115,14 +107,11 @@ for i=1:length(kk)
     xlabel('Re(z)','FontSize',16,'Interpreter','latex');
     ylabel('Im(z)','FontSize',16,'Interpreter','latex');
     h=gca;
-    % [hx,hy] = format_ticks(gca,{'$0$','$0.5$','$1$'},...
-    %                      {'$-0.5$','$0$','$0.5$'},...
-    %                        [0 0.5 1],[-0.5 0 0.5]);
-    %
+ 
     
     set(gca,'Xtick',[0 0.5 1],'FontSize',16);
     set(gca,'Ytick',[-0.5 0 0.5],'FontSize',16);
-    %set(gca,'TickLabelInterpreter', 'tex');
+    set(gca,'TickLabelInterpreter', 'tex');
     
     
 end

@@ -12,7 +12,8 @@ bc = 'som';
 
 %Wavenumber
 %kk = 40;
-kk      = [20 50 100 150];
+kmult  =  [5 10 20 50 100];
+kk     =  kmult*pi;
 iter_SL = zeros(length(kk),2);
 
 %Colors for plots
@@ -21,8 +22,11 @@ hexcolor   = ['#332288'; '#88CCEE'; '#44AA99'; '#117733'; '#999933'; ...
 %rgbcolor2 = linspecer(9);
 
 minfov  = zeros(length(kk),1);
-linetyp = {'-','.','--','-'};
-color   = {'m','b','g','k'};
+%Line colors and types for plots
+linetyp = {'-','-.',':','--','-'};
+%color   = {'r','b','g','k'};
+color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0];
+
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
 %str2={'k','k.-','k--','b*-'};
@@ -32,7 +36,7 @@ plot_gmres   = 'yes';
 ppw = 0.5;
 
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
-fvpts = 50;
+fvpts = 60;
 
 %gmres parameters
 restart = [];

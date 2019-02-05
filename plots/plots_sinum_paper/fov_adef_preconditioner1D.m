@@ -2,7 +2,6 @@
 %ADEF preconditioner
 
 %% Construction of the matrices
-clear all
 close all
 
 dim = 1;
@@ -11,16 +10,14 @@ factoreps = 10;
 bc = 'som';
 
 plot_defcsl = 'no';
-plot_csl_defcsl = 'yes';
+%plot_csl_defcsl = 'yes';
 
 %Wavenumber
-%kk      = [20 40 60 80 100];
-kk = 200;
+kmult  =  [5 10 20 50 100];
+kk     =  kmult*pi;
 
-%Colors for plots
-minfov  = zeros(length(kk),1);
-linetyp = {'-','-','-.',':','-'};
-%color   = {'r','b','g','k'};
+%Line colors and types for plots
+linetyp = {'-','-.',':','--','-'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0];
 marker  = {'*','o','.','x'};
 opt     = {'m','b','g','k'};
@@ -29,31 +26,25 @@ ppw = 0.5;
 %if pollution = 'no' the number of points np= ceil(k^(3/2))
 pollution = 'no';
 
-fvpts = 64;
+fvpts = 60;
 
 
-%% Plot of FOV of Shifted Laplace problems
+%% Plot of FOV of Deflated Shifted Laplace problems
 for i=1:length(kk)
     k   = kk(i);
+    
     eps = factoreps*k^poweps;
     
     %choosing the number of points
-    npf = ceil(ppw*k/(2*pi))-1;
     if strcmp(pollution,'no')
-        npf = ceil(k^(3/2));
+        npc = ceil(k^2/2);
     end
     
-    if (mod(npf+1,2)==1)  %set an even number of interior points in 1D
-        npf = npf+1;
-    end
+    npf = 2*npc+1;
     
-    npc  = (npf-1)/2;
     A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
     Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
     
-    %dim  = 2;
-    %A    = helmholtz2(k,0,npf,npf,bc);
-    %Aeps = helmholtz2(k,eps,npf,npf,bc);
     
     %% Sparse FOV of Deflated shifted Laplacian
     R  = fwrestrictionfem(npf,dim,bc);
@@ -68,8 +59,6 @@ for i=1:length(kk)
     Ac = Z'*A*Z; %Coarse operator
     [Lc, Uc] = lu(Ac);
     LcH = Uc'; UcH = Lc';
-    sqrtM = sqrtm(full(M));
-    
     
     %Deflated operator
     N        = length(A);
@@ -78,10 +67,6 @@ for i=1:length(kk)
     AepsHinv =  @(x) UH\(LH\x);   %Inverse of Hermitian transpose of shifted Laplace
     Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
     AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
-    
-    %FOV in the Minv inner product:
-    %AP  =  @(x)  sqrtM*Aepsinv((sqrtM*x-A*Z*Acinv((Z'*sqrtM*x))));
-    %APH =  @(x)  sqrtM*(AepsHinv(sqrtM*x)- Z*AcHinv(Z'*A'*AepsHinv(sqrtM*x)));
     
     %FOV in the Euclidean inner product
     AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
@@ -93,117 +78,60 @@ for i=1:length(kk)
     fovAP = 1+1i*eps*fovAP;
     
     close all
-    if strcmp(plot_defcsl,'yes')
-        label   = strcat('$k = ',num2str(k),'$');
-        plot(real(fovAP),imag(fovAP),'Color',color1(i,:),...
-            'LineWidth',4,'linestyle',linetyp{i},...
-            'DisplayName',label);
-        hold on
-        plot(0,0,'k*','Markersize',10,'LineWidth',2);
-        plot(1,0,'b*','Markersize',10,'LineWidth',2);
-        axis equal
-        axis([-0.2 1.2 -0.7 0.7]);
-
-       % axis([0.7 1.3 -0.3 0.3]);
-        xlabel('Re(z)','FontSize',30,'Interpreter','latex');
-        ylabel('Im(z)','FontSize',30,'Interpreter','latex');
-        h=gca;
-        
-        set(gca,'Xtick',[0 0.5 1],'FontSize',30);
-        set(gca,'Ytick',[-0.5 0 0.5],'FontSize',30);
-        %set(gca,'Xtick',[0.7 1 1.3],'FontSize',30);
-        %set(gca,'Ytick',[-0.3 0 0.4],'FontSize',30);
-        
-        kmin  = num2str(min(kk));
-        kmax  = num2str(max(kk));
-        pts   = num2str(ppw);
-        powershift  = num2str(poweps);
-        factorshift = num2str(10*factoreps);
-         
-        wn          = num2str(k);  pts = num2str(ppw);
-        powershift  = num2str(poweps);
-        factorshift = num2str(10*factoreps);
-        
-        x = xlabel('$\mathrm{Re}(z)$');
-        %         % x-axis label
-        set(x,'Interpreter','latex')
-        y=ylabel('$\mathrm{Im}(z)$','interpreter','latex'); % x-axis label
-        set(y,'Interpreter','latex')
-        figure(1)
-        name1 = strcat('1d_fov_dcsl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
-            '_pshift_',powershift,'_fshift_',factorshift,'.tex');
-        
-        if strcmp(pollution,'no')
-            name1 = strcat('1d_fov_dcsl_wn',wn,'_nopoll', ...
-                '_pshift_',powershift,'_fshift_',factorshift,'.tex');
-        end
-        %
-        matlab2tikz('filename',name1,'standalone',true,...
-            'interpretTickLabelsAsTex',true,...
-            'extraaxisoptions',['xlabel style={font=\LARGE},'...
-            'ylabel style={font=\LARGE},',...
-            'legend style={font=\LARGE},',...
-            'ticklabel style={font=\HUGE}']);    
-    end %End of FOV DCSL
+    label = strcat('$k = ', num2str(kmult(i)),' \pi$');
+    fovplot(i) =  plot(real(fovAP),imag(fovAP),'Color',color1(i,:),...
+                      'LineWidth',2.5,'linestyle',linetyp{i},...
+                      'DisplayName',label);
+       
+    hold on
+    plot(0,0,'k*','Markersize',10,'LineWidth',2);
+    plot(1,0,'b*','Markersize',10,'LineWidth',2);
+    axis equal
+    axis([-0.2 1.2 -0.7 0.7]);
+    xlabel('Re(z)','FontSize',16,'Interpreter','latex');
+    ylabel('Im(z)','FontSize',16,'Interpreter','latex');
+    h=gca;
+ 
     
-    if strcmp(plot_csl_defcsl,'yes')
-        
-        [fovAhat,minfov(i)] = slapfov(A,Aeps,fvpts);   %field of values (complex valued vector)
-        reFOV  = real(fovAhat); imFOV = imag(fovAhat);
-        cvh    = convhull(reFOV,imFOV);
-        
-        close all
-        %plotting the fov
-        label       = strcat('$k = ',num2str(k),'$');
-        plot(reFOV(cvh),imFOV(cvh),'Color',color1(i,:),...
-            'LineWidth',2.5,'linestyle',linetyp{i},...
-            'DisplayName',label);
-        
-        hold on
-        plot(real(fovAP),imag(fovAP),'Color',color1(i+1,:),...
-            'LineWidth',2.5,'linestyle',linetyp{i+1},...
-            'DisplayName',label);
-        plot(0,0,'k*','Markersize',10,'LineWidth',2);
-        plot(1,0,'b*','Markersize',10,'LineWidth',2);
-        axis equal
-        axis([-0.2 1.2 -0.7 0.7]);
-        xlabel('Re(z)','FontSize',30,'Interpreter','latex');
-        ylabel('Im(z)','FontSize',30,'Interpreter','latex');
-        h=gca;
-        
-        set(gca,'Xtick',[0 0.5 1],'FontSize',30);
-        set(gca,'Ytick',[-0.5 0 0.5],'FontSize',30);
-        %set(gca,'TickLabelInterpreter', 'tex');
-        
-        wn     = num2str(k);  pts = num2str(ppw);
-        powershift  = num2str(poweps);
-        factorshift = num2str(factoreps);
-        
-        %Filename format:
-        %wavenumber_pointswavelength_realshift_imagshift.tex
-        
-        %Tikz Axis formatting
-        x = xlabel('$\mathrm{Re}(z)$');
-        
-        % x-axis label
-        set(x,'Interpreter','latex')
-        y=ylabel('$\mathrm{Im}(z)$','interpreter','latex'); % x-axis label
-        set(y,'Interpreter','latex')
-        figure(1)
-        name1 = strcat('1d_fov_csl_dcsl_wn',wn,'_ppw',pts, ...
-            '_pshift_',powershift,'_fshift_',factorshift,'.tex');
-        
-        if strcmp(pollution,'no')
-            name1 = strcat('1d_fov_csl_dcsl_wn',wn,'_nopoll', ...
-                '_pshift_',powershift,'_fshift_',factorshift,'.tex');
-        end
-        
-    matlab2tikz('filename',name1,'standalone',true,...
-            'interpretTickLabelsAsTex',true,...
-            'extraaxisoptions',['xlabel style={font=\LARGE},'...
-            'ylabel style={font=\LARGE},',...
-            'legend style={font=\LARGE},',...
-            'ticklabel style={font=\HUGE}']);    
-    end %End of FOV CSL & DCSL
-    %close all;
+   
+    set(gca,'Xtick',[0 0.5 1],'FontSize',16);
+    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',16);
+    set(gca,'TickLabelInterpreter', 'tex');
+     
+
 end
+
+L=legend(fovplot);
+set(L,'Interpreter','latex','FontSize',16);
+
+%Filename format:
+%1d_fov_csl_kmin_kmax_pointswavelength_realshift_imagshift.tex
+
+kmin  = num2str(min(kmult));
+kmax  = num2str(max(kmult));
+pts   = num2str(ppw);
+powershift  = num2str(poweps);
+factorshift = num2str(10*factoreps);
+
+%Tikz Axis formatting
+x = xlabel('$\mathrm{Re}(z)$');
+%x-axis label
+set(x,'Interpreter','latex','fontsize',16)
+y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',16); % x-axis label
+set(y,'Interpreter','latex','fontsize',16)
+figure(1)
+name1 = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
+    '_pshift_',powershift,'_fshift_',factorshift,'.tex');
+
+if strcmp(pollution,'no')
+    name1 = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'nopoll',pts, ...
+        '_pshift_',powershift,'_fshift_',factorshift,'.tex');
+end
+
+%save .tex file of tikz figure%
+matlab2tikz('filename',name1,'standalone',true,...
+             'interpretTickLabelsAsTex',true,...
+             'extraaxisoptions',['xlabel style={font=\Large},'...
+             'ylabel style={font=\Large},',...
+             'legend style={font=\Large},',...
+             'ticklabel style={font=\Large}']);
