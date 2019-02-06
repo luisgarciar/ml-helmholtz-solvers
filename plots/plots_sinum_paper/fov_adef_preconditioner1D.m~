@@ -151,11 +151,11 @@ matlab2tikz('filename',nametex,'standalone',true,...
              'legend style={font=\Large},',...
              'ticklabel style={font=\Large}']);
 
-nameeps = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
-    '_pshift_',powershift,'_fshift_',factorshift,'.eps');
+namepdf = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
+    '_pshift_',powershift,'_fshift_',factorshift);
 
-plot_file_eps = fullfile(currentpath,'plots','pdf',eps);
-print(fig,'-depsc','-bestfit',plot_file_eps)         
+plot_file_pdf = fullfile(currentpath,'plots','eps',namepdf);
+print(fig,'-dpf',plot_file_pdf)         
          
          
          

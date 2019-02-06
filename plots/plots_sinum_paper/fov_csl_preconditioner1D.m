@@ -116,7 +116,7 @@ for i=1:length(kk)
     
 end
 L=legend(fovplot);
-set(L,'Interpreter','latex','FontSize',16);
+%set(L,'Interpreter','latex','FontSize',16);
 
 %Filename format:
 %1d_fov_csl_kmin_kmax_pointswavelength_realshift_imagshift.tex
