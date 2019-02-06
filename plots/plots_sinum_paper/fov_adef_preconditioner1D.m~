@@ -129,7 +129,7 @@ x = xlabel('$\mathrm{Re}(z)$');
 set(x,'Interpreter','latex','fontsize',16)
 y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',16); % x-axis label
 set(y,'Interpreter','latex','fontsize',16)
-fig = figure(1)
+fig = figure(1);
 
 nametex = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
     '_pshift_',powershift,'_fshift_',factorshift,'.tex');
@@ -151,11 +151,12 @@ matlab2tikz('filename',nametex,'standalone',true,...
              'legend style={font=\Large},',...
              'ticklabel style={font=\Large}']);
 
-namepdf = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
-    '_pshift_',powershift,'_fshift_',factorshift);
+nameeps = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
+    '_pshift_',powershift,'_fshift_',factorshift,'.eps');
+nameeps = 'something.eps'
 
-plot_file_pdf = fullfile(currentpath,'plots','eps',namepdf);
-print(fig,'-dpf',plot_file_pdf)         
+plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
+print(fig,'-depsc',plot_file_eps)         
          
          
          

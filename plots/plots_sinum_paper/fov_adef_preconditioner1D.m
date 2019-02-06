@@ -13,7 +13,7 @@ plot_defcsl = 'no';
 %plot_csl_defcsl = 'yes';
 
 %Wavenumber
-kmult  =  [10 20 50 80 100 150 250 500];
+kmult  =  [10 20 50 80 100];
 kk     =  kmult*pi;
 pollexp = 1.5;
 
@@ -80,7 +80,6 @@ linetyp = {'-','-.',':','--','-','-.','-','-.'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0; 1 0.5 0; 0 0 0;... 
            0.5 0 0.5];
 
-
 %% Plotting part
 for i=1:length(kk)
     k   = kk(i);   
@@ -92,8 +91,8 @@ for i=1:length(kk)
                       'DisplayName',label);
        
     hold on
-    plot(0,0,'k*','Markersize',10,'LineWidth',2);
-    plot(1,0,'b*','Markersize',10,'LineWidth',2);
+    plot(0,0,'k.','Markersize',10,'LineWidth',1);
+    plot(1,0,'b.','Markersize',10,'LineWidth',1);
     axis equal
     axis([-0.2 1.2 -0.7 0.7]);
     xlabel('Re(z)','FontSize',16,'Interpreter','latex');
@@ -103,7 +102,6 @@ for i=1:length(kk)
     set(gca,'Xtick',[0 0.5 1],'FontSize',16);
     set(gca,'Ytick',[-0.5 0 0.5],'FontSize',16);
     set(gca,'TickLabelInterpreter', 'tex');
-
 
 end
 
@@ -129,7 +127,7 @@ x = xlabel('$\mathrm{Re}(z)$');
 set(x,'Interpreter','latex','fontsize',16)
 y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',16); % x-axis label
 set(y,'Interpreter','latex','fontsize',16)
-fig = figure(1)
+fig = figure(1);
 
 nametex = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
     '_pshift_',powershift,'_fshift_',factorshift,'.tex');
@@ -140,11 +138,11 @@ if strcmp(pollution,'no')
 end
 
 %path for saving the files
-currentpath = mfilename('fullpath');
-f = fullfile(currentpath,'plots','tex',nametex);
+currentpath = pwd;
+filetex = fullfile(currentpath,'plots','tex',nametex);
 
 %save .tex file of tikz figure%
-matlab2tikz('filename',nametex,'standalone',true,...
+matlab2tikz('filename',filetex,'standalone',true,...
              'interpretTickLabelsAsTex',true,...
              'extraaxisoptions',['xlabel style={font=\Large},'...
              'ylabel style={font=\Large},',...
@@ -153,9 +151,10 @@ matlab2tikz('filename',nametex,'standalone',true,...
 
 nameeps = strcat('1d_fov_def_csl_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
     '_pshift_',powershift,'_fshift_',factorshift,'.eps');
+%nameeps = 'something';
 
-plot_file_eps = fullfile(currentpath,'plots','pdf',eps);
-print(fig,'-depsc','-bestfit',plot_file_eps)         
+plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
+print(fig,'-depsc',plot_file_eps)         
          
          
          

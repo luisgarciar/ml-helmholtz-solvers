@@ -32,10 +32,10 @@ poweps  = opts.poweps;
 factoreps = opts.factoreps;
 bc = opts.bc;
 prec = opts.prec;
-disc = opts.disc;
-fvpts = opts.fvpts;
+disc = opts.disc
 
 %Wavenumber
+kmult   =  [10 20 50 80 100 150 250 500];
 kk      =  kmult*pi;
 
 switch disc
@@ -45,8 +45,12 @@ switch disc
         pollexp = 1.5;
     case 'pw'
         pollexp = 1;
-end
 
+ppw = 0.5;
+%if pollution = 'no' the number of points np= ceil(k^(pollexp))
+pollution = 'no';
+
+fvpts = 64;
 fovAhat = zeros(fvpts, length(kk));
 
 for i=1:length(kk)
@@ -54,39 +58,42 @@ for i=1:length(kk)
     eps = factoreps*k^poweps;
     npc = ceil(k^(pollexp)/2);
     npf = 2*npc+1;
-   
+    
     A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
     Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
     M    = mass(npf,bc);
-    R    = fwrestrictionfem(npf,dim,bc);
-    Z    = R';             %Prolongation. Deflation subspace: columns of Z
+    R  = fwrestrictionfem(npf,dim,bc);
+    Z  = R';             %Prolongation. Deflation subspace: columns of Z
+    dim_def = size(Z,2); 
     [L,U] = lu(Aeps);
     Ac = Z'*A*Z; %Coarse operator
-    
-    if strcmp(prec,'adef')
-        [Lc, Uc] = lu(Ac);
-        LcH = Uc'; UcH = Lc';
-    end
+    [Lc, Uc] = lu(Ac);
+    LcH = Uc'; UcH = Lc';
 
+    
     %Function handles for FOV of shifted Laplacian
     LH    = U'; UH = L';
     N     = length(A);
     
     %Let C = MAepsinv
     C    = @(x) M*(U\(L\x));
-    CH   = @(x) UH\(LH\(M*x));    
+    CH   = @(x) UH\(LH\(M*x));
+    HerC = @(x) 0.5*(feval(C,x) + feval(CH,x)); %Hermitian part of C
+    
     
     %Function handles for FOV of Deflated shifted Laplacian      
     %Deflated operator
     N        = length(A);
+    I        = speye(N);
     Aepsinv  =  @(x) U\(L\x);     %Inverse of shifted Laplace
     AepsHinv =  @(x) UH\(LH\x);   %Inverse of Hermitian transpose of shifted Laplace
     Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
     AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
     
-    %Function handles Adef
+    %FOV in the Euclidean inner product
     AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
     APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
+    
     v0 = ones(length(A),1);
     
     switch prec
@@ -94,13 +101,29 @@ for i=1:length(kk)
             Ahat = C; AhatH = CH;
             
         case 'adef'
-            Ahat = AP;  AhatH = APH;
+          Ahat = AP;  AhatH = APH;
     end
-    
-    %Field of values of AHat in Euclidean inner product
+   
+    %Field of values of APadef in Euclidean inner product
     [fovAhat(:,i),~,~] = sfov(Ahat,AhatH,v0,N,64);
     fovAhat(:,i) = 1+1i*eps*fovAhat(:,i);
     
-   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
 end
 
