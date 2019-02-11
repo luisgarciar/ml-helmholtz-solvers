@@ -1,5 +1,5 @@
-function [fovAhat] = computefovAhat(kmult,opts)
-%COMPUTEFOVAHAT Computes the field of values of 
+function [fovAhat] = plotfovAhat(fovAhat,kmult,opts)
+%PLOTFOVAHAT Computes the field of values of 
 %preconditioned Helmholtz matrices
 
 %Input:
@@ -33,7 +33,12 @@ factoreps = opts.factoreps;
 bc = opts.bc;
 prec = opts.prec;
 disc = opts.disc;
-fvpts = opts.fvpts;
+
+linetyp = {'-','-.',':','--','-','-.','-','-.'};
+color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0; 1 0.5 0; 0 0 0;... 
+           0.5 0 0.5];
+
+
 
 %Wavenumber
 kk      =  kmult*pi;
@@ -47,47 +52,29 @@ switch disc
         pollexp = 1;
 end
 
-fovAhat = zeros(fvpts, length(kk));
-
-numCores = feature('numcores');
-pool = parpool(numCores);
 for i=1:length(kk)
     k   = kk(i);
     eps = factoreps*k^poweps;
-    npc = ceil(k^(pollexp)/2);
-    npf = 2*npc+1;
    
-    A    = helmholtzfem(k,npf,0,bc);           %Helmholtz matrix
-    Aeps = helmholtzfem(k,npf,eps,bc);         %Shifted Laplace matrix
-    M    = mass(npf,bc);
-    R    = fwrestrictionfem(npf,dim,bc);
-    Z    = R';             %Prolongation. Deflation subspace: columns of Z
-    [L,U] = lu(Aeps);
-    Ac = Z'*A*Z; %Coarse operator
-    [Lc, Uc] = lu(Ac);
-    LcH = Uc'; UcH = Lc';
+  
+    label = strcat('$k = ', num2str(kmult(i)),' \pi$');
+    fovplot(i) =  plot(real(fovAhat(:,i)),imag(fovAhat(:,i)),'Color',color1(i,:),...
+                      'LineWidth',2,'linestyle',linetyp{i},...
+                      'DisplayName',label);
+       
+    hold on
+    plot(0,0,'k.','Markersize',10,'LineWidth',1);
+    plot(1,0,'b.','Markersize',10,'LineWidth',1);
+    axis equal
+    axis([-0.2 1.2 -0.7 0.7]);
+    xlabel('Re(z)','FontSize',16,'Interpreter','latex');
+    ylabel('Im(z)','FontSize',16,'Interpreter','latex');
+    h=gca;
+   
+    set(gca,'Xtick',[0 0.5 1],'FontSize',16);
+    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',16);
+    set(gca,'TickLabelInterpreter', 'tex');
     
-
-    %Function handles for FOV of shifted Laplacian
-    LH    = U'; UH = L';
-    N     = length(A);
-    
-    %Let C = MAepsinv
-    C    = @(x) M*(U\(L\x));
-    CH   = @(x) UH\(LH\(M*x));    
-    
-    %Function handles for FOV of Deflated shifted Laplacian      
-    %Deflated operator
-    N        = length(A);
-    Aepsinv  =  @(x) U\(L\x);     %Inverse of shifted Laplace
-    AepsHinv =  @(x) UH\(LH\x);   %Inverse of Hermitian transpose of shifted Laplace
-    Acinv    =  @(x) Uc\(Lc\x);   %Inverse of coarse Helmholtz
-    AcHinv   =  @(x) UcH\(LcH\x); %Inverse of Hermitian transpose of coarse Helmholtz
-    
-    %Function handles Adef
-    AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
-    APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
-    v0 = ones(length(A),1);
     
     switch prec
         case 'csl'
