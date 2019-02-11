@@ -79,10 +79,9 @@ end
 L=legend(fovplot);
 set(L,'Interpreter','latex','FontSize',16);
 
-kmin  = num2str(min(kmult));
-kmax  = num2str(max(kmult));
-pts   = num2str(ppw);
-polexp = num2str(10*pollexp);
+kmin        = num2str(min(kmult));
+kmax        = num2str(max(kmult));
+polexp      = num2str(10*pollexp);
 powershift  = num2str(poweps);
 factorshift = num2str(10*factoreps);
 
@@ -94,14 +93,8 @@ y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',16); % x-axis label
 set(y,'Interpreter','latex','fontsize',16)
 fig = figure(1);
 
-
-nametex = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
-    '_pshift_',powershift,'_10timesfacshiftfshift_',factorshift,'.tex');
-
-if strcmp(pollution,'no')
-    nametex = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_nopoll10exp_',polexp, ...
-        '_powshift_',powershift,'_10timesfacshift_',factorshift,'.tex');
-end
+nametex = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
+       '_powshift_',powershift,'_10timesfacshift_',factorshift,'.tex');
 
 %path for saving the files
 currentpath = pwd;
@@ -115,9 +108,12 @@ matlab2tikz('filename',filetex,'standalone',true,...
              'legend style={font=\Large},',...
              'ticklabel style={font=\Large}']);
 
-nameeps = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_ppw',pts, ...
-    '_pshift_',powershift,'_10timesfacshift_',factorshift,'.eps');
-%nameeps = 'something';
+
+nameeps = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
+       '_powshift_',powershift,'_10timesfacshift_',factorshift,'.eps');
+
+
+
 
 plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
 print(fig,'-depsc',plot_file_eps)      
