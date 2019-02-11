@@ -1,4 +1,4 @@
-function [fovAhat] = plotfovAhat(fovAhat,kmult,opts)
+function plotfovAhat(fovAhat,kmult,opts)
 %PLOTFOVAHAT Computes the field of values of 
 %preconditioned Helmholtz matrices
 
