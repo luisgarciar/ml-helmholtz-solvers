@@ -112,9 +112,6 @@ matlab2tikz('filename',filetex,'standalone',true,...
 nameeps = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
        '_powshift_',powershift,'_10timesfacshift_',factorshift,'.eps');
 
-
-
-
 plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
 print(fig,'-depsc',plot_file_eps)      
 
