@@ -66,18 +66,18 @@ for i=1:length(kk)
     plot(1,0,'b.','Markersize',10,'LineWidth',1);
     axis equal
     axis([-0.2 1.2 -0.7 0.7]);
-    xlabel('Re(z)','FontSize',16,'Interpreter','latex');
-    ylabel('Im(z)','FontSize',16,'Interpreter','latex');
+    xlabel('Re(z)','FontSize',12,'Interpreter','latex');
+    ylabel('Im(z)','FontSize',12,'Interpreter','latex');
     h=gca;
    
-    set(gca,'Xtick',[0 0.5 1],'FontSize',16);
-    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',16);
+    set(gca,'Xtick',[0 0.5 1],'FontSize',12);
+    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',12);
     set(gca,'TickLabelInterpreter', 'tex');
  
 end
 
 L=legend(fovplot);
-set(L,'Interpreter','latex','FontSize',16);
+set(L,'Interpreter','latex','FontSize',12);
 
 kmin        = num2str(min(kmult));
 kmax        = num2str(max(kmult));
@@ -88,9 +88,9 @@ factorshift = num2str(10*factoreps);
 %Tikz Axis formatting
 x = xlabel('$\mathrm{Re}(z)$');
 %x-axis label
-set(x,'Interpreter','latex','fontsize',16)
-y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',16); % x-axis label
-set(y,'Interpreter','latex','fontsize',16)
+set(x,'Interpreter','latex','fontsize',12)
+y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',12); % x-axis label
+set(y,'Interpreter','latex','fontsize',12)
 fig = figure(1);
 
 nametex = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
