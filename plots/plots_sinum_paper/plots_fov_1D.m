@@ -1,6 +1,5 @@
 %Plots of FOVs for SINUM paper
 
-
 %% Plots with eps = k^2
 
 %% Plots with N = ceil(k^2)
@@ -35,7 +34,6 @@ opts.bc = 'som';
 opts.fvpts = 64;
 opts.disc = 'pf';
 close all
-
 
 kmult  =  [5 20 50 80 100];
 
@@ -131,9 +129,7 @@ plotfovAhat(fovAB,kmult,opts);
 close all
 
 
-
 %% Plots with  N = ceil(k^1.5)
-
 %1D Case
 opts.dim = 1;
 opts.poweps    = 2;

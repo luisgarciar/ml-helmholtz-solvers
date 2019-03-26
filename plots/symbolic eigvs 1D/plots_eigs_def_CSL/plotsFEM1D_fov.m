@@ -2,6 +2,7 @@ clear all;
 close all;
 
 ppw = 10;  %points per wavelength 
+bc = 'som'
 
 %Parameters for the shifted Laplacian
 %We use a shifted Laplacian of the form
@@ -31,22 +32,22 @@ eps = factoreps*(k^poweps);
 pollution = 'yes';
 %otherwise the number of grid points is chosen
 %with a fixed number of points per wavelength
-np = ceil(ppw*k/(2*pi))-1; 
+npf = ceil(ppw*k/(2*pi))-1; 
 
 if strcmp(pollution,'no')
-np = ceil(k^(3/2));
+npf = ceil(k^(3/2));
 end
     
-if (mod(np,2)==1) 
-    np = np+1; 
+if (mod(npf,2)==0) 
+    npf = npf+1;
 end
-npc = (np-1)/2;
+npc = (npf-1)/2;
 
 dim = 1;
 
-A = helmholtzfem(k,np,0); %Helmholtz matrix
-Aeps = helmholtzfem(k,np,eps); %Shifted Laplace matrix
-M = mass(np);
+A = helmholtzfem(k,npf,0,bc); %Helmholtz matrix
+Aeps = helmholtzfem(k,npf,eps,bc); %Shifted Laplace matrix
+M = mass(npf,bc);
 X = sqrtm(full(M));
 
 Ahat = Aeps\A;
@@ -103,12 +104,11 @@ name1 = strcat('fvcslfem_wn',wn,'_ppw',pts, ...
             '_pshift_',powershift,'_fshift_',factorshift,'.tex');
         end
 
-matlab2tikz('filename',name1,'standalone',true); %save .tex file of tikz figure%
+%matlab2tikz('filename',name1,'standalone',true); %save .tex file of tikz figure%
 end %End of eigenvalues dCSL
 
-close all;
 
-R = fwrestrictionfem(np,dim);
+R = fwrestrictionfem(npf,dim,bc);
 Z = R';     %Prolongation. Deflation subspace: columns of Z
 dim_def = size(Z,2);
 
@@ -132,16 +132,14 @@ axis([0  1.4 -0.7 0.7]);
     set(gca,'Xtick',[-1 -0.5 0 0.5 1],'FontSize',14);
     set(gca,'Ytick',[-1 -0.5 0 0.5 1],'FontSize',14);
 axis equal
-
-
     
-% U = null(full(R));
-% %Restricted matrix
-% B = U'*(M\(A\(Aeps*U)));
-% B = inv(B);
-% 
-% [fvB, eigB] = fv(B,1,32);
-% m2 = min(abs(fvB));
+U = null(full(R));
+%Restricted matrix
+B = U'*(M\(A\(Aeps*U)));
+B = inv(B);
+
+[fvB, eigB] = fv(B,1,32);
+m2 = min(abs(fvB));
 %%
 if strcmp(plot_defcsl,'yes')
     plot(real(fvB),imag(fvB),'k','MarkerSize',16); 
