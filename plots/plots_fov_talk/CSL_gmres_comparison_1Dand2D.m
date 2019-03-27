@@ -4,7 +4,8 @@
 % with gmres, for different implementations of A*M^{-1}*x:
 %  - eps = k
 %  - eps = k^2
-%
+
+
 clear all;
 save_flag = 1;  % save_flag=1: save plots and table, =0 do not save.
 % Setup parameters
@@ -87,8 +88,6 @@ for kk = 1:length(wavenum)
     end
 end
 
-
-
 %% Plot iteration numbers and save as tikz (.tex) and .eps
 figure(2)
 
@@ -121,6 +120,3 @@ legend('1D', ...
 axis([10 100 0 10])
 set(gca,'Xtick',10:20:100,'FontSize',FS);
 set(gca,'Ytick',0:2:10,'FontSize',FS);
-
-
-

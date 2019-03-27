@@ -4,7 +4,7 @@ function [fovAhat] = computefovAhat(kmult,opts)
 
 %Input:
 %kmult: vector of integers 
-        %(wavenumbers, to be multiplied by k)
+        %(wavenumbers, to be multiplied by pi)
 %opts: Data structure with options for the computation
 %opts.prec = 'csl' or 'adef': preconditioner
 %opts.poweps    = power of the shifted Laplacian

@@ -4,7 +4,7 @@ function plotfovAhat(fovAhat,kmult,opts)
 
 %Input:
 %kmult: vector of integers 
-        %(wavenumbers, to be multiplied by k)
+        %(wavenumbers, to be multiplied by pi)
 %opts: Data structure with options for the computation
 %opts.prec = 'csl' or 'adef': preconditioner
 %opts.poweps    = power of the shifted Laplacian
@@ -36,9 +36,6 @@ disc = opts.disc;
 linetyp = {'-','-.',':','--','-','-.','-','-.'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0; 1 0.5 0; 0 0 0;... 
            0.5 0 0.5];
-
-
-
 %Wavenumber
 kk      =  kmult*pi;
 
@@ -54,8 +51,7 @@ end
 for i=1:length(kk)
     k   = kk(i);
     eps = factoreps*k^poweps;
-   
-  
+ 
     label = strcat('$k = ', num2str(kmult(i)),' \pi$');
     fovplot(i) =  plot(real(fovAhat(:,i)),imag(fovAhat(:,i)),'Color',color1(i,:),...
                       'LineWidth',2,'linestyle',linetyp{i},...
@@ -66,18 +62,18 @@ for i=1:length(kk)
     plot(1,0,'b.','Markersize',10,'LineWidth',1);
     axis equal
     axis([-0.2 1.2 -0.7 0.7]);
-    xlabel('Re(z)','FontSize',12,'Interpreter','latex');
-    ylabel('Im(z)','FontSize',12,'Interpreter','latex');
+    xlabel('Re(z)','FontSize',14,'Interpreter','latex');
+    ylabel('Im(z)','FontSize',14,'Interpreter','latex');
     h=gca;
    
-    set(gca,'Xtick',[0 0.5 1],'FontSize',12);
-    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',12);
+    set(gca,'Xtick',[0 0.5 1],'FontSize',14);
+    set(gca,'Ytick',[-0.5 0 0.5],'FontSize',14);
     set(gca,'TickLabelInterpreter', 'tex');
  
 end
 
 L=legend(fovplot);
-set(L,'Interpreter','latex','FontSize',12);
+set(L,'Interpreter','latex','FontSize',14);
 
 kmin        = num2str(min(kmult));
 kmax        = num2str(max(kmult));
@@ -88,9 +84,9 @@ factorshift = num2str(10*factoreps);
 %Tikz Axis formatting
 x = xlabel('$\mathrm{Re}(z)$');
 %x-axis label
-set(x,'Interpreter','latex','fontsize',12)
-y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',12); % x-axis label
-set(y,'Interpreter','latex','fontsize',12)
+set(x,'Interpreter','latex','fontsize',14)
+y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',14); % x-axis label
+set(y,'Interpreter','latex','fontsize',14)
 fig = figure(1);
 
 nametex = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
@@ -108,9 +104,8 @@ matlab2tikz('filename',filetex,'standalone',true,...
              'legend style={font=\Large},',...
              'ticklabel style={font=\Large}']);
 
-
 nameeps = strcat('1d_fov',prec,'_kmin',kmin,'_kmax',kmax,'_disc_',disc,'_10polexp_',polexp, ...
-       '_powshift_',powershift,'_10timesfacshift_',factorshift,'.eps');
+       '_powshift_',powershift,'_10timesfacshift_',factorshift);
 
 plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
 print(fig,'-depsc',plot_file_eps)      

@@ -4,7 +4,6 @@
 %% Construction of the matrices
 clear all
 close all
-
 dim       = 1;
 poweps    = 2;
 factoreps = 0.5;
@@ -39,14 +38,12 @@ restart = [];
 tol     = 1e-8;
 maxit   = 100;
 
-
 %% Plot of FOV of Shifted Laplace problems
 for i=1:length(kk)
     k   = kk(i);
     eps = factoreps*k^poweps;
     
     %choosing the number of points
-    
     if strcmp(pollution,'no')
         npc = ceil(k^2/2);
     end
