@@ -89,8 +89,8 @@ y=ylabel('$\mathrm{Im}(z)$','interpreter','latex','fontsize',14); % x-axis label
 set(y,'Interpreter','latex','fontsize',14)
 fig = figure(1);
 
-nametex = strcat('1Dfv',prec,'_kmin',kmin,'_kmax',kmax,'_d_',disc,'_px_',polexp, ...
-       '_pws_',powershift,'_fs_',factorshift,'.tex');
+nametex = strcat('1dfv',prec,'kmin',kmin,'kmax',kmax,'d',disc,'px',polexp, ...
+       'pws',powershift,'fs',factorshift,'.tex');
 
 %path for saving the files
 currentpath = pwd;
@@ -104,8 +104,8 @@ matlab2tikz('filename',filetex,'standalone',true,...
              'legend style={font=\Large},',...
              'ticklabel style={font=\Large}']);
 
-nameeps = strcat('1Dfv',prec,'_kmin',kmin,'_kmax',kmax,'_d_',disc,'_px_',polexp, ...
-       '_pws_',powershift,'_fs_',factorshift);
+nameeps = strcat('1dfv',prec,'kmin',kmin,'kmax',kmax,'d',disc,'px',polexp, ...
+       'pws',powershift,'fs',factorshift);
    
 plot_file_eps = fullfile(currentpath,'plots','eps',nameeps);
 print(fig,'-depsc',plot_file_eps)      
