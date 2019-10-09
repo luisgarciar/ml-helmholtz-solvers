@@ -72,7 +72,6 @@ for kk = 1:length(wavenum)
     
 end % of going through different wavenumbers
 time_mg  = time_mg/numruns;
-
 profile off
 
 %% Count matrix-vector operations

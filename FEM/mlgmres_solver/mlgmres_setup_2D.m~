@@ -1,4 +1,4 @@
-function [mL_mat,ml_prec] = mlgmres_setup_2D(npcc,numlev,pde,option)
+function [ml_mat,ml_prec] = mlgmres_setup_2D(npcc,numlev,pde,option)
 %% MLGMRES_SETUP_2D: Constructs a hierarchy of Galerkin coarse grid matrices,
 % smoother splittings and interpolation operators for a 2D Helmholtz/shifted
 % Laplace problem discretized with P1 finite elements on a uniform square
@@ -7,7 +7,7 @@ function [mL_mat,ml_prec] = mlgmres_setup_2D(npcc,numlev,pde,option)
 % Requires the iFEM package!! 
 %
 %  Use:
-% [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pde)
+% [ml_mat,ml_prec] = mg_setupfem_2D(npcc,numlev,pde)
 %
 %  Input: 
 %
@@ -22,10 +22,11 @@ function [mL_mat,ml_prec] = mlgmres_setup_2D(npcc,numlev,pde,option)
 %  mg_mat: Cell array with Galerkin matrices 
 %                     (grid_matrices{i}: Galerkin matrix level i)   
 %
-%  mg_split: Cell array with upper, lower and diagonal part of
-%                  Galerkin matrices to be applied in smoothing steps
-%                  (galerkin_split{i}.U, galerkin_split{i}.L, galerkin_split{i}.D)
-% 
+%  mg_split: Cell array with 
+
+
+
+
 %  restrict:   Cell array with restriction operators
 %              (restrict_op{i}:restriction operator from i to i+1)
 %  If option.twolevel = 'true', restrict is a matrix of size according to 
