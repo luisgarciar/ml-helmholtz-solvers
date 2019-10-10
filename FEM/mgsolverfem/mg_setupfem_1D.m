@@ -1,7 +1,7 @@
-function [mg_mat,mg_split,restr,prol] = mg_setupfem(k,eps,op_type,npcc,numlev,dim,bc)
+function [mg_mat,mg_split,restr,prol] = mg_setupfem_1D(k,eps,op_type,npcc,numlev,dim,bc)
 %% MG_SETUPFEM: Constructs a hierarchy of Galerkin coarse grid matrices,
-% smoother splittings and interpolation operators for a Helmholtz problem
-% discretized with P1 finite elements
+%  smoother splittings and interpolation operators for a Helmholtz problem
+%  discretized with P1 finite elements
 %
 %  Use:
 % [mg_mat,mg_split,restr,prol] = mg_setupfem(k,eps,op_type,npcc,numlev,dim)
@@ -47,7 +47,7 @@ function [mg_mat,mg_split,restr,prol] = mg_setupfem(k,eps,op_type,npcc,numlev,di
 %% Construction of restriction and interpolation matrices
 
 %% to be fixed
-npf = npc_numlev_to_npf_fem(npcc,numlev); %add this function%
+npf = npc_numlev_to_npf_fem(npcc,numlev); %
 npc = round(npf/2); %ok for fem discretizations!!
 
 %%

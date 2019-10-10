@@ -42,32 +42,7 @@ else
     %initialization of Arnoldi basis
     V(:,1) = r0/norm(r0);
     
-    while (iter < maxiter)
-        iter = iter +1;
-        
-        %preconditioning step
-        z=
-        
-        
-        
-        %recursive call to function
-        
-        
-        
-        
-        
-        %end of preconditioning step
-        
-        
-        %
-        w = A*z
-        
-        %Arnoldi orthogonalization
-        
-        
-        
-        
-    end
+    while(
 
 
     

@@ -1,13 +1,13 @@
-function [ml_mat,ml_prec] = mlfgmres_setup_2D(npcc,numlev,pde1,pde2,option)
-%% MLGMRES_SETUP_2D: Constructs a hierarchy of Galerkin coarse grid matrices,
+function [ml_mat,ml_prec,ml_prec_split,restrict,interp] = mlsetup2D(npcc,numlev,pde1,pde2,option)
+%% MLSETUP2D: Constructs a multilevel hierarchy of Galerkin coarse grid matrices,
 % smoother splittings and interpolation operators for a 2D Helmholtz/shifted
 % Laplace problem discretized with P1 finite elements on a uniform square
-% grid 
+% grid to be used with the MLFGMRES solver
 %
-% Requires the iFEM package!! 
+% Requires the iFEM package! 
 %
 %  Use:
-% [ml_mat,ml_prec] = mg_setupfem_2D(npcc,numlev,pde,option)
+% [ml_mat,ml_prec] = mgsetup2D(npcc,numlev,pde,option)
 %
 %  Input: 
 %  npcc:      number of interior points on coarsest grid in 1D          
@@ -22,14 +22,17 @@ function [ml_mat,ml_prec] = mlfgmres_setup_2D(npcc,numlev,pde1,pde2,option)
 %          (grid_matrices{i}: Galerkin matrix level i)   
 %
 %  ml_prec: Cell array with preconditioners at level i
-%           
-%
-%
+%  ml_prec_split: Cell array with splitting of preconditioners at level i
+%  restrict: Cell array with restriction operators 
+%  interp: Cell array with interpolation operators
+%       
 %  Author:      Luis Garcia Ramos, 
 %               Institut fur Mathematik, TU Berlin
 %               Version 1.0 Sep 2017
-%%
 
+%%
+[ml_mat,~,restrict,interp]  = mg_setupfem_2D(npcc,numlev,pde1,option);
+[ml_prec,ml_prec_split,~,~] = mg_setupfem_2D(npcc,numlev,pde2,option);
 
 end
        
