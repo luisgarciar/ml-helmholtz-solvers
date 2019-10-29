@@ -1,5 +1,5 @@
 function [c,s] = givens(f,g)
-%Computes the angles for a Givens rotation of a 2x1 complex vector
+%Computes the angles for a Givens rotation of a 2x1 (possibly) complex vector
 %
 % Input:  (a,b)
 % Output: [c,s]
