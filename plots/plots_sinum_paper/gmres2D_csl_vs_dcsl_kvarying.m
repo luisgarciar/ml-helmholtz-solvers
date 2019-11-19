@@ -1,20 +1,28 @@
-%Comparison of Shifted Laplacian and two-level deflation for fixed k
+%Comparison of Shifted Laplacian and two-level deflation for varying k
 %Homogeneous problem
 
 dim       = 2;
 poweps    = 2;
 factoreps = 1;
+kk = [10 20 40];
+m  = length(kk);
 
-k  = 40;
-bc = 'som';
+itercsl = zeros(m,1);
+iterdef = zeros(m,1);
 
-reflevs   = 1;   %
+
+reflevs   = 1;   
 restart   = [];
 tol       = 1e-6;
 maxit     = 200;
-
 npcc = 3;
 par  = 0.7;
+
+
+for i = 1:m
+    
+k    = kk(i);
+bc   = 'som';
 npf  = ceil(k^(3/2));
 np   = npf-2;
 
@@ -42,8 +50,7 @@ option.tol = 1e-8;
 [mg_mat,mg_split,restr,interp]= mg_setupfem_2D(npcc,numlev,pdeSL);
 
 A      = eqn1.A;
-Aeps  = mg_mat{1};
-%[L,U]  = lu(Aeps);
+Aeps   = mg_mat{1};
 
 n1 = length(A);
 n2 = length(Aeps);
@@ -58,7 +65,7 @@ npre = 1; npos = 1; w  = 0.7; numit = 20; smo = 'wjac';
 Aepsinv = @(x) Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
 mat1 = @(x) A*Aepsinv(x);
 
-[~, ~, ~, iter1, ~] = gmres(mat1,  b, restart, tol, maxit);
+[~, ~, ~, itercsl(i), ~] = gmres(mat1,  b, restart, tol, maxit);
 
 R = restr{1};
 P = interp{1};
@@ -71,11 +78,6 @@ cgc =  @(x) P*(Uc\(Lc\(R*x)));
 def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
 mat2 = @(x) A*def(x);
  
-[~, ~, ~, iter2, ~] = gmres(mat2,  b, restart, tol, maxit);
+[~, ~, ~, itercsl(i), ~] = gmres(mat2,  b, restart, tol, maxit);
 
-
-
-
-
-
-
+end

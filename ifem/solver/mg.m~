@@ -94,7 +94,7 @@ tic;
 
 %% Size of systems
 Ndof = length(b);                  % number of dof
-N  = max(elem(:));                  % number of nodes
+N = max(elem(:));                  % number of nodes
 NT = size(elem,1);                 % number of elements
 dim = size(elem,2)-1;
 if N > NT       % 2-D quad mesh
@@ -321,7 +321,7 @@ for j = level:-1:2
     Ai{j-1} = Res{j}*Ai{j}*Pro{j-1};           % Ac = Res*Af*Pro
     switch option.smoother
         case 'GS'
-            Bi{j} =  tril(Ai{j});       % Forward Gauss-Seidel   B = D+L
+            Bi{j} =  tril(Ai{j});        % Forward Gauss-Seidel   B = D+L
             BTi{j} = triu(Ai{j});       % Backward Gauss-Seidel BT = D+U    
         case 'JAC'                      % Jacobi iteration  B = BT = D;           
             Bi{j} = spdiags(diag(Ai{j}),0,size(Ai{j},1),size(Ai{j},1)); 

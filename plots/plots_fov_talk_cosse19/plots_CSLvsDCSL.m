@@ -69,10 +69,10 @@ reFOV  = real(fovAhat); imFOV = imag(fovAhat);
 cvh    = convhull(reFOV,imFOV);
 
 %plotting the fov
-label       = strcat('$k = ', num2str(k),'$');
+label    = strcat('$k = ', num2str(k),'$');
 fovplot  = plot(reFOV,imFOV,'Color','k',...
-    'LineWidth',2.5,'linestyle','-',...
-    'DisplayName',label);
+                'LineWidth',2.5,'linestyle','-',...
+                'DisplayName',label);
 
 hold on
 plot(0,0,'k.','Markersize',5,'LineWidth',2);

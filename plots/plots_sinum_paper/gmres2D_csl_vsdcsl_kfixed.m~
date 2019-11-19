@@ -55,25 +55,17 @@ restart = [];
 u0      = zeros(length(A),1);
 
 npre = 1; npos = 1; w  = 0.7; numit = 20; smo = 'wjac';
-Aepsinv = @(x) Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
-mat1 = @(x) A*Aepsinv(x);
+x    = Fcycle(mg_mat,mg_split,restr,interp,u0,b,npre,npos,w,smo,1);
+mat1 = @(x) A*Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
 
 [~, ~, ~, iter1, ~] = gmres(mat1,  b, restart, tol, maxit);
+
+
 
 R = restr{1};
 P = interp{1};
 
-Ac = R*A*P;
-
-[Lc,Uc] = lu(Ac);
-  
-cgc =  @(x) P*(Uc\(Lc\(R*x)));
-def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
-mat2 = @(x) A*def(x);
- 
-[~, ~, ~, iter2, ~] = gmres(mat2,  b, restart, tol, maxit);
-
-
+AH
 
 
 

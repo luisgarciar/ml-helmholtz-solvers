@@ -1,9 +1,8 @@
 %Test of GMRES for the 2D Helmholtz problem with P1 finite elements
 %
 % We use the test problem
-%
 %  -div(grad u)-k^2 u  = f   in Omega = (0,1)x(0,1)
-%  grad(u) dot n - i*ku = g on boundary(Omega)
+%   grad(u) dot n - i*ku = g on boundary(Omega)
 %
 % for the preconditioner we use the shifted Laplacian
 %
@@ -26,7 +25,6 @@ for i=1:length(kk)
     npcc = 5;
     [npf,numlev] = fd_npc_to_npf(npcc,k,0.5);  %number of points in finest grid (1D)
 
-    
     %Construction of the linear system and the preconditioner
     bc = 'som';
     %Construct square mesh of meshsize h
@@ -53,8 +51,7 @@ for i=1:length(kk)
     Aeps = mg_mat_{1};
     
     assert(length(Aeps)==length(A),'Size of matrices does not match');
-    
-    
+   
     %Parameters for GMRES
     restart   = [];
     tol       = 1e-8;

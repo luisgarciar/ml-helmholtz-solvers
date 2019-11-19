@@ -30,12 +30,9 @@ for i=1:length(kk)
         npf = npf+1;
     end
     npc = (npf-1)/2;
-    
-    
-    
+     
     [~,numlev] = fd_npc_to_npf(npcc,k,ppw);  %number of points in finest grid (1D)
 
-    
     bc = 'som';
     %Construct square mesh of meshsize h
     h = 1/npf;

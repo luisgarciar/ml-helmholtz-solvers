@@ -32,10 +32,10 @@ if par >1
     npf = npf-1;
 else 
 %Case 2: When  par <1, the number of fine grid points grows 
-%linearly with respect to k^3/2. , 
+%linearly with respect to par*k^3/2. , 
 %and the gridsize h = 1/(npf+1) satisfies npf approx ceil(k^(3/2))
 
-    m  = (sqrt(k)^3)*(1/(npc+1));
+    m  = par*(sqrt(k)^3)*(1/(npc+1));
    lev = ceil(log2(m))+1;
    lev = max(lev,1);   %at least 1 level
    npf = (npc+1)*(2^(lev-1))-1;

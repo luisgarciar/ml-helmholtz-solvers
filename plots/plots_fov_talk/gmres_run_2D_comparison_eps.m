@@ -88,11 +88,11 @@ for j=1:length(poweps)
     Aeps = eqn2.A;
     
     %Inverses of SLaplace and coarse operator
-    [L,U]    = lu(Aeps);
-    Aepsinv  =  @(x) U\(L\x);     %Inverse of shifted Laplace
+    [L,U]   = lu(Aeps);
+    Aepsinv =  @(x) U\(L\x);     %Inverse of shifted Laplace
     
     %Definition of preconditioned operators
-    AAepsinv  = @(x) A*Aepsinv(x);  %SL
+    AAepsinv = @(x) A*Aepsinv(x);  %SL
     
     %Input for GMRES
     b  = ones(length(A),1);
@@ -111,8 +111,7 @@ for j=1:length(poweps)
     FS = 25; % font size
     set(gca,'LooseInset',get(gca,'TightInset'))
     set(gca,'FontSize',FS)
-    
-    
+   
     hold on
 end %End of factoreps for-loop
 
