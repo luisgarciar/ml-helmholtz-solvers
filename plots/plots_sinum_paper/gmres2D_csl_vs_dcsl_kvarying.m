@@ -78,6 +78,6 @@ cgc =  @(x) P*(Uc\(Lc\(R*x)));
 def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
 mat2 = @(x) A*def(x);
  
-[~, ~, ~, itercsl(i), ~] = gmres(mat2,  b, restart, tol, maxit);
+[~, ~, ~, iterdef(i), ~] = gmres(mat2,  b, restart, tol, maxit);
 
 end
