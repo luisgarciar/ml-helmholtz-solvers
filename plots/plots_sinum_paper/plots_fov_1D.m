@@ -1,4 +1,4 @@
-%Plots of FOVs for SINUM paper
+ %Plots of FOVs for SINUM paper
 
 %% Plots with eps = k^2
 %% Plots with N = ceil(k^2)

@@ -123,6 +123,7 @@ for j = 2:3
     [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
     iterdef(i,j) = iter2(2);  
     msg = strcat('Finished GMRES-TL run');
+
     
 end
 
