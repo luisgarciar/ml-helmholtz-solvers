@@ -23,6 +23,7 @@ np   = npf-2;
 h = 1/(npcc+1);
 [node,elem] = squaremesh([0 1 0 1],h);
 
+
 %refining the mesh numlev times
 for j = 1:numlev-1
     [node,elem] = uniformrefine(node,elem);
@@ -72,10 +73,3 @@ def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
 mat2 = @(x) A*def(x);
  
 [~, ~, ~, iter2, ~] = gmres(mat2,  b, restart, tol, maxit);
-
-
-
-
-
-
-
