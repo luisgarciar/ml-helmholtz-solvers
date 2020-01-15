@@ -12,13 +12,12 @@ iterdef = zeros(m,3);
 reflevs   = 1;   
 restart   = [];
 tol       = 1e-6;
-maxit     = 200;
+maxit     = 150;
 npcc      = 3;
-par       = 0.7;
+par       = 0.6;
 
 
 for i = 1:m
-    
 k    = kk(i);
 bc   = 'som';
 npf  = ceil(k^(3/2));
@@ -63,7 +62,16 @@ npre = 1; npos = 1; w  = 0.7; smo = 'wjac';
 Aepsinv = @(x) Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
 mat1    = @(x) A*Aepsinv(x);
 
-[~, ~, ~, iter1, ~] = gmres(mat1,  b, restart, tol, maxit);
+factorepss = num2str(factoreps);
+ks = num2str(kk(i));
+
+msg = strcat('Beginning GMRES-CSL run for Helmholtz problem with k','=',ks,', eps','=',factorepss,'*k^2');
+disp(msg);
+disp(strcat('Size of problem is',': ',num2str(length(A))));
+
+[~, ~, ~, iter1, ~] = gmres(mat1,b,restart,tol,maxit);
+msg = strcat('Finished GMRES-CSL run');
+disp(msg);
 
 itercsl(i)=iter1(2);
 P = interp{1};
@@ -71,15 +79,24 @@ R = restr{1};
 Ac = R*A*P;
 
 setup.type = 'crout';
-setup.droptol = 1e-1;
+setup.droptol = 1e-6;
+
+msg = strcat('Beginning iLU factorization of coarse matrix for Helmholtz problem with k','= ',ks,'eps','= ', factorepss,'*k^2');
+disp(msg);
+disp(strcat('Size of coarse problem is', ': ',num2str(length(Ac))));
 [Lc,Uc] = ilu(Ac,setup); 
-length(Ac)
+msg = strcat('Finished iLU factorization of coarse problem');
+disp(msg)
 
 cgc =  @(x) P*(Uc\(Lc\(R*x)));
 def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
 mat2 = @(x) A*def(x);
- 
+
+msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k', '=',ks,', eps', ' = ', factorepss,'*k^2');
+disp(msg)
 [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
+msg = strcat('Finished GMRES-TL run');
+disp(msg);
 
 iterdef(i,1) = iter2(2);
 
@@ -87,26 +104,32 @@ Pc = P;
 Rc = R;
 
 for j = 2:3
-    
     Pc = Pc*interp{j};
     Rc = restr{j}*Rc;
-    Acc = R*A*P;
-    [Lc,Uc] = lu(Acc);
+    Acc = Rc*A*Pc;
+    msg = strcat('Beginning iLU factorization of coarse matrix for Helmholtz problem with k','=',ks,', eps', '=', factorepss,'*k^2');
+    disp(msg);
+    disp(strcat(' Size of coarse problem is', ' : ', num2str(length(Ac))));
+    [Lc,Uc] = ilu(Acc,setup);     
+    msg = strcat('Finished iLU factorization of coarse problem');
+    disp(msg);
     
-    cgcc = @(x) Pccc*(Uc\(Lc\(Rcc*x)));
-    def  = @(x) Aepsinv(x-A*cgc(x))+cgc(x);
+    cgcc = @(x) Pc*(Uc\(Lc\(Rc*x)));
+    def  = @(x) Aepsinv(x-A*cgcc(x))+cgcc(x);
     mat2 = @(x) A*def(x);
-    [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
     
+    msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k',' = ',ks,' eps', ' = ', factorepss,'*k^2');
+    disp(msg);
+    [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
     iterdef(i,j) = iter2(2);  
-    length(Acc)
+    msg = strcat('Finished GMRES-TL run');
+    disp(msg);
+    
 end
-
 end
-
 
 %% Postprocessing   %% 
-epss   = num2str(10*factoreps);
+epss = num2str(10*factoreps);
 table_data   = [kk',itercsl,iterdef(:,1),iterdef(:,2),iterdef(:,3)];
 numrows      = size(table_data,1);
 numcols      = size(table_data,2);
@@ -137,7 +160,7 @@ footer = {'\end{tabular}';['\caption{',tableCaption,'}']; ...
 table1 = [table1;'\hline';footer];
 
 %Save the table to a file in folder ../../../tex_files/tables
-namefile = strcat('table_csl_vs_adef_coarse_facteps',epss,'.tex');
+namefile = strcat('table_csl_vs_adef_coarse_inexact_facteps',epss,'.tex');
 %currentpath = mfilename('fullpath');
 currentpath = fileparts(mfilename('fullpath'));
 

@@ -12,7 +12,7 @@ iterdef = zeros(m,3);
 reflevs   = 1;   
 restart   = [];
 tol       = 1e-6;
-maxit     = 100;
+maxit     = 150;
 npcc      = 3;
 par       = 0.7;
 
@@ -67,7 +67,7 @@ mat1    = @(x) A*Aepsinv(x);
 factorepss = num2str(factoreps);
 ks = num2str(kk(i));
 
-msg = strcat('Beginning GMRES-CSL run for Helmholtz problem with k=',ks,'eps=', factorepss,'*k^2');
+msg = strcat('Beginning GMRES-CSL run for Helmholtz problem with k', '=', ks,' eps', '=', factorepss,'*k^2');
 disp(msg);
 disp(strcat('Size of problem is  ',num2str(length(A))));
 
@@ -81,19 +81,19 @@ P = interp{1};
 R = restr{1};
 Ac = R*A*P;
 
-msg = strcat('Beginning LU factorization of coarse matrix for Helmholtz problem with k=',ks,'eps=', factorepss,'*k^2');
+msg = strcat('Beginning LU factorization of coarse matrix for Helmholtz problem with k','=',ks,' eps', '=', factorepss,'*k^2');
 disp(msg);
-disp(strcat(' Size of coarse problem is   ',num2str(length(Ac))));
+disp(strcat('Size of coarse problem is:',num2str(length(Ac))));
 [Lc,Uc] = lu(Ac); 
 msg = strcat('Finished LU factorization of coarse problem');
-
+disp(msg)
 
 cgc =  @(x) P*(Uc\(Lc\(R*x)));
 def =  @(x) Aepsinv(x-A*cgc(x))+cgc(x);
 mat2 = @(x) A*def(x);
 
-
-msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k=',ks,' eps= ', factorepss,'*k^2');
+msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k', ' = ',ks,' eps', ' = ', factorepss,'*k^2');
+disp(msg)
 [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
 msg = strcat('Finished GMRES-TL run');
 disp(msg);
@@ -107,22 +107,25 @@ for j = 2:3
     
     Pc = Pc*interp{j};
     Rc = restr{j}*Rc;
-    Acc = R*A*P;
-    msg = strcat('Beginning LU factorization of coarse matrix for Helmholtz problem with k=',ks,'eps=', factorepss,'*k^2');
+    Acc = Rc*A*Pc;
+    msg = strcat('Beginning LU factorization of coarse matrix for Helmholtz problem with k','=',ks,'eps','=',factorepss,'*k^2');
     disp(msg);
-    disp(strcat(' Size of coarse problem is   ',num2str(length(Ac))));
-    msg = strcat('Finished LU factorization of coarse problem');
-
-    [Lc,Uc] = lu(Acc);
+    disp(strcat('Size of coarse problem is:',num2str(length(Acc))));
     
-    cgcc = @(x) Pccc*(Uc\(Lc\(Rcc*x)));
-    def  = @(x) Aepsinv(x-A*cgc(x))+cgc(x);
+    [Lc,Uc] = lu(Acc);
+    msg = strcat('Finished LU factorization of coarse problem');
+    disp(msg);
+    
+    cgcc = @(x) Pc*(Uc\(Lc\(Rc*x)));
+    def  = @(x) Aepsinv(x-A*cgcc(x))+cgcc(x);
     mat2 = @(x) A*def(x);
     
-    msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k=',ks,'eps=', factorepss,'*k^2');
+    msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k','=',ks,' eps', '=',factorepss,'*k^2');
+    disp(msg);
     [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
     iterdef(i,j) = iter2(2);  
     msg = strcat('Finished GMRES-TL run');
+    disp(msg);
     
 end
 
