@@ -10,18 +10,18 @@ opts.bc = 'som';
 opts.fvpts = 64;
 opts.disc = 'q'; 
 
-kmult  =  [5 20 50 80 100];
+kk  =  [20 40 80 160 320];
 
 %CSL
 opts.prec = 'csl';
-[fovAAeps] = computefovAhat(kmult,opts);
-plotfovAhat(fovAAeps,kmult,opts);
+[fovAAeps] = computefovAhat(kk,opts);
+plotfovAhat(fovAAeps,kk,opts);
 close all
 
 %Deflated CSL
 opts.prec = 'adef';
-[fovAB] = computefovAhat(kmult,opts);
-plotfovAhat(fovAB,kmult,opts);
+[fovAB] = computefovAhat(kk,opts);
+plotfovAhat(fovAB,kk,opts);
 close all
 
 %% Plots with  N = ceil(k^1.5)
@@ -34,18 +34,18 @@ opts.fvpts = 64;
 opts.disc = 'pf';
 close all
 
-kmult  =  [5 20 50 80 100];
+%kmult  =  [20 40 80 160 320];
 
 %CSL
 opts.prec = 'csl';
-[fovAAeps] = computefovAhat(kmult,opts);
-plotfovAhat(fovAAeps,kmult,opts);
+[fovAAeps] = computefovAhat(kk,opts);
+plotfovAhat(fovAAeps,kk,opts);
 close all
 
 %Deflated CSL
 opts.prec = 'adef';
-[fovAB] = computefovAhat(kmult,opts);
-plotfovAhat(fovAB,kmult,opts);
+[fovAB] = computefovAhat(kk,opts);
+plotfovAhat(fovAB,kk,opts);
 close all
 
 %% Plots with eps = 5k^2
@@ -59,18 +59,18 @@ opts.bc = 'som';
 opts.fvpts = 64;
 opts.disc = 'q';
 
-kmult  =  [5 20 50 80 100];
+kk  =  [20 40 80 160 320];
 
 %CSL
 opts.prec = 'csl';
-[fovAAeps] = computefovAhat(kmult,opts);
-plotfovAhat(fovAAeps,kmult,opts);
+[fovAAeps] = computefovAhat(kk,opts);
+plotfovAhat(fovAAeps,kk,opts);
 close all
 
 %Deflated CSL
 opts.prec = 'adef';
-[fovAB] = computefovAhat(kmult,opts);
-plotfovAhat(fovAB,kmult,opts);
+[fovAB] = computefovAhat(kk,opts);
+plotfovAhat(fovAB,kk,opts);
 close all
 
 %% Plots with  N = ceil(k^1.5)
@@ -82,20 +82,16 @@ opts.bc = 'som';
 opts.fvpts = 64;
 opts.disc = 'pf';
 
-kmult  =  [5 20 50 80 100];
+%kk  =  [20 40 80 160 320];
 
 %CSL
 opts.prec = 'csl';
-[fovAAeps] = computefovAhat(kmult,opts);
-plotfovAhat(fovAAeps,kmult,opts);
+[fovAAeps] = computefovAhat(kk,opts);
+plotfovAhat(fovAAeps,kk,opts);
 close all
 
 %Deflated CSL
 opts.prec = 'adef';
-[fovAB] = computefovAhat(kmult,opts);
-plotfovAhat(fovAB,kmult,opts);
+[fovAB] = computefovAhat(kk,opts);
+plotfovAhat(fovAB,kk,opts);
 close all
-
-
-
-

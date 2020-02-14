@@ -37,7 +37,7 @@ linetyp = {'-','-.',':','--','-','-.','-','-.'};
 color1  = [0 0 0; 0.5 0 0.5; 0 0 1; 0 0.5 0; 1 0 0; 1 0.5 0; 0 0 0;... 
            0.5 0 0.5];
 %Wavenumber
-kk      =  kmult*pi;
+kk      =  kmult;
 
 switch disc
     case 'q'
@@ -52,7 +52,7 @@ for i=1:length(kk)
     k   = kk(i);
     eps = factoreps*k^poweps;
  
-    label = strcat('$k = ', num2str(kmult(i)),' \pi$');
+    label = strcat('$k = ', num2str(kmult(i)),'$');
     fovplot(i) =  plot(real(fovAhat(:,i)),imag(fovAhat(:,i)),'Color',color1(i,:),...
                       'LineWidth',2,'linestyle',linetyp{i},...
                       'DisplayName',label);

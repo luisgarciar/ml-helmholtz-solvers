@@ -8,11 +8,10 @@ p=1;
 
 itercsl = zeros(m,1);
 iterdef = zeros(m,3);
-
 reflevs   = 1;   
 restart   = [];
 tol       = 1e-6;
-maxit     = 150;
+maxit     = 200;
 npcc      = 3;
 par       = 0.6;
 

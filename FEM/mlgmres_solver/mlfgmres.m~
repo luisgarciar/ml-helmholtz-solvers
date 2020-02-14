@@ -90,7 +90,7 @@ while (j < maxit)
     
     %Transform j-th column of Hessenberg matrix with previous Givens-rotations
     for i=1:j-1
-        H(i:i+1,j) = [c(i),s(i); -s(i)',c(i)]*H(i:i+1,j);
+        H(i:i+1,j) = [c(i),s(i);-s(i)',c(i)]*H(i:i+1,j);
     end
     
     beta = norm(H(j:j+1));   %Is this correct?

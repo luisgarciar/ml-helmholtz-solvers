@@ -36,7 +36,7 @@ disc = opts.disc;
 fvpts = opts.fvpts;
 
 %Wavenumber
-kk      =  kmult*pi;
+kk      =  kmult;
 
 switch disc
     case 'q'
@@ -87,7 +87,7 @@ for i=1:length(kk)
     %Function handles Adef
     AP  =  @(x)  M*Aepsinv(x-A*Z*Acinv((Z'*x)));
     APH =  @(x)  AepsHinv(M*x)- Z*AcHinv(Z'*A'*AepsHinv(M*x));
-    v0 = ones(length(A),1);
+    v0 = randn(length(A),1);
     
     switch prec
         case 'csl'
@@ -98,7 +98,7 @@ for i=1:length(kk)
     end
     
     %Field of values of AHat in Euclidean inner product
-    [fovAhat(:,i),~,~] = sfov(Ahat,AhatH,v0,N,64);
+    [fovAhat(:,i),~,~] = sfov(Ahat,AhatH,v0,N,fvpts);
     fovAhat(:,i) = 1+1i*eps*fovAhat(:,i);
     
    
