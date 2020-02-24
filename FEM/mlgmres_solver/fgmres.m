@@ -140,6 +140,7 @@ for it=1:max_iters
     end
     u = r;
     normr = norm(r);
+    beta = normr; 
     if (verb>1)
         fprintf('==fgmres== iter=%d, |r| = %g, time=%g  \n', it-1, beta, toc(t_gmres_start));
     end
@@ -187,11 +188,9 @@ for it=1:max_iters
             u = [zeros(j,1); w(j+1:end)];
             alpha = norm(u);
             if (alpha ~= 0)
-                if (w(j+1)<0)
-                    alpha = -alpha;
-                end
-                u(j+1) = u(j+1) + alpha;
-                u = u / norm(u);
+                alpha  = scalarsign(w(j+1))*alpha;
+                u(j+1) = u(j+1)+alpha;
+                u = u/norm(u);
                 V{j+1} = u;
                 
                 %  Apply Pj+1 to v.
