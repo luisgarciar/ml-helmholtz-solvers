@@ -45,7 +45,7 @@ function [x,iter,resids] = fgmres(A, b, tol, varargin)
 % as tol/(|r|/|b|)^relaxation, where r is the current residual
 relaxation = 0;
 % Number of outer iterations
-max_iters = 2;
+max_iters = 1;
 % Number of inner iterations
 restart = 20;
 % Initial guess

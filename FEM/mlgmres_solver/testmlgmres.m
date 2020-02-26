@@ -1,15 +1,4 @@
-%% test fgmres
-
-% n = 20;
-% A1 = randn(n,1);
-% A2 = randn(n,n);
-% b  = ones(n,1);
-% A  = A1+1i*A2;
-% x1 = gmres(A,b);
-% x2 = fgmres(A,b,1e-8);
-% 
-% res1 = norm(b-A*x1);
-% res2 = norm(b-A*x2);
+%% test mlfgmres.m
 
  
 %% test with Helmholtz matrix and Shifted Laplace preconditioner
@@ -18,16 +7,15 @@ dim       = 2;
 poweps    = 2;
 factoreps = 1;
 
-k  = 40;
+k  = 180;
 bc = 'som';
 
-reflevs   = 1;   %
 restart   = [];
 tol       = 1e-6;
-maxit     = 200;
+maxit     = 100;
 
 npcc = 3;
-par  = 0.7;
+par  = 0.6;
 npf  = ceil(k^(3/2));
 np   = npf-2;
 
@@ -49,14 +37,16 @@ pdehelm    = helmholtz2Dconstantwndata(k,0,1);
 pdeSL      = helmholtz2Dconstantwndata(k,factoreps,poweps);
 option.tol = 1e-8;
 
+%building the matrices
 [eqn1,~] = helmholtz2Dfem(node,elem,pdehelm,bdFlag,bdEdge);
 [eqn2,~] = helmholtz2Dfem(node,elem,pdeSL,bdFlag,bdEdge);
 
-[mg_mat,mg_split,restr,interp]= mg_setupfem_2D(npcc,numlev,pdeSL);
+%setting up the multilevel structure
+[mg_matHelm,mg_splitHelm,restr,interp]= mg_setupfem_2D(npcc,numlev,pdehelm);
+[mg_matCSL,mg_splitCSL,restrCSL,interpCSL]= mg_setupfem_2D(npcc,numlev,pdeSL);
 
-A      = eqn1.A;
-Aeps  = mg_mat{1};
-%[L,U]  = lu(Aeps);
+A      = mg_matHelm{1};
+Aeps   = mg_matCSL{1};
 
 n1 = length(A);
 n2 = length(Aeps);
@@ -73,7 +63,15 @@ mat1 = @(x) A*Aepsinv(x);
 
 tol = 1e-8;
 Aa = @(x,tol) A*x;
-P = @(x,tol) Aepsinv(x);
+P  = @(x,tol) Aepsinv(x);
 
-[x1,iter,resids] = fgmres(Aa, b, tol, 'P',P,'max_iters', 1,'restart',200);
-[x2, ~, ~, iter1, ~] = gmres(mat1,  b, restart, tol, maxit);
+maxiter = ones(length(mg_matHelm),1);
+maxiter(1:5)=[20,8,4,2,2]';
+x0 = zeros(n1,1);
+
+%[x1,iter1,resids] = fgmres(Aa, b, tol, 'P',P,'max_iters', 1,'restart',200);
+[x2,flag,resvec,iter2] = mlfgmres(b,x0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
+
+
+
+

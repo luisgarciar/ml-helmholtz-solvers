@@ -11,7 +11,6 @@ n2 = length(ml_prec{1});
 
 assert(n1==n2,'inconsistent size of matrix and preconditioner');
 n = n1;
-tol_exit=tol;
 
 %if numlevs==1 solve exactly and return
 if numlevs == 1
@@ -106,7 +105,7 @@ else
         else
             xinit = zeros(length(ml_mat{2}),1);
             %recursive call to multilevel method
-            [rH,~,~,~] = mlfgmres(z1,xinit,ml_mat(2:numlevs),ml_prec(2:numlevs),ml_prec_split(2:numlevs),restrict(2:numlevs-1),interp(2:numlevs-1),maxiter(2:end),tol);
+            [rH,~,~,~] = mlfgmres(z1,xinit,ml_mat(2:numlevs),ml_prec(2:numlevs),ml_prec_split(2:numlevs),restrict(2:numlevs-1),interp(2:numlevs),maxiter(2:end),tol);
         end
         
         eH = interp{1}*rH;
@@ -114,7 +113,7 @@ else
         z3 = M(z2);
         Z{j} = z3 + eH;
         %end of preconditioning step
-        w = A(Z{j});
+        w = A*Z{j};
         
         % Orthogonalize the Krylov vector
         %  Form Pj*Pj-1*...P1*Av.
@@ -170,7 +169,6 @@ else
         
         if (resid<tol_exit)
             iter = j;
-            flag = 0;
             break;
         end
     end
@@ -183,8 +181,7 @@ else
     end
     
     x = x0+dx;
-    flag = 0;
-    iter = j;
+    
 end
 
 
