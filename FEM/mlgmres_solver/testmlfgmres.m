@@ -1,23 +1,17 @@
-%% test mlfgmres.m
-
- 
+%% test mlfgmres.m 
 %% test with Helmholtz matrix and Shifted Laplace preconditioner
-
 dim       = 2;
 poweps    = 2;
 factoreps = 1;
 
-k  = 180;
+k  = 160;
 bc = 'som';
 
-restart   = [];
-tol       = 1e-6;
-maxit     = 100;
-
-npcc = 3;
-par  = 0.6;
-npf  = ceil(k^(3/2));
-np   = npf-2;
+maxit = 100;
+npcc  = 1;
+par   = 0.6;
+npf   = ceil(k^(3/2));
+np    = npf-2;
 
 [npf,numlev] = fem_npc_to_npf(npcc,k,par);  %number of points in finest grid (1D)
 
@@ -57,21 +51,25 @@ b       = ones(length(A),1);
 restart = [];
 u0      = zeros(length(A),1);
 
-npre = 1; npos = 1; w  = 0.7; numit = 20; smo = 'wjac';
-Aepsinv = @(x) Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
+npre = 1; npos = 1; w  = 2/3; smo = 'wjac';
+Aepsinv = @(x) Vcycle(mg_matCSL,mg_splitCSL,restrCSL,interpCSL,u0,x,npre,npos,w,smo,1);
 mat1 = @(x) A*Aepsinv(x);
 
-tol = 1e-8;
-Aa = @(x,tol) A*x;
-P  = @(x,tol) Aepsinv(x);
+tol = 1e-6;
+Aa  = @(x,tol) A*x;
+AP  = @(x) A*Aepsinv(x);
 
 maxiter = ones(length(mg_matHelm),1);
-maxiter(1:5)=[20,8,4,2,2]';
+maxiter(1:5)=[20,6,2,2,1]';
 x0 = zeros(n1,1);
+ 
+ tol = 1e-6;
 
-%[x1,iter1,resids] = fgmres(Aa, b, tol, 'P',P,'max_iters', 1,'restart',200);
-[x2,flag,resvec,iter2] = mlfgmres(b,x0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
+  
+tic
+[x1,flag1,relres,iter]  = gmres(AP, b, [], tol, maxit);
+timecsl = toc;
 
-
-
-
+tic
+[x2,flag2,resvec,iter2] = mlfgmres(b,x0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
+timeml = toc;

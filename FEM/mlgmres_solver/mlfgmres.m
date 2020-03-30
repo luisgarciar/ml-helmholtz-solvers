@@ -22,7 +22,7 @@ else
     
     %setup for shifted Laplace preconditioner
     x1    = zeros(length(b),1);
-    npre  = 1; npos = 1; w = 0.7; smo = 'wjac';
+    npre  = 1; npos = 1; w = 2/3; smo = 'wjac';
     M     = @(x) feval(@Vcycle,ml_prec,ml_prec_split,restrict,interp,x1,x,npre,npos,w,smo,1);
     maxit = maxiter(1);
     
@@ -48,7 +48,7 @@ else
         return;
     end
     
-    resvec = zeros(maxit+1,1);
+    %resvec = zeros(maxit+1,1);
     % Householder data
     W = zeros(maxit+1,1);
     R = zeros(maxit, maxit);
@@ -162,11 +162,7 @@ else
         
         %Residual
         resid = abs(W(j+1))/beta0;
-        resvec(j+1)=resid;
-        
-        %     if (verb>1)
-        %         fprintf('==fgmres== iter=[%d,%d], resid=%3.3e, locerr=%3.3e, time=%g\n', it, j, resid, err, toc(t_gmres_start));
-        %     end
+        resvec=[resvec', abs(W(j+1))]';
         
         if (resid<tol_exit)
             iter = j;
