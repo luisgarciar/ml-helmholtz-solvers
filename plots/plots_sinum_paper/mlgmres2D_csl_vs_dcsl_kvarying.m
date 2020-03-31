@@ -2,27 +2,25 @@ function [p] = mlgmres2D_csl_vs_dcsl_kvarying(kk,factoreps)
 
 dim       = 2;
 poweps    = 2;
-m  = length(kk);
+m         = length(kk);
 save_flag = 1;
-p=1;
+p         = 1;
 
-itercsl   = zeros(m,1);
-iterdef   = zeros(m,2);
-timecsl   = zeros(m,1);
-timedef   = zeros(m,2);
+itercsl   =  zeros(m,1);
+iterdef   =  zeros(m,2);
+timecsl   =  zeros(m,1);
+timedef   =  zeros(m,2);
 
-
-tol       = 1e-6;
-maxit     = 200;
-npcc      = 1;
-par       = 0.6;
+tol       =  1e-6;
+maxit     =  200;
+npcc      =  1;
+par       =  0.6;
 bc        = 'som';
+
 
 for i = 1:m
     k    = kk(i);
-    
-    [npf,numlev] = fem_npc_to_npf(npcc,k,par);  %number of points in finest grid (1D)
-    
+    [npf,numlev] = fem_npc_to_npf(npcc,k,par);  %number of points in finest grid (1D)    
     h = 1/(npcc+1);
     [node,elem] = squaremesh([0 1 0 1],h);
     
@@ -60,7 +58,7 @@ for i = 1:m
     u0      = zeros(length(A),1);
     
     npre = 1; npos = 1; w  = 0.7; smo = 'wjac';
-    Aepsinv = @(x) Fcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,1);
+    Aepsinv = @(x) Fcycle(mg_matCSL,mg_splitCSL,restrCSL,interpCSL,u0,x,npre,npos,w,smo,1);
     AP  = @(x) A*Aepsinv(x);
     tol = 1e-6;
     
@@ -75,7 +73,7 @@ for i = 1:m
     
     tic
     [~, ~, ~, iter1, ~] = gmres(AP,b,restart,tol,maxit);
-    timecsl = toc;
+    timecsl(i,1) = toc;
     
     msg = strcat('Finished GMRES-CSL run');
     disp(msg);
@@ -92,20 +90,22 @@ for i = 1:m
     [x2,~,~,iter2] = mlfgmres(b,x0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
     timeml1 = toc;
     msg = strcat('Finished GMRES-TL run');
-    iterdef(i,1) = iter2(2);
+    iterdef(i,1) = iter2;
     timeml(i,1)=timeml1;
     
+    %% ML Run with MK(6,4,2,1)
+
     maxiter(1:5)=[20,6,2,2,1]';
     
     msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k', '=',ks,', eps', ' = ', factorepss,'*k^2');
     disp(msg)
     tic
-    [~, ~, ~,iter2, ~] = gmres(mat2, b, restart, tol, maxit);
+    [x2,~,~,iter2] = mlfgmres(b,x0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
     timeml2 = toc;
     msg = strcat('Finished GMRES-TL run');
     disp(msg);
     
-    iterdef(i,2) = iter2(2);
+    iterdef(i,2) = iter2;
     timeml(i,2)=timeml2;
 
 end
@@ -113,14 +113,14 @@ end
 
 %% Postprocessing   %%
 epss = num2str(10*factoreps);
-table_data   = [kk',itercsl,timecsl,iterdef(:,1),timedef(:,1),iterdef(:,2),timedef(:,2)];
+table_data   = [kk',itercsl,timecsl,iterdef(:,1),timeml(:,1),iterdef(:,2),timeml(:,2)];
 numrows      = size(table_data,1);
 numcols      = size(table_data,2);
 tableCaption = strcat('Number of GMRES iterations and total computation time (in seconds) for the Helmholtz linear system preconditioned by the  CSL and the multilevel method (ML)');
 tableLabel   = strcat('mlgmres_csl_vs_adef_coarse_eps_',epss);
 
 %Data Format: .0f no decimals,
-dataFormat = {'%.0f','%.0f','.3f','%.0f','.3f','%.0f','.3f'};
+dataFormat = {'%.0f','%.0f','%g','%.0f','%g','%.0f','%g'};
 header = ['\begin{tabular}','{',repmat(('c'),1,numcols),'}'];
 table1  = {'\begin{table}[t]';'\centering';header;'\hline'};
 row1   = {'$k$ & CSL & CSL-t & ML(8,4,2) & ML(8,4,2)-t& ML(6,4,2) & ML(6,4,2)-t \\ \hline'};
@@ -143,7 +143,7 @@ footer = {'\end{tabular}';['\caption{',tableCaption,'}']; ...
 table1 = [table1;'\hline';footer];
 
 %Save the table to a file in folder ../../../tex_files/tables
-namefile = strcat('table_mlgmres_csl_vs_adef_coarse_inexact_facteps',epss,'.tex');
+namefile = strcat('table_mlgmres_csl_vs_ml_facteps',epss,'.tex');
 %currentpath = mfilename('fullpath');
 currentpath = fileparts(mfilename('fullpath'));
 
