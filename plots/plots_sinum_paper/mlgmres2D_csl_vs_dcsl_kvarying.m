@@ -13,7 +13,7 @@ timedef   =  zeros(m,2);
 
 tol       =  1e-6;
 maxit     =  200;
-npcc      =  1;
+npcc      =  3;
 par       =  0.6;
 bc        = 'som';
 
@@ -71,18 +71,20 @@ for i = 1:m
     disp(msg);
     disp(strcat('Size of problem is',': ',num2str(length(A))));
     
-    tic
-    [~, ~, ~, iter1, ~] = gmres(AP,b,restart,tol,maxit);
-    timecsl(i,1) = toc;
+    %tic
+    %[~, ~, ~, iter1, ~] = gmres(AP,b,restart,tol,maxit);
+    %timecsl(i,1) = toc;
     
     msg = strcat('Finished GMRES-CSL run');
     disp(msg);
     
-    itercsl(i)=iter1(2);
+    %itercsl(i)=iter1(2);
+    itercsl(i)=0;
+   
     
     %% ML Run with MK(8,4,2,1)
     maxiter = ones(length(mg_matHelm),1);
-    maxiter(1:5)=[20,8,2,2,1]';
+    maxiter(1:5)=[20,8,4,2,1]';
     x0 = zeros(n1,1);
     
     msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k', '=',ks,', eps', ' = ', factorepss,'*k^2');
@@ -95,7 +97,7 @@ for i = 1:m
     
     %% ML Run with MK(6,4,2,1)
 
-    maxiter(1:5)=[20,6,2,2,1]';
+    maxiter(1:5)=[20,6,4,2,1]';
     
     msg = strcat('Beginning GMRES-TL run for Helmholtz problem with k', '=',ks,', eps', ' = ', factorepss,'*k^2');
     disp(msg)
