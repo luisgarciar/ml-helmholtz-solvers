@@ -12,7 +12,7 @@ save_flag = 0;  % save_flag=1: save plots and table, =0 do not save.
 %Setup list of wavenumbers
 %wavenum = [20:20:120];
 %wavenum = [5 10 20 40 60 80 100 120 150];
-wavenum =  [10 20 40 80];
+wavenum =  [10 20 40 60 80 100 120 160];
 
 bc  = 'som1';
 ppw = 0.5;   %pollution free grid

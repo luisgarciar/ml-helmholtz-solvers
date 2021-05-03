@@ -49,11 +49,10 @@ for i=1:length(np)
     
     %Constructing the matrix and right hand side
     [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge);
-   
     
     %Matrix and right hand side
     A = eqn.A; b = eqn.b;
-    u       = A\b;
+    u = A\b;
     
     %interpolant of the exact solution
     u_exact = pde.exactu(node);
