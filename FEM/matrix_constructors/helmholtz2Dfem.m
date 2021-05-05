@@ -22,12 +22,9 @@ function [eqn,info] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge,option)
 %   The data is given by the
 %   structure pde which contains function handles k, f, g
 %   and the parameters poweps, factoreps for the shifted Laplacian
-%   TO DO: Add parameters for the shifted Laplacian
 %
 %   The structure option contains the order of quadrature for the
 %   integration of the right hand side function.
-%
-%   Input:
 %
 %   Example
 %
