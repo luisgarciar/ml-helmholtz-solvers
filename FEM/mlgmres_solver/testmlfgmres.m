@@ -63,7 +63,7 @@ maxiter = ones(length(mg_matHelm),1);
 maxiter(1:5)=[20,6,2,2,1]';
 x0 = zeros(n1,1);
  
- tol = 1e-6;
+tol = 1e-6;
 
   
 tic

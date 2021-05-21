@@ -45,7 +45,7 @@ function [x,iter,resids] = fgmres(A, b, tol, varargin)
 % as tol/(|r|/|b|)^relaxation, where r is the current residual
 relaxation = 0;
 % Number of outer iterations
-max_iters = 1;
+max_iters = 2;
 % Number of inner iterations
 restart = 20;
 % Initial guess
@@ -90,9 +90,12 @@ end
 
 n = size(b,1);
 
-if (restart>n)
-    restart = n;
-end
+%if (restart>n)
+%    restart = n;
+%end
+
+restart = n;
+
 
 % Norm of the RHS
 beta0 = norm(b);
@@ -110,8 +113,6 @@ end
 
 t_gmres_start = tic;
 
-% % Hessinberg matrix
-%H = zeros(restart+1, restart);
 % Householder data
 W = zeros(restart+1,1);
 R = zeros(restart, restart);
@@ -134,31 +135,29 @@ for it=1:max_iters
     % Compute the initial residual
     if (it>1)||(norm(x)>0)
         Ax = A(x, tol);
-        r = b - Ax;
+        u = b - Ax;
     else
-        r = b;
+        u = b;
     end
-    u = r;
-    normr = norm(r);
-    beta = normr; 
+    beta = norm(u);
     if (verb>1)
         fprintf('==fgmres== iter=%d, |r| = %g, time=%g  \n', it-1, beta, toc(t_gmres_start));
     end
     % Prepare the first Householder vector
-    beta = scalarsign(r(1))*normr;
-    u(1) = u(1)+beta;
+    if (u(1)<0)
+        beta = -beta;
+    end
+    u(1) = u(1)+beta;    
     u = u/norm(u);
-    V{1} = u;
-
-    %First Hessenberg entry: Apply Householder projection to r
+    % The first Hh entry
     W(1) = -beta;
-  
+    V{1} = u;
     
     for j=1:restart
         % Construct the last vector from the HH storage
         %  Form P1*P2*P3...Pj*ej.
         %  v = Pj*ej = ej - 2*u*u'*ej
-        v = -2*u(j)'*u;
+        v = -2*conj(u(j))*u;
         v(j) = v(j) + 1;
         %  v = P1*P2*...Pjm1*(Pj*ej)
         for i = (j-1):-1:1
@@ -172,7 +171,7 @@ for it=1:max_iters
         else
             % Keep the PrecVec separately
             Z{j} = P(v, tol_kryl);
-            w    = A(Z{j}, tol_kryl);
+            w = A(Z{j}, tol_kryl);
         end
         
         % Orthogonalize the Krylov vector
@@ -188,9 +187,11 @@ for it=1:max_iters
             u = [zeros(j,1); w(j+1:end)];
             alpha = norm(u);
             if (alpha ~= 0)
-                alpha  = scalarsign(w(j+1))*alpha;
-                u(j+1) = u(j+1)+alpha;
-                u = u/norm(u);
+                if (w(j+1)<0)
+                    alpha = -alpha;
+                end
+                u(j+1) = u(j+1) + alpha;
+                u = u / norm(u);
                 V{j+1} = u;
                 
                 %  Apply Pj+1 to v.
@@ -254,9 +255,7 @@ for it=1:max_iters
     end
     x = x+dx;
     
-    if (resid<tol_exit)
-        break
-    end
+    if (resid<tol_exit); break; end
 end
 
 if (verb>0)
@@ -272,11 +271,4 @@ if (nargout>2)
     resids(j+1:restart,it)=resid;
 end
 
-end
-
-function sgn = scalarsign(d)
-sgn = sign(d);
-if (sgn == 0)
-    sgn = 1;
-end
 end

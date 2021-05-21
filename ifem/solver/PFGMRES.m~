@@ -49,6 +49,7 @@ else
 end
 
 % initalize memory
+r = zeros(N,1);
 V = zeros(N, restart+1);
 Z = zeros(N, restart);
 H = zeros(restart+1, restart);
@@ -108,7 +109,7 @@ while (iter < maxit)
         elseif isa(M, 'function_handle')
             Z(:,i) = M(V(:,i));
         else
-            error('Preconditoner M is invalid!!!');
+            resid('Preconditoner M is invalid!!!');
         end % end if
         
         % w = Az
@@ -117,7 +118,7 @@ while (iter < maxit)
         elseif isa(A, 'function_handle')
             V(:,i+1) = A(Z(:,i));
         else
-            error('A is neither a matrix or a function handle!!!');
+            resid('A is neither a matrix or a function handle!!!');
         end % end if
         
         %--------------------------------------
@@ -189,6 +190,10 @@ while (iter < maxit)
     % solution
     u = u + Z(:,1:i)*y(1:i);
     
+    % check convergence
+%     if (converge)
+%        break;
+%     end
     
     % update residual and restart
     if isa(A, 'double')
@@ -196,7 +201,7 @@ while (iter < maxit)
     elseif isa(A, 'function_handle')
         r = f - A(u);
     else
-        error('A is neither a matrix or a function handle!!!');
+        resid('A is neither a matrix or a function handle!!!');
     end % end if
     
     % check convergence

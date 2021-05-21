@@ -52,15 +52,15 @@ y = 0.5*sin(t);
 
 plot(x,y,'k','LineWidth',1);
 hold on
-plot(real(eCSL),imag(eCSL),'b+','MarkerSize',5,'LineWidth',2);
+plot(real(eCSL),imag(eCSL),'b.','MarkerSize',18,'LineWidth',2);
 
 
 axis equal
 axis([-0.2  1.2 -0.7 0.7]);
-xlabel('Re(z)','FontSize',14);
-ylabel('Im(z)','FontSize',14);
-set(gca,'Xtick',[-1 -0.5 0 0.5 1],'FontSize',14);
-set(gca,'Ytick',[-1 -0.5 0 0.5 1],'FontSize',14);
+xlabel('Re(z)','FontSize',20);
+ylabel('Im(z)','FontSize',20);
+set(gca,'Xtick',[-1 -0.5 0 0.5 1],'FontSize',20);
+set(gca,'Ytick',[-1 -0.5 0 0.5 1],'FontSize',20);
 hold on;
 
 %Tikz Axis formatting
