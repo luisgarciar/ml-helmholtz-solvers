@@ -89,15 +89,11 @@ print_level = 1;
 
 P = @(x,tol) U\(L\x);
 
-
 [u_iter0,flag,relres, iter1] = gmres(A,b,restart,tol,maxit,Aepsinv2);
-[u_iter1,iter,resids] = fgmres(A, b, tol,'restart',restart, 'P',P);
 [u_iter1, iter, resid] = PFGMRES(A, b, u0, maxit, restart, tol, Aepsinv2,print_level);
 
-
-
-%Solving the Galerkin problem 
-%[u_iter2,~,~,iter2] = mlfgmres(b,u0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
+%Solving the Galerkin problem with mlpfgmres
+[u_iter2,~,~,iter2] = mlpfgmres(b,u0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
 
 %plotting the real part of the solution
 %showsolution(node,elem,real(full(u_gal)));

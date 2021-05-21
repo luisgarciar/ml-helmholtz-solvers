@@ -23,7 +23,7 @@ else
     %setup for shifted Laplace preconditioner
     x1    = zeros(length(b),1);
     npre  = 1; npos = 1; w = 2/3; smo = 'wjac';
-    M     = @(x) feval(@Fcycle,ml_prec,ml_prec_split,restrict,interp,x1,x,npre,npos,w,smo,1);
+    M     = @(x) feval(@Vcycle,ml_prec,ml_prec_split,restrict,interp,x1,x,npre,npos,w,smo,1);
     maxit = maxiter(1);
     
     %FGMRES initialization

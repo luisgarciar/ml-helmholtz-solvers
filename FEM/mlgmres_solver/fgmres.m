@@ -1,4 +1,4 @@
-function [x,iter,resids] = fgmres(A, b, tol, varargin)
+openfunction [x,iter,resids] = fgmres(A, b, tol, varargin)
 % Flexible GMRES method
 %   [x,iter] = fgmres(A, b, tol, varargin)
 %
