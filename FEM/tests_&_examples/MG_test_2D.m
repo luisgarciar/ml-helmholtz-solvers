@@ -1,59 +1,41 @@
- k  = 10;
- poweps    = 1;
- factoreps = 1;
- bc = 'som';
- 
-% %coarse mesh
- npcc = 10; 
- h = 1/(npcc+1);
- numlev = 5;
- 
-pdeSL = helmholtz2Dconstantwndata(k,factoreps,poweps);
+k  = 20;
+poweps    = 2;
+factoreps = 1;
+bc = 'som';
+par = 0.5;
+npcc = 3;
 
-%option.twolevel = true;
+[npf,numlev] = fem_npc_to_npf(npcc,k,par);  %number of points in finest grid (1D)
+h= 1/(npf+1);
+
+pdeSL = helmholtz2Dconstantwndata(k,factoreps,poweps);
 option.twolevel = false;
 
 [mg_mat,mg_split,restr,interp] = mg_setupfem_2D(npcc,numlev,pdeSL,option);
+[node,elem] = squaremesh([0 1 0 1],h);
 
-% [node,elem] = squaremesh([0 1 0 1],h);
-% 
-% %refining the mesh numlev times
-% for j = 1:numlev-1
-%     [node,elem] = uniformrefine(node,elem);
-% end
-% 
-% %Find boundary nodes
-% [~,bdEdge,~] = findboundary(elem);
-%     
-% %Sets Sommerfeld boundary conditions on all boundary edges
-% bdFlag = setboundary(node,elem,'ABC');
-% 
-% %pde data
-% pde     = helmholtz2Dconstantwndata(k,factoreps,poweps);
-% [eqn,~] = helmholtz2Dfem(node,elem,pde,bdFlag,bdEdge);
-% 
-% A = eqn.A;
-% n = size(A,1);
-% b = sparse(n,1);
-% option.solver = 'NO';
-% 
-% [~,~,Ai,~,~,Res,Pro,~] = mg(A,b,elem,option);
-% assert(length(Ai)==numlev, 'error: incorrect number of levels');
-% 
-% mg_mat = flip(Ai);
-% restr  = flip(Res);
-% restr  = restr(1:numlev-1);
-% 
-% prol  = flip(Pro); 
-% prol  = prol(2:numlev);
-% 
-% mg_split = cell(numlev,1);    
-%
-% for i=1:numlev     
-%     %matrix splitting of mg_mat{i}
-%     mg_split{i}.U = sparse(triu(mg_mat{i},1));  
-%     mg_split{i}.L = sparse(tril(mg_mat{i},-1));
-%     mg_split{i}.D = spdiags(diag(mg_mat{i}),0,length(mg_mat{i}),length(mg_mat{i}));
-% 
-% end
+Aeps = mg_mat{1};
+N = length(Aeps);
+b=zeros(N,1);
+b(ceil(N/2),1)=1;
+
+[L,U] = lu(Aeps);
+u_gal = U\(L\b);
+
+npre = 1; npos = 1; w  = 0.7; smo = 'wjac';
+u0      = zeros(length(Aeps),1);
+Aepsinv = @(x,num) Wcycle(mg_mat,mg_split,restr,interp,u0,x,npre,npos,w,smo,num);
+u_mg = Aepsinv(b,10);
+
+%%
+figure(1)
+showsolution(node,elem,real(full(u_gal)));
+
+figure(2)
+showsolution(node,elem,real(full(u_mg)));
+
+norm(u_mg-u_gal,Inf)
+
+
+
 

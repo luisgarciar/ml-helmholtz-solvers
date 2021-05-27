@@ -28,7 +28,8 @@ norm2 = @(x)sqrt(abs(x'*M*x));
 % Matrix hierarchy and right hand side 
 f = ones(npf,1); f(npf) = 0.5; h = 1/npf; f = h*f; %(constant function f=1)
 eps = 0;
-[mg_mat,mg_split,restrict,interp] = mg_setupfem(k,eps,op_type,npc,numlev,dim);
+bc = 'som';
+[mg_mat,mg_split,restrict,interp] = mg_setupfem_1D(k,eps,op_type,npc,numlev,dim,bc);
 u_exact = exact_sol(k,grid);
 A = mg_mat{1}; 
 

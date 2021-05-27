@@ -58,8 +58,8 @@ mg_split = cell(numlev,1);    %grid_smoothers{i}: matrix splittings needed for s
 
 %Level 1 
 mg_mat{1} = helmholtzfem(k,npf,eps,bc);
-restr{1}  = fwrestrictionfem(npf,dim);  %fw restriction, grid 1 to grid 2 
-prol{1}   = lininterpolfem(npc,dim);   %lin interp, grid 2 to grid 1
+restr{1}  = fwrestrictionfem(npf,dim,bc);  %fw restriction, grid 1 to grid 2 
+prol{1}   = lininterpolfem(npc,dim,bc);   %lin interp, grid 2 to grid 1
 
 mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of mg_mat{}
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
@@ -75,8 +75,8 @@ npf = npc;   npc = round(npf/2);
 for i=2:numlev-1
     
     if i<numlev      
-        restr{i}  = fwrestrictionfem(npf,dim); %fw restriction, grid i to grid i+1
-        prol{i}   = lininterpolfem(npc,dim);   %lin interp, grid i+1 to grid i        
+        restr{i}  = fwrestrictionfem(npf,dim,bc); %fw restriction, grid i to grid i+1
+        prol{i}   = lininterpolfem(npc,dim,bc);   %lin interp, grid i+1 to grid i        
     end
     
     switch op_type

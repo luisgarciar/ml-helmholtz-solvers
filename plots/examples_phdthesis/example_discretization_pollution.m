@@ -2,8 +2,8 @@ clear all;
 
 dim       = 2;
 poweps    = 2;
-factoreps = 0.5;
-k = 10;
+factoreps = 10;
+k = 20;
 
 npcc = 3;
 par  = 0.7;
@@ -75,30 +75,50 @@ option.tol = 1e-8;
  
  
 %Solving the Galerkin problem with the shifted Laplacian
-npre = 1; npos = 1; w  = 0.7; smo = 'wjac';
+npre = 0; npos = 1; w  = 0.6; smo = 'gs';
 u0      = zeros(length(A),1);
-Aepsinv = @(x) Fcycle(mg_matCSL,mg_splitCSL,restrCSL,interpCSL,u0,x,npre,npos,w,smo,1);
+Aepsinv = @(x,tol,num) Vcycle(mg_matCSL,mg_splitCSL,restrCSL,interpCSL,u0,x,npre,npos,w,smo,1);
+AP  = @(x) A*Aepsinv(x,tol,10);
 
 [L,U] = lu(Aeps);
-Aepsinv2 = @(x) U\(L\x);
+Aepsinv2 = @(x,tol) U\(L\x);
+AP2 =  @(x) A*Aepsinv2(x,tol);
+
 
 tol = 1e-12;
 maxit = 150;
 restart = [];
 print_level = 1;
 
-P = @(x,tol) U\(L\x);
 
-[u_iter0,flag,relres, iter1] = gmres(A,b,restart,tol,maxit,Aepsinv2);
-[u_iter1, iter, resid] = PFGMRES(A, b, u0, maxit, restart, tol, Aepsinv2,print_level);
+%[u_iter0,flag1,relres1, iter1] = gmres(AP2,b,restart,tol,maxit);
+%u_iter1 = Aepsinv2(u_iter0,tol);
+
+%[u_iter2,flag2,relres2, iter2] = gmres(AP,b,restart,tol,maxit);
+%u_iter3 = Aepsinv(u_iter2,tol,10);
+
+[u_iter4,flag2,relres2, iter2] = gmres(A,b,restart,tol,maxit,Aepsinv);
+
+
+
+%[u_iter1, iter, resid] = fgmres(A, b, tol, 'restart',200,'tol_exit', tol,'P',Aepsinv);
 
 %Solving the Galerkin problem with mlpfgmres
-[u_iter2,~,~,iter2] = mlpfgmres(b,u0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
+%[u_iter2,~,~,iter2] = mlfgmres(b,u0,mg_matHelm,mg_matCSL,mg_splitCSL,restr,interp,maxiter,tol);
 
 %plotting the real part of the solution
 %showsolution(node,elem,real(full(u_gal)));
 %showsolution(node,elem,real(full(u_iter2)));
-showsolution(node,elem,real(full(u_iter1)));
+
+% figure(1)
+% showsolution(node,elem,real(full(u_iter1)));
+% 
+% figure(2)
+% showsolution(node,elem,real(full(u_iter3)));
+
+
+figure(2)
+showsolution(node,elem,real(full(u_iter4)));
 
 %Computing the relative error of the Galerkin problem w.r.t.
 %the exact solution
