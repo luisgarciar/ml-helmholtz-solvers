@@ -4,7 +4,7 @@ clc
 clear global;
 close all;
 npc = 3;    %number of interior points in coarsest grid in one dim
-bc  = 'som1'; dim = 2; %boundary conditions, dimension
+dim = 2; %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
 k  = 40;
@@ -76,12 +76,12 @@ tol   = 1e-10;
 maxit = 300;
 
 % %GMRES iteration with LU preconditioner
-% [L,U] = lu(Aeps);
-% AMinv_lu = @(v) A*(U\(L\v));
-% tic
-% [xlu,flaglu,relreslu,iterlu,resveclu] = gmres(AMinv_lu,b,[],tol,maxit);
-% time_lu = toc;
-% u_lu =U\(L\xlu);
+[L,U] = lu(Aeps);
+AMinv_lu = @(v) A*(U\(L\v));
+tic
+[xlu,flaglu,relreslu,iterlu,resveclu] = gmres(AMinv_lu,b,[],tol,maxit);
+time_lu = toc;
+u_lu =U\(L\xlu);
 
 %GMRES iteration with V-cycle preconditioner
 AMinv_vmg = @(v) A*feval(Minv_vmg,v);
@@ -107,12 +107,14 @@ u_wmg = Minv_wmg(xw);
 
 %% Plots
 figure(1)
-semilogy(1:(iterv(2)+1),resvecv'/resvecv(1),'r-+');
+
+semilogy(1:(iterlu(2)+1),resveclu'/resveclu(1),'r-+');
 hold on
+semilogy(1:(iterv(2)+1),resvecv'/resvecv(1),'r-+');
 semilogy(1:(iterf(2)+1),resvecf'/resvecf(1),'k-*');
 semilogy(1:(iterw(2)+1),resvecw'/resvecw(1),'b-*');
 
-legend('Vcycle preconditioner','Fcycle preconditioner',...
+legend('LU preconditioner','Vcycle preconditioner','Fcycle preconditioner',...
     'Wcycle preconditioner');
 
 time_v

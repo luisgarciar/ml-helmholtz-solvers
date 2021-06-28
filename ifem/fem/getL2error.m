@@ -149,7 +149,7 @@ for p = 1:nQuad
     pxy = lambda(p,1)*node(elem(:,1),:) ...
         + lambda(p,2)*node(elem(:,2),:) ...
         + lambda(p,3)*node(elem(:,3),:);
-    err = err + weight(p)*(uexact(pxy) - uhp).^2;
+    err = err + weight(p)*(abs(uexact(pxy) - uhp)).^2;
 end
 %% Modification
 % area of triangles

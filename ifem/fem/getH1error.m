@@ -61,6 +61,8 @@ if ~exist('quadOrder','var')
     end
 end
 
+
+
 %% compute gradient of finite element function uh
 if (size(uh,2) == 2) && (Nu == NT)      % uh is a piecewise constant vector
     Duh = uh;
@@ -135,9 +137,11 @@ for p = 1:nQuad
               repmat(uh(elem2dof(:,10)),1,2).*Dphip10;
     end 
     if exist('K','var') && ~isempty(K) && ~isnumeric(K) % K is a function
-        err = err + weight(p)*K(pxy).*sum((Du(pxy)-Duh).^2,2);
+        z = abs(Du(pxy)-Duh);
+        err = err + weight(p)*K(pxy).*sum(z.^2,2);
     else
-        err = err + weight(p)*sum((Du(pxy)-Duh).^2,2);        
+         z = abs(Du(pxy)-Duh);
+        err = err + weight(p).*sum(z.^2,2);        
     end
 end
 if exist('K','var') && ~isempty(K) && isnumeric(K) && size(K,1) == NT

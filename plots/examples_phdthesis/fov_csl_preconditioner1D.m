@@ -15,7 +15,6 @@ kk     =  kmult;
 iter_SL = zeros(length(kk),2);
 minfov  = zeros(length(kk),1);
 
-
 %Line colors and types for plots
 linetyp = {'-','-.',':','--','-'};
 %color   = {'r','b','g','k'};
