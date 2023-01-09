@@ -4,4 +4,4 @@ pipelines:
   default:
     - step:
         script:
-          - git push --mirror git@github.com:luisgarciar/ml-helmholtz-solvers.git
+          - git push --mirror git@github.com:luisgarciar/ml_helmholtz_solvers.git
