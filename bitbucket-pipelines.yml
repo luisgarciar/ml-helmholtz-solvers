@@ -1,6 +1,2 @@
 clone:
-  depth: fulpipelines:
-  
-          - git clone --bare git@bitbucket.org:luisgarciar/helmholtz.git
-          - cd RepoName.git
-          - git push --mirror git@github.com:luisgarciar/ml_helmholtz_solvers.git
+  d
