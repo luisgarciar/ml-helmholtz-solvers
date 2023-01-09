@@ -5,7 +5,7 @@ function [A] = helmholtz(k,eps,np,bc)
 %
 %       -u''- (k^2+ieps)u = f in (0,1)
 %        u(0)=0, u(1)=0, or
-%        u'(0)-iku(0)=0, u'(1)+iku(1)=0
+%        -u'(0)-iku(0)=0, u'(1)-iku(1)=0
 %  
 %  Use: [A] = helmholtz(k,eps,np,bc)
 
