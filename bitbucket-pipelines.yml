@@ -1,7 +1,5 @@
 clone:
-  depth: full
-pipelines:
- pipelines:
+  depth: fulpipelines:
   default:
     - step:
         name: Sync GitHub Mirror
