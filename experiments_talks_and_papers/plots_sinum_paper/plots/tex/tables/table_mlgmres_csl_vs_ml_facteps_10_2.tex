@@ -1,0 +1,14 @@
+\begin{table}[t]
+\centering
+\begin{tabular}{ccccccc}
+\hline
+$k$ & CSL & CSL-t & ML(8,4,2) & ML(8,4,2)-t& ML(6,4,2) & ML(6,4,2)-t \\ \hline
+20 & 0 & 0.000126349 & 7 & 0.97604 & 7 & 0.882442 \\
+40 & 0 & 1.4403e-05 & 6 & 3.35423 & 6 & 2.98072 \\
+80 & 0 & 2.0758e-05 & 7 & 13.3731 & 7 & 9.90771 \\
+160 & 0 & 0.00162274 & 6 & 251.608 & 8 & 266.527 \\
+\hline
+\end{tabular}
+\caption{Number of GMRES iterations and total computation time (in seconds) for the Helmholtz linear system preconditioned by the  CSL and the multilevel method (ML)}
+\label{table:mlgmres_csl_vs_adef_coarse_eps_10}
+\end{table}
