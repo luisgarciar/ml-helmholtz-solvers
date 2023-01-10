@@ -3,9 +3,9 @@ function [A] = helmholtz(k,eps,np,bc)
 %  Constructs the finite difference matrix corresponding
 %  to the discretization of the 1D Helmholtz/shifted Laplace problem
 %
-%       -u''- k^2u = f in (0,1)
+%       -u''- (k^2+ieps)u = f in (0,1)
 %        u(0)=0, u(1)=0, or
-%        u'(0)-iku(0)=0, u'(1)+iku(1)=1
+%        -u'(0)-iku(0)=0, u'(1)-iku(1)=0
 %  
 %  Use: [A] = helmholtz(k,eps,np,bc)
 

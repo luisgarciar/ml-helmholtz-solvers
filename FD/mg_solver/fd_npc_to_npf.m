@@ -3,7 +3,7 @@ function [npf,lev] = fd_npc_to_npf(npc,k,par)
 %  number of points on the coarsest grid and discretization
 %  requirements
 %
-% Use:  [npf,lev] = npcc2npf(npcc,k,par)
+% Use:  [npf,lev] = fd_npc_to_npf(npcc,k,par)
 %
 % Input
 %       npc : number of points on coarsest grid
@@ -33,12 +33,12 @@ if par>1
     npf = 2^(lev-1)*(npc+1)-1;
     
 else
-%Case 2: The number of fine grid points grows 
-%linearly w.r.t. k^2.In this case par <<1, 
-%and the gridsize h=1/(npf+1) satisfies k^2*h approx par
+%Case 2: When  par <1, the number of fine grid points grows 
+%linearly with respect to k^3/2. , 
+%and the gridsize h = 1/(npf+1) satisfies npf approx ceil(k^(3/2)
 
-    m  = (k^2/par)*(1/npc+1);
-    lev = 1+ceil(log2(m));
+    m   = (sqrt(k)^3)*(1/(npc+1));
+    lev = 1 + ceil(log2(m));
     lev = max(lev,1);   %at least 1 level
     npf = 2^(lev-1)*(npc+1)-1;
 

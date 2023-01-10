@@ -31,8 +31,8 @@ function [A] = helmholtz2(k,eps,npx,npy,bc)
 %  npx:    number of interior discretization points in the x-direction
 %  npy:    number of interior discretization points in the y-direction
 %  bc:     type of boundary conditions:      
-%          'dir' for homogeneous dirichlet bc's
-%          'som' for 1st order sommerfeld bc's 
+%          'dir' for homogeneous dirichlet BC's
+%          'som' for 1st order sommerfeld BC's 
 %
 %  Output:
 %  A:      discretization matrix of Helmholtz problem
@@ -53,11 +53,10 @@ hy  = 1/(npy+1);  %gridsize in y-direction
 
 
 switch bc
-    case 'dir'        
-        
+    case 'dir'                
           np = npx*npy;
           W = -ones(np,1)/hx^2;  E=W; %Dxx
-          N = -ones(np,1)/hy^2; S=N; %Dyy
+          N = -ones(np,1)/hy^2;  S=N;  %Dyy
           C = 2*ones(np,1)/hx^2+2*ones(np,1)/hy^2;
           A = spdiags([S W C E N],[-npx -1 0 1 npx],np, np)-(k^2+1i*eps)*speye(np);
           
@@ -113,7 +112,7 @@ switch bc
         %West boundary
         j   = 1:npy; 
         ind = j*nx+1;
-        Wc  =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
+        Wc  = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hx;
         Ws  = -1/hy^2;
         We  = -2/hx^2;
         Wn  = -1/hy^2;
@@ -126,45 +125,139 @@ switch bc
       
         %South boundary
         ind = (1:npx)+1;
-        Sc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-        Sw = -1/hx^2;
-        Se = -1/hx^2;
-        Sn = -2/hy^2;
-        SC = sparse(ind,ind,Sc,np,np);
-        SE = sparse(ind,ind+1,Se,np,np);
-        SW = sparse(ind,ind-1,Sw,np,np);
-        SN = sparse(ind,ind+nx,Sn,np,np);
-        S  = SC+SE+SW+SN;
-        A(ind,:)=S(ind,:);        
+        Sc  =  2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+        Sw  = -1/hx^2;
+        Se  = -1/hx^2;
+        Sn  = -2/hy^2;
+        SC  = sparse(ind,ind,Sc,np,np);
+        SE  = sparse(ind,ind+1,Se,np,np);
+        SW  = sparse(ind,ind-1,Sw,np,np);
+        SN  = sparse(ind,ind+nx,Sn,np,np);
+        S   = SC+SE+SW+SN;
+        A(ind,:) = S(ind,:);        
 %          
-         %East boundary
-         j=1:npy; ind = nx*(j+1);
-         Ec = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
-         Ew = -2/hx^2;
-         Es = -1/hy^2;
-         En = -1/hy^2;
-         EC = sparse(ind,ind,Ec,np,np);
-         EW = sparse(ind,ind-1,Ew,np,np);
-         ES = sparse(ind,ind-nx,Es,np,np);
-         EN = sparse(ind,ind+nx,En,np,np);
-         E  = EC+EW+EN+ES;
-         A(ind,:)=E(ind,:);
+        %East boundary
+        j=1:npy; ind = nx*(j+1);
+        Ec = (-k^2-1i*eps-2*1i*k/hx+2/hx^2+2/hy^2);
+        Ew = -2/hx^2;
+        Es = -1/hy^2;
+        En = -1/hy^2;
+        EC = sparse(ind,ind,Ec,np,np);
+        EW = sparse(ind,ind-1,Ew,np,np);
+        ES = sparse(ind,ind-nx,Es,np,np);
+        EN = sparse(ind,ind+nx,En,np,np);
+        E  = EC+EW+EN+ES;
+        A(ind,:)=E(ind,:);
                       
-         %North boundary
-         i=1:npx; ind = (nx)*(npy+1)+(i+1);
-         Nc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
-         Ne = -1/hx^2;
-         Nw = -1/hx^2; 
-         Ns = -2/hy^2;
-         NC = sparse(ind,ind,Nc,np,np);
-         NW = sparse(ind,ind-1,Nw,np,np);
-         NS = sparse(ind,ind-nx,Ns,np,np);
-         NE = sparse(ind,ind+1,Ne,np,np);
-         N  = NC+NW+NS+NE;
-         A(ind,:)=N(ind,:);
-         
-         
-   
+        %North boundary
+        i = 1:npx; ind = (nx)*(npy+1)+(i+1);
+        Nc = 2/hx^2+2/hy^2-k^2-1i*eps-2*1i*k/hy;
+        Ne = -1/hx^2;
+        Nw = -1/hx^2; 
+        Ns = -2/hy^2;
+        NC = sparse(ind,ind,Nc,np,np);
+        NW = sparse(ind,ind-1,Nw,np,np);
+        NS = sparse(ind,ind-nx,Ns,np,np);
+        NE = sparse(ind,ind+1,Ne,np,np);
+        N  = NC+NW+NS+NE;
+        A(ind,:)=N(ind,:);
+        
+    case 'som1'
+       %Construction of the 2D matrix (version 2)
+        %2D matrix with Sommerfeld bc's (with boundary points)
+        nx = npx+2;
+        ny = npy+2;
+        np = nx*ny;
+        
+        %Interior points
+        W = -ones(np,1)/hx^2;  E = W; %Dxx
+        N = -ones(np,1)/hy^2;  S = N; %Dyy
+        C = ((2/hx^2) + (2/hy^2)-(k^2+1i*eps))*ones(np,1);
+        A = spdiags([S W C E N],[-nx -1 0 1 nx],np, np);
+          
+        %Corner points
+        %SW Corner: (0,0)
+        A(1,:)     = zeros(np,1)';
+        A(1,1)     = 1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(1,2)     = -1/hx^2;
+        A(1,1+nx)  = -1/hy^2;
+      
+        %SE Corner: (1,0)
+        n = nx;
+        A(n,:)   = zeros(np,1)';
+        A(n,n)   =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n-1) = -1/hx^2;
+        A(n,2*n) = -1/hy^2;
+
+        %NW Corner: (0,1)
+        n = (nx)*(ny-1)+1;
+        A(n,:)    =   zeros(np,1)';
+        A(n,n)    =   1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n+1)  =  -1/hx^2;
+        A(n,n-nx) =  -1/hy^2;
+
+        %NE Corner: (1,1)
+        n = nx*ny;
+        A(n,:)     =  zeros(np,1)';
+        A(n,n)     =  1/hx^2+1/hy^2-k^2-1i*eps-1i*k/hy-1i*k/hx;
+        A(n,n-1)   = -1/hx^2;
+        A(n,n-nx)  = -1/hy^2;
+     
+        %Noncorner boundary points    
+        %Vectorized version
+        %West boundary
+        j   =  1:npy; 
+        ind =  j*nx+1;
+        Wc  =  -k^2 - 1i*eps + 2/hy^2 + 1/hx^2 - 1i*k/hx;
+        Ws  = -1/hy^2;
+        Wn  = -1/hy^2;
+        We  = -1/hx^2;
+        WC  = sparse(ind,ind,Wc,np,np); 
+        WN  = sparse(ind,ind+nx,Wn,np,np);      
+        WS  = sparse(ind,ind-nx,Ws,np,np);
+        WE  = sparse(ind,ind+1,We,np,np);
+        W   = WC+WN+WS+WE;
+        A(ind,:)= W(ind,:);      
+      
+        %South boundary
+        ind = (1:npx) + 1;
+        Sc  = -k^2-1i*eps + 2/hx^2 + 1/hy^2 -1i*k/hy;
+        Sw  = -1/hx^2;
+        Se  = -1/hx^2;
+        Sn  = -1/hy^2;
+        SC  = sparse(ind,ind,Sc,np,np);
+        SE  = sparse(ind,ind+1,Se,np,np);
+        SW  = sparse(ind,ind-1,Sw,np,np);
+        SN  = sparse(ind,ind+nx,Sn,np,np);
+        S   = SC+SE+SW+SN;
+        A(ind,:) = S(ind,:);        
+          
+        %East boundary
+        j  = 1:npy; ind = nx*(j+1);
+        Ec = (-k^2-1i*eps +2/hy^2 +1/hx^2 -1i*k/hx);
+        Ew = -1/hx^2;
+        Es = -1/hy^2;
+        En = -1/hy^2;
+        EC = sparse(ind,ind,Ec,np,np);
+        EW = sparse(ind,ind-1,Ew,np,np);
+        ES = sparse(ind,ind-nx,Es,np,np);
+        EN = sparse(ind,ind+nx,En,np,np);
+        E  = EC+EW+EN+ES;
+        A(ind,:)= E(ind,:);
+                      
+        %North boundary
+        i  = 1:npx; ind = (nx)*(npy+1)+(i+1);
+        Nc = - k^2 -1i*eps+ 2/hx^2 + 1/hy^2 -1i*k/hy;
+        Ne = -1/hx^2;
+        Nw = -1/hx^2; 
+        Ns = -1/hy^2;
+        NC = sparse(ind,ind,Nc,np,np);
+        NE = sparse(ind,ind+1,Ne,np,np);
+        NW = sparse(ind,ind-1,Nw,np,np);
+        NS = sparse(ind,ind-nx,Ns,np,np);
+        N  = NC+NW+NS+NE;
+        A(ind,:)=N(ind,:); 
+                 
     otherwise
         error('invalid boundary conditions')
 end

@@ -1,0 +1,261 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>u = DIVDARCY</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-11-06"><meta name="DC.source" content="divDarcydoc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>u = DIVDARCY</h1><!--introduction--><p>Find a u such at Bu = g</p><p>Copyright (C) Long Chen. See COPYRIGHT.txt for details.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Set up</a></li><li><a href="#2">Isolate equations</a></li><li><a href="#3">Data structure</a></li><li><a href="#4">Index map and indicator of elements</a></li><li><a href="#5">Overlapping Schwarz smoother</a></li><li><a href="#7">debug: plot open elem and check residual of each element</a></li></ul></div><h2>Set up<a name="1"></a></h2><pre class="codeinput">[node,elem] = squaremesh([0,1,0,1],0.25);
+[elem2edge,edge] = dofedge(elem);
+showmesh(node,elem);
+
+pde = sincosNeumanndata;
+bdFlag = setboundary(node,elem,<span class="string">'Neumann'</span>);
+option.solver = <span class="string">'none'</span>;
+[~,~,eqn] = PoissonRT0(node,elem,pde,bdFlag,option);
+freeEdge = eqn.freeEdge;
+M = eqn.M(freeEdge,freeEdge);
+B = eqn.B(:,freeEdge);
+f = eqn.f(freeEdge);
+g = eqn.g;
+u = zeros(length(freeEdge),1);
+</pre><img vspace="5" hspace="5" src="divDarcydoc_01.png" alt=""> <h2>Isolate equations<a name="2"></a></h2><pre class="codeinput">pdeg = full(sum(spones(B),2));
+isIsoElem = (pdeg == 1);
+isoElem = find(isIsoElem);
+[ii,jj,ss] = find(B(isIsoElem,:));
+u(jj) = g(isoElem(ii))./ss;
+temp = abs(g-B*u);
+idx = temp&lt;1e-14;
+findelem(node,elem,idx,<span class="string">'index'</span>,<span class="string">'FaceColor'</span>,<span class="string">'c'</span>);
+</pre><img vspace="5" hspace="5" src="divDarcydoc_02.png" alt=""> <h2>Data structure<a name="3"></a></h2><pre class="codeinput">N = max(elem(:));
+NT = size(elem,1);
+NE = size(edge,1);
+validEdge = 1:NE;
+validEdge(freeEdge(jj)) = []; <span class="comment">% remove isolate edges</span>
+e2v = sparse([validEdge,validEdge], double(edge(validEdge,:)), 1, NE, N);
+validElem = find(~isIsoElem); <span class="comment">% remove isolate element</span>
+t2v = sparse([validElem,validElem,validElem], elem(validElem,:), 1, NT, N);
+oppe2v = sparse(double(elem2edge(:)), elem(:), 1, NE, N);
+<span class="comment">% In e2v, remove isolated edges dof since their values are determined. But</span>
+<span class="comment">% they are remained in oppe2v as boundary dofs</span>
+</pre><h2>Index map and indicator of elements<a name="4"></a></h2><pre class="codeinput">idxMap = zeros(NE,1);
+idxMap(freeEdge) = 1:length(freeEdge);
+isOpenElem = true(NT,1);
+isSolvedElem = false(NT,1);
+isSolvedElem(isoElem) = true;
+<span class="comment">% In solved elements: Bu = g</span>
+</pre><h2>Overlapping Schwarz smoother<a name="5"></a></h2><pre class="codeinput"><span class="keyword">for</span> i = 1:N
+</pre><pre class="codeinput">    findnode(node,i);
+    starElem = find(t2v(:,i));
+    <span class="keyword">if</span> all(isSolvedElem(starElem)) <span class="comment">% all elements are solved</span>
+        <span class="keyword">continue</span>;
+    <span class="keyword">end</span>
+    starEdge = idxMap(find(e2v(:,i))); <span class="comment">%#ok&lt;*FNDSB&gt;</span>
+    starBdEdge = idxMap(find(oppe2v(:,i))); <span class="comment">% edge opposite to a vertex</span>
+    domainStarEdgeIdx = (starEdge == 0); <span class="comment">% remove fixed edge d.o.f.</span>
+    starEdge(domainStarEdgeIdx) = [];
+    domainBdEdgeIdx = (starBdEdge == 0);
+    starBdEdge(domainBdEdgeIdx) = [];
+    <span class="comment">% solve loccal problem</span>
+    locM = M(starEdge,[starEdge; starBdEdge]);
+    locB = B(starElem,[starEdge; starBdEdge]);
+    <span class="comment">% update right hand side</span>
+    locf = f(starEdge) - locM*u([starEdge; starBdEdge]);
+    locg = g(starElem) - locB*u([starEdge; starBdEdge]);
+    locF = [locf; locg];
+	Nf = length(locf);
+    Ng = length(locg);
+    locM = locM(:,1:Nf);
+    locB = locB(:,1:Nf);
+    locL = [locM locB'; locB  zeros(Ng)];
+    <span class="comment">% local problem is unique up to a constant</span>
+    <span class="comment">% leave an open element non-solved</span>
+    locOpenElem = find(isOpenElem(starElem));
+    <span class="keyword">if</span> ~isempty(locOpenElem)
+        locOpenElem = locOpenElem(1);
+    <span class="keyword">else</span>
+        locOpenElem = Ng; <span class="comment">% chose the last one if no elem open</span>
+    <span class="keyword">end</span>
+    activeIdx = true(Nf+Ng,1);
+    activeIdx(Nf+locOpenElem) = false;
+    locep = locL(activeIdx,activeIdx)\locF(activeIdx);
+    u(starEdge) = u(starEdge) + locep(1:Nf);
+    isSolvedElem(starElem) = true;
+    locResidual = abs(locg(locOpenElem) - locB(locOpenElem,:)*locep(1:Nf));
+    <span class="keyword">if</span> locResidual &gt; 1e-14 <span class="comment">% check the residual of the open element</span>
+        isSolvedElem(starElem(locOpenElem)) = false;
+    <span class="keyword">end</span>
+    isOpenElem(starElem) = false;
+</pre><img vspace="5" hspace="5" src="divDarcydoc_03.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_05.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_07.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_09.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_11.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_13.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_15.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_17.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_19.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_21.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_23.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_25.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_27.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_29.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_31.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_33.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_35.png" alt=""> <h2>debug: plot open elem and check residual of each element<a name="7"></a></h2><pre class="codeinput">    findelem(node,elem,starElem(locOpenElem),<span class="string">'index'</span>,<span class="string">'FaceColor'</span>,<span class="string">'r'</span>);
+    temp = abs(g-B*u);
+    idx = temp&lt;1e-14;
+    findelem(node,elem,idx,<span class="string">'index'</span>,<span class="string">'FaceColor'</span>,<span class="string">'c'</span>);
+</pre><img vspace="5" hspace="5" src="divDarcydoc_04.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_06.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_08.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_10.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_12.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_14.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_16.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_18.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_20.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_22.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_24.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_26.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_28.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_30.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_32.png" alt=""> <img vspace="5" hspace="5" src="divDarcydoc_34.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% u = DIVDARCY
+%
+% Find a u such at Bu = g
+%
+% Copyright (C) Long Chen. See COPYRIGHT.txt for details.
+
+
+%% Set up 
+[node,elem] = squaremesh([0,1,0,1],0.25); 
+[elem2edge,edge] = dofedge(elem);
+showmesh(node,elem);
+
+pde = sincosNeumanndata;
+bdFlag = setboundary(node,elem,'Neumann');
+option.solver = 'none';
+[~,~,eqn] = PoissonRT0(node,elem,pde,bdFlag,option);
+freeEdge = eqn.freeEdge;
+M = eqn.M(freeEdge,freeEdge); 
+B = eqn.B(:,freeEdge);
+f = eqn.f(freeEdge);
+g = eqn.g;
+u = zeros(length(freeEdge),1);
+
+%% Isolate equations
+pdeg = full(sum(spones(B),2));
+isIsoElem = (pdeg == 1);
+isoElem = find(isIsoElem);
+[ii,jj,ss] = find(B(isIsoElem,:));
+u(jj) = g(isoElem(ii))./ss;
+temp = abs(g-B*u);
+idx = temp<1e-14;
+findelem(node,elem,idx,'index','FaceColor','c');  
+
+%% Data structure
+N = max(elem(:));
+NT = size(elem,1);
+NE = size(edge,1);
+validEdge = 1:NE;
+validEdge(freeEdge(jj)) = []; % remove isolate edges
+e2v = sparse([validEdge,validEdge], double(edge(validEdge,:)), 1, NE, N);
+validElem = find(~isIsoElem); % remove isolate element
+t2v = sparse([validElem,validElem,validElem], elem(validElem,:), 1, NT, N);
+oppe2v = sparse(double(elem2edge(:)), elem(:), 1, NE, N);
+% In e2v, remove isolated edges dof since their values are determined. But
+% they are remained in oppe2v as boundary dofs
+
+%% Index map and indicator of elements
+idxMap = zeros(NE,1);
+idxMap(freeEdge) = 1:length(freeEdge);
+isOpenElem = true(NT,1);
+isSolvedElem = false(NT,1);
+isSolvedElem(isoElem) = true; 
+% In solved elements: Bu = g
+
+%% Overlapping Schwarz smoother
+for i = 1:N
+    findnode(node,i);
+    starElem = find(t2v(:,i));
+    if all(isSolvedElem(starElem)) % all elements are solved
+        continue;
+    end
+    starEdge = idxMap(find(e2v(:,i))); %#ok<*FNDSB>
+    starBdEdge = idxMap(find(oppe2v(:,i))); % edge opposite to a vertex
+    domainStarEdgeIdx = (starEdge == 0); % remove fixed edge d.o.f.
+    starEdge(domainStarEdgeIdx) = [];
+    domainBdEdgeIdx = (starBdEdge == 0);
+    starBdEdge(domainBdEdgeIdx) = [];
+    % solve loccal problem
+    locM = M(starEdge,[starEdge; starBdEdge]);
+    locB = B(starElem,[starEdge; starBdEdge]);
+    % update right hand side
+    locf = f(starEdge) - locM*u([starEdge; starBdEdge]);
+    locg = g(starElem) - locB*u([starEdge; starBdEdge]);
+    locF = [locf; locg];
+	Nf = length(locf);
+    Ng = length(locg);
+    locM = locM(:,1:Nf);
+    locB = locB(:,1:Nf);
+    locL = [locM locB'; locB  zeros(Ng)];
+    % local problem is unique up to a constant
+    % leave an open element non-solved
+    locOpenElem = find(isOpenElem(starElem));
+    if ~isempty(locOpenElem)
+        locOpenElem = locOpenElem(1);
+    else
+        locOpenElem = Ng; % chose the last one if no elem open
+    end
+    activeIdx = true(Nf+Ng,1);
+    activeIdx(Nf+locOpenElem) = false;
+    locep = locL(activeIdx,activeIdx)\locF(activeIdx);
+    u(starEdge) = u(starEdge) + locep(1:Nf);
+    isSolvedElem(starElem) = true;
+    locResidual = abs(locg(locOpenElem) - locB(locOpenElem,:)*locep(1:Nf));
+    if locResidual > 1e-14 % check the residual of the open element
+        isSolvedElem(starElem(locOpenElem)) = false;
+    end
+    isOpenElem(starElem) = false;
+    %% debug: plot open elem and check residual of each element
+    findelem(node,elem,starElem(locOpenElem),'index','FaceColor','r'); 
+    temp = abs(g-B*u);
+    idx = temp<1e-14;
+    findelem(node,elem,idx,'index','FaceColor','c');  
+end
+##### SOURCE END #####
+--></body></html>

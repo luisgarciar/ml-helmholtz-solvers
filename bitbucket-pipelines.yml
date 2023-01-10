@@ -7,5 +7,5 @@ pipelines:
           enabled: false
         script:
           - git clone --bare git@bitbucket.org:luisgarciar/helmholtz.git
-          - cd RepoName.git
+          - cd helmholtz.git
           - git push --mirror git@github.com:luisgarciar/ml_helmholtz_solvers.git

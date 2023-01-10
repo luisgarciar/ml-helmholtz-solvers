@@ -13,6 +13,6 @@ function [g_e] = g_east(y,k,t)
 % See Model problem 2 in 
 %'Finite Element Analysis of Acoustic Scattering', Ihlenburg.
 %
-s   = sin(t); c = cos(t);
+s  = sin(t); c = cos(t);
 yy   = k*(y*s+c);
-g_e = k*(1-c)*(sin(yy)-1i*cos(yy));
+g_e  = k*(1-c)*(sin(yy)-1i*cos(yy));

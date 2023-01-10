@@ -13,6 +13,5 @@ function [g_s] = g_south(x,k,t)
 %See Model problem 2 in 
 %'Finite Element Analysis of Acoustic Scattering', Ihlenburg.
 %
-
 s   = sin(t); c = cos(t);
 g_s = k*(1+s)*(sin(k*x*c)-1i*cos(k*x*c));

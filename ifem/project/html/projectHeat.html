@@ -1,0 +1,116 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project: Heat Equation</title><meta name="generator" content="MATLAB 7.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-03-02"><meta name="DC.source" content="projectHeat.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+
+  </style></head><body><div class="content"><h1>Project: Heat Equation</h1><!--introduction--><p>The purpose of this project is to implement explict and implicit numerical methods for solving the parabolic equation. The example is the heat equation</p><p><img src="projectHeat_eq02190.png" alt="$u_t-\Delta u  = f$"> for <img src="projectHeat_eq26011.png" alt="$x\in \Omega$">, and <img src="projectHeat_eq60321.png" alt="$u |_{\partial \Omega} = g, u(*,0) = u_0$">.</p><p>We consider a 2-d problem on the unit square <img src="projectHeat_eq23328.png" alt="$\Omega = (0,1)^2$"> with the exact solution</p><p><img src="projectHeat_eq09295.png" alt="$$u(x,t) = \beta (t)\exp(-[(x-t+0.5)^2+(y-t+0.5)^2]/0.04), \quad \beta (t) = 0.1(1-\exp(-10^2(t-0.5)^2)).$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Step 1: Forward Euler, Backward Euler, and Crack-Nicolson methods</a></li><li><a href="#2">Step 2: Check the convergence</a></li><li><a href="#3">Step 3: Visulization</a></li><li><a href="#4">Step 4: Adaptive finite element method</a></li></ul></div><h2>Step 1: Forward Euler, Backward Euler, and Crack-Nicolson methods<a name="1"></a></h2><div><ul><li>Given a mesh for the unit square, construct the stiffness matrix <tt>A</tt> for the Laplace operator and the mass matrix <tt>M</tt> for the identity operator.</li><li>Given a time step size <tt>dt</tt>, final time <tt>T</tt>, code a for loop over time to involve the solution by either forward, backward Euler or Crack-Nicolson methods.</li><li>Please do not store the approximation at all time steps. Instead only the solution in the previous step <tt>uold</tt> and the current step <tt>u</tt> is needed.</li><li>For implicit methods, use direct solver or multigrid to solve the linear system. If the mesh generated using <tt>squaremesh</tt> in ifem, you can use <tt>mg(A,b,elem)</tt>. With input <tt>mesh</tt>, <tt>mg</tt> is faster than <tt>amg</tt>.</li></ul></div><h2>Step 2: Check the convergence<a name="2"></a></h2><div><ul><li>Check the convergence rate in time and space. You can use the exact solution to get the nodal interpolant <tt>uI</tt> and compute the H1 norm of the error using matrix <tt>A</tt> and the L2 norm using matrix <tt>M</tt>.</li><li>To check the convergence rate in time, you can fix a small h in space  and let <tt>dt</tt> vary and vice verse for convergence in space.</li></ul></div><h2>Step 3: Visulization<a name="3"></a></h2><div><ul><li>Use <tt>showsolution(node,elem,u)</tt> to plot the solution and together with <tt>pause(0.01)</tt> to get an animation.</li><li>For small time step, do not plot the solution at every time step. Instead you can plot every 10 or 100 steps.</li><li>You can save the plot into a movie. Read <tt>doc getframe</tt> for an example.</li></ul></div><h2>Step 4: Adaptive finite element method<a name="4"></a></h2><div><ul><li>Run 2D examples: Lshape, crack and Kellogg in iFEM and read the code to learn the usage of AFEM.</li><li>In one time step involution, repeat the refinement and coarsen several steps to get a better approximation of the solution. You can control the max iteration steps for AFEM or the maximal number of elements. You may need <tt>nodeinterpolate</tt> and <tt>eleminterpolate</tt> to interpolate function between different meshes.</li><li>Check the convergence rate for AFEM.</li><li>Make animation for meshes and solutions.</li></ul></div><p class="footer"><br>
+      Published with MATLAB&reg; 7.14<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Project: Heat Equation
+%
+% The purpose of this project is to implement explict and implicit
+% numerical methods for solving the parabolic equation.
+% The example is the heat equation 
+%
+% $u_t-\Delta u  = f$ for $x\in \Omega$, and 
+% $u |_{\partial \Omega} = g, u(*,0) = u_0$.
+% 
+% We consider a 2-d problem on the unit square $\Omega = (0,1)^2$ with the
+% exact solution
+%
+% $$u(x,t) = \beta (t)\exp(-[(x-t+0.5)^2+(y-t+0.5)^2]/0.04), \quad \beta (t) = 0.1(1-\exp(-10^2(t-0.5)^2)).$$
+
+%% Step 1: Forward Euler, Backward Euler, and Crack-Nicolson methods
+%
+% * Given a mesh for the unit square, construct the stiffness matrix |A| for
+% the Laplace operator and the mass matrix |M| for the identity operator.
+% * Given a time step size |dt|, final time |T|, code a for loop over time to
+% involve the solution by either forward, backward Euler or Crack-Nicolson
+% methods.
+% * Please do not store the approximation at all time steps. Instead only the
+% solution in the previous step |uold| and the current step |u| is needed.
+% * For implicit methods, use direct solver or multigrid to solve the linear
+% system. If the mesh generated using |squaremesh| in ifem, you can use
+% |mg(A,b,elem)|. With input |mesh|, |mg| is faster than |amg|.
+
+%% Step 2: Check the convergence
+%
+% * Check the convergence rate in time and space. You can use the exact
+% solution to get the nodal interpolant |uI| and compute the H1 norm of the
+% error using matrix |A| and the L2 norm using matrix |M|.
+% * To check the convergence rate in time, you can fix a small h in space
+%  and let |dt| vary and vice verse for convergence in space.
+
+%% Step 3: Visulization
+%
+% * Use |showsolution(node,elem,u)| to plot the solution and together with
+% |pause(0.01)| to get an animation.
+% * For small time step, do not plot the solution at every time step. Instead
+% you can plot every 10 or 100 steps.
+% * You can save the plot into a movie. Read |doc getframe| for an example.
+
+%% Step 4: Adaptive finite element method
+%
+% * Run 2D examples: Lshape, crack and Kellogg in iFEM and read the code to
+% learn the usage of AFEM.
+% * In one time step involution, repeat the refinement and coarsen several
+% steps to get a better approximation of the solution. You can control the
+% max iteration steps for AFEM or the maximal number of elements. You may
+% need |nodeinterpolate| and |eleminterpolate| to interpolate function
+% between different meshes.
+% * Check the convergence rate for AFEM.
+% * Make animation for meshes and solutions.
+##### SOURCE END #####
+--></body></html>

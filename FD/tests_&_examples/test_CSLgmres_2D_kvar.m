@@ -4,11 +4,11 @@ clc
 clear global;
 close all;
 
-npc = 3;    %number of interior points in coarsest grid in one dim 
-bc  = 'dir'; dim = 2; %boundary conditions, dimension
+npc = 1;    %number of interior points in coarsest grid in one dim 
+bc  = 'som'; dim = 2; %boundary conditions, dimension
 
 %variable wavenumber and imaginary shift of shifted Laplacian
-kref    = 80; eps = 0.6;
+kref    = 80; eps = 0.5;
 kvar    = @(x,y) klay(x,y,kref);
 epsvar  = @(x,y) eps*(klay(x,y,kref).^2); 
 zero    = @(x,y) 0*x;
@@ -56,19 +56,19 @@ setup_time=toc;
 %Parameters of V-cycle and Jacobi iteration
 b    = zeros(length(A),1); b(ceil(length(A)/2),1) = 1/(hx*hy);
 x0   = zeros(length(A),1);
-npre = 1; npos = 1; w = 0.7; smo = 'wjac'; numcycles = 1;
+npre = 1; npos = 1; w = 0.6; smo = 'wjac'; numcycles = 1;
 Minv_fmg = @(v)feval(@Fcycle,galerkin_matrices,galerkin_split,restrict,...
                             interp,x0,v,npre,npos,w,smo,numcycles);
 
 Minv_vmg = @(v)feval(@Vcycle,galerkin_matrices,galerkin_split,restrict,...
                             interp,x0,v,npre,npos,w,smo,numcycles);
-                                               
-[L,U]=lu(M);                        
-Minv_lu=  @(v) (L\(U\v));                   
-                        
+
+Minv_wmg = @(v)feval(@Wcycle,galerkin_matrices,galerkin_split,restrict,...
+                            interp,x0,v,npre,npos,w,smo,numcycles);
+                                                
 %Parameters of GMRES iteration
-tol   = 1e-10;
-maxit = length(A);
+tol   = 1e-8;
+maxit = 300;
 
 %GMRES iteration without preconditioner (too slow for large wavenumbers)
 % tic
@@ -76,27 +76,37 @@ maxit = length(A);
 % time1 = toc;
  
 % GMRES iteration with V cycle preconditioner
- AMinv_vmg = @(v) A*feval(Minv_vmg,v);
- tic
- [x2,flag2,relres2,iter2,resvec2] = gmres(AMinv_vmg,b,[],tol,maxit);
- time2 = toc;
-
-% GMRES iteration with right SL preconditioner
-AMinv = @(v) A*feval(Minv,v);
+AMinv_vmg = @(v) A*feval(Minv_vmg,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(AMinv,b,[],tol,maxit);
-time3 = toc;
+[xv,flagv,relresv,iterv,resvecv] = gmres(AMinv_vmg,b,[],tol,maxit);
+time_v = toc;
+
+% GMRES iteration with F cycle preconditioner
+AMinv_fmg = @(v) A*feval(Minv_fmg,v);
+tic
+[xf,flagf,relresf,iterf,resvecf] = gmres(AMinv_fmg,b,[],tol,maxit);
+time_f = toc;
+
+% GMRES iteration with W cycle preconditioner
+AMinv_wmg =  @(v) A*feval(Minv_wmg,v);
+tic
+[xw,flagw,relresw,iterw,resvecw] = gmres(AMinv_wmg,b,[],tol,maxit);
+time_w = toc;
 
 %semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
 %hold on
 figure(1)
-semilogy(1:(iter_rmg(2)+1),resvec_rmg'/resvec_rmg(1),'r-+');
+semilogy(1:(iterv(2)+1),resvecv'/resvecv(1),'r-+');
 hold on
-semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
-legend('Vcycle preconditioner','Fcycle preconditioner')
+semilogy(1:(iterf(2)+1),resvecf'/resvecf(1),'k-*');
+semilogy(1:(iterw(2)+1),resvecw'/resvecw(1),'b-*');
 
-time2
-time3
+legend('Vcycle preconditioner','Fcycle preconditioner',...
+        'Wcycle preconditioner');
+
+time_v
+time_f
+time_w
 
 
 % figure(2)

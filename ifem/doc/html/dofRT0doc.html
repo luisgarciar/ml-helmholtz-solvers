@@ -1,0 +1,203 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RT0 Lowest Order Edge Element in 2D</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-26"><meta name="DC.source" content="dofRT0doc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>RT0 Lowest Order Edge Element in 2D</h1><!--introduction--><p>We explain degree of freedoms and basis functions for Raviart-Thomas edge element on triangles. The dofs and basis depends on the orientation of the mesh. Read <a href="scdoc.html">Simplicial complex in two dimensions</a> for the discussion of indexing, ordering and orientation.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Local bases of RT0 element</a></li><li><a href="#2">Data Structure</a></li><li><a href="#5">Matrix for divergence operator</a></li></ul></div><h2>Local bases of RT0 element<a name="1"></a></h2><p>Suppose [i,j] is the k-th edge. The two dimensional curl is a rotated graident defined as <img src="dofRT0doc_eq09126079959971099579.png" alt="$\nabla^{\bot} f = (-\partial_y f, \partial _x f).$"> The basis of this edge along with its divergence are given by</p><p><img src="dofRT0doc_eq05733525994056128625.png" alt="$$ \Phi_k = \lambda_i \nabla^{\bot} \lambda_j - \lambda_j \nabla^{\bot} \lambda_i. $$"></p><p>Inside one triangular, the 3 bases corresponding to 3 local edges [2 3; 1 3; 1 2] are:</p><p><img src="dofRT0doc_eq01396368838789569273.png" alt="$$ \Phi_1 = \lambda_2 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_2. $$"></p><p><img src="dofRT0doc_eq07675162837820788190.png" alt="$$ \Phi_2 = \lambda_1 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_1. $$"></p><p><img src="dofRT0doc_eq02715474303232224125.png" alt="$$ \Phi_3 = \lambda_1 \nabla^{\bot} \lambda_2 - \lambda_2 \nabla^{\bot} \lambda_1. $$"></p><p>The dual basis is the line integral over an orientated edge</p><p><img src="dofRT0doc_eq16446563717737057529.png" alt="$$\int_{e_i} \phi_j de_i = \delta(i,j).$$"></p><h2>Data Structure<a name="2"></a></h2><p>We use ascend ordering system. Note that the signed area of some triangles could be negative.</p><pre class="codeinput">[node,elem] = squaremesh([0 1 0 1], 0.5);
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+[elem,bdFlag] = sortelem(elem,bdFlag);
+showmesh(node,elem);
+findnode(node);
+findelem(node,elem);
+<span class="comment">% Three local edges are |locEdge = [2 3; 1 3; 1 2]|. The pointer from the</span>
+<span class="comment">% local to global index can be constructured by</span>
+[elem2dof,edge] = dofedge(elem);
+findedge(node,edge,<span class="string">'all'</span>,<span class="string">'vec'</span>);
+</pre><img vspace="5" hspace="5" src="dofRT0doc_01.png" alt=""> <pre class="codeinput">display(elem);
+display(elem2dof);
+</pre><pre class="codeoutput">
+elem =
+
+     1     4     5
+     2     5     6
+     4     7     8
+     5     8     9
+     1     2     5
+     2     3     6
+     4     5     8
+     5     6     9
+
+
+elem2dof =
+
+           8           3           2
+          11           6           5
+          15          10           9
+          16          13          12
+           5           3           1
+           7           6           4
+          12          10           8
+          14          13          11
+
+</pre><p>The global and local orientation of edges are induced from the ascend ordering of vertices. Thanks to the ascend ordering, the local and global orientation are consistent.</p><p>However the ordering orientation is not consistent with the induced orientation. The second edge would be [3 1] for the consistent orientation. So <tt>[1 -1 1]</tt> is used in the construction of div operator.</p><h2>Matrix for divergence operator<a name="5"></a></h2><p>For triangle t, the basis for the constant function space is p = 1, the characteristic function. So in the computation of divergence operator, elemSign should be used. In the output of gradbasis, -Dlambda is always the outwards normal direction. The signed area could be negative but in the ouput, <tt>area</tt> is the absolute value (for the easy of integration on elements). Thus <tt>elemSign</tt> is used to record elements with negative area.</p><pre class="codeinput">[Dlambda,area,elemSign] = gradbasis(node,elem);
+B = icdmat(double(elem2dof),elemSign*[1 -1 1]);
+display(full(B))
+</pre><pre class="codeoutput">
+ans =
+
+  Columns 1 through 13
+
+     0     1    -1     0     0     0     0     1     0     0     0     0     0
+     0     0     0     0     1    -1     0     0     0     0     1     0     0
+     0     0     0     0     0     0     0     0     1    -1     0     0     0
+     0     0     0     0     0     0     0     0     0     0     0     1    -1
+    -1     0     1     0    -1     0     0     0     0     0     0     0     0
+     0     0     0    -1     0     1    -1     0     0     0     0     0     0
+     0     0     0     0     0     0     0    -1     0     1     0    -1     0
+     0     0     0     0     0     0     0     0     0     0    -1     0     1
+
+  Columns 14 through 16
+
+     0     0     0
+     0     0     0
+     0     1     0
+     0     0     1
+     0     0     0
+     0     0     0
+     0     0     0
+    -1     0     0
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% RT0 Lowest Order Edge Element in 2D
+%
+% We explain degree of freedoms and basis functions for Raviart-Thomas edge
+% element on triangles. The dofs and basis depends on the orientation of
+% the mesh. Read <scdoc.html Simplicial complex in two dimensions> for the
+% discussion of indexing, ordering and orientation.
+
+%% Local bases of RT0 element
+%
+% Suppose [i,j] is the k-th edge. The two dimensional curl is a rotated
+% graident defined as $\nabla^{\bot} f = (-\partial_y f, \partial _x f).$
+% The basis of this edge along with its divergence are given by
+% 
+% $$ \Phi_k = \lambda_i \nabla^{\bot} \lambda_j - \lambda_j \nabla^{\bot} \lambda_i. $$
+%
+% Inside one triangular, the 3 bases corresponding to 3 local edges [2 3; 1
+% 3; 1 2] are:
+%
+% $$ \Phi_1 = \lambda_2 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_2. $$ 
+%
+% $$ \Phi_2 = \lambda_1 \nabla^{\bot} \lambda_3 - \lambda_3 \nabla^{\bot} \lambda_1. $$
+%
+% $$ \Phi_3 = \lambda_1 \nabla^{\bot} \lambda_2 - \lambda_2 \nabla^{\bot} \lambda_1. $$
+%
+% The dual basis is the line integral over an orientated edge
+%
+% $$\int_{e_i} \phi_j de_i = \delta(i,j).$$ 
+
+%% Data Structure
+%
+% We use ascend ordering system. Note that the signed area of some
+% triangles could be negative.
+[node,elem] = squaremesh([0 1 0 1], 0.5);
+bdFlag = setboundary(node,elem,'Dirichlet');
+[elem,bdFlag] = sortelem(elem,bdFlag);
+showmesh(node,elem);
+findnode(node);
+findelem(node,elem);
+% Three local edges are |locEdge = [2 3; 1 3; 1 2]|. The pointer from the
+% local to global index can be constructured by
+[elem2dof,edge] = dofedge(elem);
+findedge(node,edge,'all','vec');
+%%
+display(elem);
+display(elem2dof);
+
+%%
+% The global and local orientation of edges are induced from the ascend
+% ordering of vertices. Thanks to the ascend ordering, the local and global
+% orientation are consistent.
+%
+% However the ordering orientation is not consistent with the induced
+% orientation. The second edge would be [3 1] for the consistent
+% orientation. So |[1 -1 1]| is used in the construction of div operator.
+
+%% Matrix for divergence operator
+%
+% For triangle t, the basis for the constant function space is p = 1, the
+% characteristic function. So in the computation of divergence operator,
+% elemSign should be used. In the output of gradbasis, -Dlambda is always
+% the outwards normal direction. The signed area could be negative but in
+% the ouput, |area| is the absolute value (for the easy of integration on
+% elements). Thus |elemSign| is used to record elements with negative area.
+%
+[Dlambda,area,elemSign] = gradbasis(node,elem);
+B = icdmat(double(elem2dof),elemSign*[1 -1 1]);
+display(full(B))
+##### SOURCE END #####
+--></body></html>

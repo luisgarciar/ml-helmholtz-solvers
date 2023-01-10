@@ -12,7 +12,8 @@ clear all; clc; close all;
 k  = 10; %Helmholtz problem
 bc = 'som';
 t  = pi/2; c = cos(t); s=sin(t);
-u  = @(x,y)cos(k*x*cos(t) + k*y*s) + 1i*sin(k*x*c + k*y*s);
+u  = @(x,y)cos(k*x*c + k*y*s) + 1i*sin(k*x*c + k*y*s);
+
 
 %% gridsize fixed  
  npint1D = 1000; 
@@ -66,7 +67,7 @@ end
 A = helmholtz2(k,0,npxint,npyint,bc);
 %b_d = A*u_ex; 
 u_d = A\g; 
-relerr1 = norm(real(u_d)-real(u_ex),inf)/norm(real(u_ex),inf)
+relerr1 = norm(real(u_d)-real(u_ex),inf)/norm(real(u_ex),inf);
 
 %Plotting the exact solution
 U_ex = reshape(real(u_ex),[npxint+2,npyint+2]);
@@ -85,38 +86,35 @@ surf(X,Y,U_d); title('discrete solution')
 % %Plotting the exact rhs
 % %b = reshape(b,[npx,npy]); 
 % %figure(4); surf(X,Y,b); title('ex rhs')
-% 
-% 
-
-% 
-% 
+%
+ 
 % %Plotting the error solution
 % figure(3);
 % Err = reshape(u_d-u_ex,[npx,npy]); 
 % surf(X,Y,Err)
 
 
-% %% Refining gridsize, h->0
-% 
-% npt = 2.^(4:1:9);
-% relerr = zeros(length(npt),1);
-% 
-% for i=1:length(npt)
-%    nd = npt(i);
-%    npx = nd; npy=nd; hx = 1/(npx+1); hy = 1/(npy+1);
-%    xgrid = hx*(1:1:npx); ygrid = hy*(1:1:npy);
-%    np = npx*npy;
-%    [X,Y]= meshgrid(xgrid,ygrid);
-%    
-%    %exact solution and right hand side
-%    u_ex = u(X,Y); u_ex = u_ex'; u_ex = reshape(u_ex,[np,1]); %exact solution
-%    b    = f(X,Y); b = b'; b = reshape(b,[np,1]);  %right hand side
-%    
-%    %solving the discrete equation and computing error
-%    A = helmholtz2(k,0,npx,npy,bc); b_d = A*u_ex; 
-%    u_d = A\b; 
-%    relerr(i) = norm(u_d-u_ex,Inf)/norm(u_ex,Inf); 
-% end
-% 
-% loglog(npt,relerr)
-% title('relative error of solution vs number of points')
+ %% Refining gridsize, h->0
+ 
+npt = 2.^(4:1:9);
+relerr = zeros(length(npt),1);
+ 
+ for i=1:length(npt)
+   nd = npt(i);
+   npx = nd; npy=nd; hx = 1/(npx+1); hy = 1/(npy+1);
+   xgrid = hx*(1:1:npx); ygrid = hy*(1:1:npy);
+   np = npx*npy;
+   [X,Y]= meshgrid(xgrid,ygrid);
+   
+   %exact solution and right hand side
+   u_ex = u(X,Y); u_ex = u_ex'; u_ex = reshape(u_ex,[np,1]); %exact solution
+   b    = f(X,Y); b = b'; b = reshape(b,[np,1]);  %right hand side
+   
+   %solving the discrete equation and computing error
+   A = helmholtz2(k,0,npx,npy,bc); b_d = A*u_ex; 
+   u_d = A\b; 
+   relerr(i) = norm(u_d-u_ex,Inf)/norm(u_ex,Inf); 
+end
+
+loglog(npt,relerr)
+title('relative error of solution vs number of points')

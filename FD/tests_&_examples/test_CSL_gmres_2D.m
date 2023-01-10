@@ -1,14 +1,15 @@
 %% Solving Helmholtz problems with GMRES preconditioned by the Shifted Laplacian 
-% 2-D Example, Dirichlet boundary conditions
+% 2-D Example, Sommerfeld boundary conditions
 clc
 clear global;
 close all;
 npc = 1;    %number of interior points in coarsest grid in one dim 
-bc  ='dir'; 
-dim = 2;    %boundary conditions, dimension
+bc  = 'som1'; dim = 2; %boundary conditions, dimension
 
 %wavenumber and imaginary shift of shifted Laplacian
-k   = 40;  eps = 0.5*k^2; %Helmholtz problem
+k   = 60; 
+factoreps = 0.5; poweps = 2;
+eps = factoreps*k^poweps; %Helmholtz problem
 ppw = 12;                 %number of points per wavelength
 [npf,numlev] = fd_npc_to_npf(npc,k,ppw);  %number of points in finest grid (1D)
 
@@ -20,7 +21,7 @@ ppw = 12;                 %number of points per wavelength
 % 
 % %Helmholtz and Shifted Laplacian Matrices and rhs
 % dim = 2;
-% M   = helmholtz2(k,eps,npf,npf,bc);
+% M  = helmholtz2(k,eps,npf,npf,bc);
 % 
 % npx = npf; npy=npf; hx = 1/(npx+1); hy = 1/(npy+1);
 % xgrid = hx*(1:1:npx); ygrid = hy*(1:1:npy);
@@ -31,56 +32,67 @@ ppw = 12;                 %number of points per wavelength
 % b    = f(X,Y); b = b'; b = reshape(b,[np,1]);  %right hand side
 
 %% Multigrid Setup
-npf = 63; numlev=6;
 profile on
 A       = helmholtz2(k,0,npf,npf,bc);
 op_type = 'gal'; %type of coarse operators (galerkin or rediscretized)
 [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npc,numlev,bc,dim);
 
-% Setting the SL preconditioner Minv
-% Parameters of V-cycle and Jacobi iteration
+u_gal = A\b; %exact solution
+
+% Setting the CSL preconditioners Minv
+% Parameters of MG-cycle and Jacobi iteration
 b    = ones(length(A),1);
 x0   = zeros(size(b));
-npre = 1; npos = 1; w = 2/3; smo = 'gs'; numcycles = 1;
-Minv = @(v)feval(@Wcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
-
-[L,U]   = lu(mg_mat{1});
-Minv_ex = @(v) U\(L\v);
+npre = 1; npos = 1; w = 2/3; smo = 'wjac'; numcycles = 1;
+Minv_wmg = @(v)feval(@Wcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
+Minv_vmg = @(v)feval(@Vcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
+Minv_fmg = @(v)feval(@Fcycle,mg_mat,mg_split,restrict,interp,x0,v,npre,npos,w,smo,numcycles);
 
 % %Parameters of GMRES iteration
-tol   = 1e-7;
-maxit = 200;
-
-%GMRES iteration without preconditioner (too slow for large wavenumbers)
-%tic
-%[~,flag1,relres1,iter1,resvec1] = gmres(A,b,[],tol,maxit,[]);
-%time1 = toc;
+tol   = 1e-8;
+maxit = 300;
  
-% GMRES iteration with left SL preconditioner
+%GMRES iteration with V-cycle preconditioner
+AMinv_vmg = @(v) A*feval(Minv_vmg,v);
 tic
-[x2,flag2,relres2,iter2,resvec2] = gmres(A,b,[],tol,maxit,Minv);
-profile off
-time2 = toc;
+[xv,flagv,relresv,iterv,resvecv] = gmres(AMinv_vmg,b,[],tol,maxit);
+time_v = toc;
+u_vmg = Minv_vmg(xv);
 
-%GMRES iteration with right SL preconditioner
-AMinv = @(v) A*feval(Minv,v);
+% GMRES iteration with F-cycle preconditioner
+AMinv_fmg = @(v) A*feval(Minv_fmg,v);
 tic
-[x3,flag3,relres3,iter3,resvec3] = gmres(A,b,[],tol,maxit,Minv_ex);
-%x3 = feval(Minv,x3);
-time3=toc;
+[xf,flagf,relresf,iterf,resvecf] = gmres(AMinv_fmg,b,[],tol,maxit);
+time_f = toc;
+u_fmg = Minv_fmg(xf);
 
-%semilogy(1:(iter1(2)+1),resvec1'/resvec1(1),'b-+');
-%hold on
-semilogy(1:(iter2(2)+1),resvec2'/resvec2(1),'r-+');
+% GMRES iteration with W cycle preconditioner
+AMinv_wmg =  @(v) A*feval(Minv_wmg,v);
+tic
+[xw,flagw,relresw,iterw,resvecw] = gmres(AMinv_wmg,b,[],tol,maxit);
+time_w = toc;
+u_wmg = Minv_wmg(xw);
+
+
+%% Plots
+figure(1)
+semilogy(1:(iterv(2)+1),resvecv'/resvecv(1),'r-+');
 hold on
-semilogy(1:(iter3(2)+1),resvec3'/resvec3(1),'k-*');
+semilogy(1:(iterf(2)+1),resvecf'/resvecf(1),'k-*');
+semilogy(1:(iterw(2)+1),resvecw'/resvecw(1),'b-*');
 
-%relative error with respect to exact solution
-%relerr  = norm(x2-u_ex)/norm(u_ex)
-%relerr2 = norm(x3-u_ex)/norm(u_ex)
-%relerr = norm(A\b-u_ex)/norm(u_ex);
+legend('Vcycle preconditioner','Fcycle preconditioner',...
+        'Wcycle preconditioner');
 
-%%print results
-%fprintf('Number of GMRES iterations (no preconditioning) %i\n',iter1(2));
-fprintf('Number of GMRES iterations (+MG left  V-cycle preconditioning) %i\n',iter2(2));
-fprintf('Number of GMRES iterations (+MG exact preconditioning) %i\n',iter3(2));
+time_v
+time_f
+time_w
+
+
+norm(u_gal-u_wmg,Inf)
+norm(u_gal-u_vmg,Inf)
+norm(u_gal-u_fmg,Inf)
+
+
+
+

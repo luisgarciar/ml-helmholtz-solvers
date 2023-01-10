@@ -1,6 +1,7 @@
 function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
 %% MG_SETUP: Constructs a hierarchy of coarse grid operators,
-%            splittings and intergrid operators for a Helmholtz/Laplace PDE problem   
+%            splittings and intergrid operators for a Helmholtz/Laplace PDE problem
+%            in 2D
 %  Use:
 %
 % [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,bc,dim)
@@ -15,20 +16,21 @@ function [mg_mat,mg_split,restrict,interp] = mg_setup(k,eps,op_type,npcc,numlev,
 %             'rd'  for rediscretized operators on coarse levels
 %             'gal' for Galerkin operators on coarse levels
 %
-%  npcc:       number of interior points on coarsest grid in 1D
+%  npcc:      number of interior points on coarsest grid in 1D
 %
 %  numlev:    Total number of levels (number of coarse grids + 1)
 %
 %  bc:        Type of boundary conditions:      
 %             'dir' for homogeneous dirichlet bc's
-%             'som' for sommerfeld bc's 
+%             'som' for sommerfeld bc's
+%             'som1' for sommerfeld bc's with 1st order discretization  
 %
 %  dim:        Dimension (1 or 2)
 %
 %  Output:
 %
-%  mg_mat:     Cell array with multigrid matrices 
-%                 (mg_mat{i}: matrix at level i)   
+%  mg_mat:     Cell array with  matrices at all levels
+%              (mg_mat{i}: matrix at level i)   
 %
 %  mg_split:   Cell array with splitting of mg_mat matrices
 %              (upper, lower and diagonal part) to be applied in
@@ -87,7 +89,7 @@ interp{1}     = lininterpol(npc,dim,bc);    %lin interp, grid 2 to grid 1
 mg_split{1}.U = sparse(triu(mg_mat{1},1));  %matrix splitting of A
 mg_split{1}.L = sparse(tril(mg_mat{1},-1));
 mg_split{1}.D = spdiags(diag(mg_mat{1}),0,length(mg_mat{1}),length(mg_mat{1}));
-mg_split{1}.P = eye(length(mg_mat{1}));
+mg_split{1}.P = speye(length(mg_mat{1}));
 
 if dim==2
     mg_split{1}.P = perm_rb(length(mg_mat{1}));

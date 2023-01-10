@@ -21,7 +21,7 @@ function [x_sol] = Fcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp
 %       numcycles:       number of V-cycles
 %
 %   Output       
-%       x_sol:     solution computed with the multigrid V-cycle   
+%       x_sol:     solution computed with the multigrid F-cycle   
 %
 %   Reference: 
 %   W. Briggs, V.E. Henson & S. McCormick, A Multigrid Tutorial, p.43

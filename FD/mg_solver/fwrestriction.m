@@ -44,6 +44,13 @@ switch dim
                 npff  = npf+2; % total number of points with endpoints
                 npcc  = npc+2;
                 R = 0.25*lininterpol(npc,dim,'som')';
+                
+                case 'som1'
+                assert(mod(npf,2)==1,'number of interior points must be odd')
+                npc = round((npf-1)/2);
+                npff  = npf+2; % total number of points with endpoints
+                npcc  = npc+2;
+                R = 0.25*lininterpol(npc,dim,'som1')';
                  
         end      
       

@@ -1,0 +1,191 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>NE2 Quadratic Edge Element (first family) in 3D</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-26"><meta name="DC.source" content="Maxwell2doc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>NE2 Quadratic Edge Element (first family) in 3D</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Local Bases</a></li><li><a href="#2">Data Structure</a></li></ul></div><h2>Local Bases<a name="1"></a></h2><p>The first 12 bases are associated to edges. We order the local bases as</p><p>1- 6:  <img src="Maxwell2doc_eq00278172288406450011.png" alt="$\{\Phi_1, \Phi_2, \Phi_3, \Phi_4, \Phi_5, \Phi_6\},$"></p><p>7- 12: <img src="Maxwell2doc_eq12911293268886567175.png" alt="$\{\Psi_1, \Psi_2, \Psi_3, \Psi_4, \Psi_5, \Psi_6\}.$"></p><p><a href="Maxwelldoc.html">NE0 Lowest order edge element</a> <a href="Maxwell1doc.html">NE1 Linear edge element</a></p><p>Suppose <img src="Maxwell2doc_eq15135040524337631244.png" alt="$i,j,k$"> are the vertices of the <img src="Maxwell2doc_eq11306495728221823791.png" alt="$l$">-th face and <img src="Maxwell2doc_eq02624465688696917998.png" alt="$i<j<k$">. The two basis associated to this face are</p><p><img src="Maxwell2doc_eq15572011501499912763.png" alt="$$ \chi_l^1 = \lambda_j\phi _{ik} = \lambda_j(\lambda_i\nabla\lambda_k -&#xA;\lambda_k\nabla\lambda_i),\quad&#xA;   \chi_l^2 = \lambda_k\phi _{ij} = \lambda_k(\lambda_i\nabla\lambda_j -&#xA;\lambda_j\nabla\lambda_i).$$"></p><p>Inside one tetrahedron, the 8 bases functions assocaited to the four local faces [2 3 4; 1 3 4; 1 2 4; 1 2 3] are:</p><p><img src="Maxwell2doc_eq13269292985670436423.png" alt="$$ \chi_1^1 = \lambda_3\phi _{24} = \lambda_3(\lambda_2\nabla\lambda_4 -&#xA;\lambda_4\nabla\lambda_2),\quad&#xA;   \chi_1^2 = \lambda_4\phi _{23} = \lambda_4(\lambda_2\nabla\lambda_3 -&#xA;\lambda_3\nabla\lambda_2).$$"></p><p><img src="Maxwell2doc_eq10528122807644971582.png" alt="$$ \chi_2^1 = \lambda_3\phi _{14} = \lambda_3(\lambda_1\nabla\lambda_4 -&#xA;\lambda_4\nabla\lambda_1),\quad&#xA;   \chi_2^2 = \lambda_4\phi _{13} = \lambda_4(\lambda_1\nabla\lambda_3 -&#xA;\lambda_3\nabla\lambda_1).$$"></p><p><img src="Maxwell2doc_eq01977319375393287634.png" alt="$$ \chi_3^1 = \lambda_2\phi _{14} = \lambda_2(\lambda_1\nabla\lambda_4 -&#xA;\lambda_4\nabla\lambda_1),\quad&#xA;   \chi_3^2 = \lambda_4\phi _{12} = \lambda_4(\lambda_1\nabla\lambda_2 -&#xA;\lambda_2\nabla\lambda_1).$$"></p><p><img src="Maxwell2doc_eq09609799617555920316.png" alt="$$ \chi_4^1 = \lambda_2\phi _{13} = \lambda_2(\lambda_1\nabla\lambda_3 -&#xA;\lambda_3\nabla\lambda_1),\quad&#xA;   \chi_4^2 = \lambda_3\phi _{12} = \lambda_3(\lambda_1\nabla\lambda_2 -&#xA;\lambda_2\nabla\lambda_1).$$"></p><p>Reference: See page 12, Table 9.2. Arnold, Douglas N. and Falk, Richard S. and Winther, Ragnar. Geometric decompositions and local bases for spaces of finite element differential forms. Comput. Methods Appl. Mech. Engrg. 198():1660--1672, 2009.</p><p>Locally, we order the local bases in the following way:</p><p><img src="Maxwell2doc_eq10236683886027075700.png" alt="$$\{\chi_1^1,~\,\chi_1^2,~\,\chi_2^1,~\,\chi_2^2,~\,\chi_3^1,~\,\chi_3^2,&#xA;   ~\,\chi_4^1,~\,\chi_4^2.\}$$"></p><p>and rewrite the local bases as:</p><p>13- 20: <img src="Maxwell2doc_eq06334276452232892368.png" alt="$\{\chi_1,~\,\chi_2,~\,\chi_3,~\,\chi_4,~\,\chi_5,~\,\chi_6,~\,   \chi_7,~\,\chi_8.\}$"></p><h2>Data Structure<a name="2"></a></h2><pre class="codeinput">[node,elem] = cubemesh([0,1,0,1,0,1],1);
+</pre><p>Locally we construct <tt>locBasesIdx</tt> to record the local index used in the bases.</p><pre class="codeinput">locEdge = [1 2; 1 3; 1 4; 2 3; 2 4; 3 4];
+locFace = [2 3 4; 1 3 4; 1 2 4; 1 2 3];
+locBasesIdx = [1 2 0; 1 3 0; 1 4 0; 2 3 0; 2 4 0; 3 4 0; <span class="keyword">...</span><span class="comment"> % phi</span>
+               1 2 0; 1 3 0; 1 4 0; 2 3 0; 2 4 0; 3 4 0; <span class="keyword">...</span><span class="comment"> % psi</span>
+               3 2 4; 3 1 4; 2 1 4; 2 1 3; <span class="keyword">...</span>
+               4 2 3; 4 1 3; 4 1 2; 3 1 2]; <span class="comment">% chi</span>
+</pre><p>For example, for basis <img src="Maxwell2doc_eq12228398555130309381.png" alt="$\chi_i =\lambda_{i_1}\phi _{i_2i_3}$"> for <img src="Maxwell2doc_eq16117624833627842059.png" alt="$i=4$">, we can get i1,i2,i3 by:</p><pre class="codeinput">i = 4+12;
+i1 = locBasesIdx(i,1); i2 = locBasesIdx(i,2); i3 = locBasesIdx(i,3);
+</pre><p>In addition to the edge structure, we need face and the corresponding pointers.</p><pre class="codeinput">[elem2edge,edge] = dof3edge(elem);
+[elem2face,face] = dof3face(elem);
+</pre><p>Furthermore we need pointer from face to edge.</p><pre class="codeinput">face2edge = zeros(size(face,1),3,<span class="string">'int32'</span>);
+<span class="comment">% face is given by auxtructure3 and is sorted according to global indices.</span>
+<span class="comment">% locFace = [2 3 4; 1 3 4; 1 2 4; 1 2 3];</span>
+<span class="comment">% face2edge is used to compute uI. So it is consistent with the local index</span>
+<span class="comment">% system in edgeinterpolate2, i.e., if face is (i,j,k) with i&lt;j&lt;k, then the</span>
+<span class="comment">% three edges are [i j], [i k], [j k].</span>
+face2edge(elem2face(:,1),:) = elem2edge(:,[4 5 6]);
+face2edge(elem2face(:,2),:) = elem2edge(:,[2 3 6]);
+face2edge(elem2face(:,3),:) = elem2edge(:,[1 3 5]);
+face2edge(elem2face(:,4),:) = elem2edge(:,[1 2 4]);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% NE2 Quadratic Edge Element (first family) in 3D
+%
+
+%% Local Bases
+%
+% The first 12 bases are associated to edges. We order the local bases as
+% 
+% 1- 6:  $\{\Phi_1, \Phi_2, \Phi_3, \Phi_4, \Phi_5, \Phi_6\},$
+%
+% 7- 12: $\{\Psi_1, \Psi_2, \Psi_3, \Psi_4, \Psi_5, \Psi_6\}.$
+%
+% <Maxwelldoc.html NE0 Lowest order edge element> 
+% <Maxwell1doc.html NE1 Linear edge element> 
+%
+% Suppose $i,j,k$ are the vertices of the $l$-th face and $i<j<k$. The two
+% basis associated to this face are
+% 
+% $$ \chi_l^1 = \lambda_j\phi _{ik} = \lambda_j(\lambda_i\nabla\lambda_k -
+% \lambda_k\nabla\lambda_i),\quad
+%    \chi_l^2 = \lambda_k\phi _{ij} = \lambda_k(\lambda_i\nabla\lambda_j -
+% \lambda_j\nabla\lambda_i).$$
+%
+% Inside one tetrahedron, the 8 bases functions assocaited to the four
+% local faces [2 3 4; 1 3 4; 1 2 4; 1 2 3] are:
+%
+% $$ \chi_1^1 = \lambda_3\phi _{24} = \lambda_3(\lambda_2\nabla\lambda_4 -
+% \lambda_4\nabla\lambda_2),\quad
+%    \chi_1^2 = \lambda_4\phi _{23} = \lambda_4(\lambda_2\nabla\lambda_3 -
+% \lambda_3\nabla\lambda_2).$$
+%
+% $$ \chi_2^1 = \lambda_3\phi _{14} = \lambda_3(\lambda_1\nabla\lambda_4 -
+% \lambda_4\nabla\lambda_1),\quad
+%    \chi_2^2 = \lambda_4\phi _{13} = \lambda_4(\lambda_1\nabla\lambda_3 -
+% \lambda_3\nabla\lambda_1).$$
+%
+% $$ \chi_3^1 = \lambda_2\phi _{14} = \lambda_2(\lambda_1\nabla\lambda_4 -
+% \lambda_4\nabla\lambda_1),\quad
+%    \chi_3^2 = \lambda_4\phi _{12} = \lambda_4(\lambda_1\nabla\lambda_2 -
+% \lambda_2\nabla\lambda_1).$$
+%
+% $$ \chi_4^1 = \lambda_2\phi _{13} = \lambda_2(\lambda_1\nabla\lambda_3 -
+% \lambda_3\nabla\lambda_1),\quad
+%    \chi_4^2 = \lambda_3\phi _{12} = \lambda_3(\lambda_1\nabla\lambda_2 -
+% \lambda_2\nabla\lambda_1).$$
+%
+% Reference: See page 12, Table 9.2. Arnold, Douglas N. and Falk, Richard S. and Winther, Ragnar.
+% Geometric decompositions and local bases for spaces of finite element
+% differential forms. Comput. Methods Appl. Mech. Engrg. 198():1660REPLACE_WITH_DASH_DASH1672,
+% 2009.
+%
+% Locally, we order the local bases in the following way: 
+% 
+% $$\{\chi_1^1,~\,\chi_1^2,~\,\chi_2^1,~\,\chi_2^2,~\,\chi_3^1,~\,\chi_3^2,
+%    ~\,\chi_4^1,~\,\chi_4^2.\}$$
+%
+% and rewrite the local bases as: 
+%
+% 13- 20: $\{\chi_1,~\,\chi_2,~\,\chi_3,~\,\chi_4,~\,\chi_5,~\,\chi_6,~\,
+%   \chi_7,~\,\chi_8.\}$
+
+%% Data Structure
+
+[node,elem] = cubemesh([0,1,0,1,0,1],1);
+%%
+% Locally we construct |locBasesIdx| to record the local index used in the
+% bases.
+
+locEdge = [1 2; 1 3; 1 4; 2 3; 2 4; 3 4];
+locFace = [2 3 4; 1 3 4; 1 2 4; 1 2 3];
+locBasesIdx = [1 2 0; 1 3 0; 1 4 0; 2 3 0; 2 4 0; 3 4 0; ... % phi
+               1 2 0; 1 3 0; 1 4 0; 2 3 0; 2 4 0; 3 4 0; ... % psi
+               3 2 4; 3 1 4; 2 1 4; 2 1 3; ...
+               4 2 3; 4 1 3; 4 1 2; 3 1 2]; % chi
+
+%%
+% For example, for basis $\chi_i =\lambda_{i_1}\phi _{i_2i_3}$ for $i=4$,
+% we can get i1,i2,i3 by:
+i = 4+12;
+i1 = locBasesIdx(i,1); i2 = locBasesIdx(i,2); i3 = locBasesIdx(i,3);
+
+%%
+% In addition to the edge structure, we need face and the corresponding
+% pointers.
+[elem2edge,edge] = dof3edge(elem);
+[elem2face,face] = dof3face(elem); 
+%%
+% Furthermore we need pointer from face to edge. 
+face2edge = zeros(size(face,1),3,'int32');
+% face is given by auxtructure3 and is sorted according to global indices.
+% locFace = [2 3 4; 1 3 4; 1 2 4; 1 2 3];
+% face2edge is used to compute uI. So it is consistent with the local index
+% system in edgeinterpolate2, i.e., if face is (i,j,k) with i<j<k, then the
+% three edges are [i j], [i k], [j k]. 
+face2edge(elem2face(:,1),:) = elem2edge(:,[4 5 6]);
+face2edge(elem2face(:,2),:) = elem2edge(:,[2 3 6]);
+face2edge(elem2face(:,3),:) = elem2edge(:,[1 3 5]);
+face2edge(elem2face(:,4),:) = elem2edge(:,[1 2 4]);
+
+##### SOURCE END #####
+--></body></html>

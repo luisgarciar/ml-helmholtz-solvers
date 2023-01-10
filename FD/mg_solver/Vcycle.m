@@ -1,13 +1,14 @@
 function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
 %% VCYCLE Solves the Helmholtz/Poisson equation using a multigrid V-cycle.
-%   Use: Vcycle_som(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
+%   Use: Vcycle_som(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,numcycles)
 %   Input:
-%       Output from the function mg_setup_som: 
-%         - mg_mat:      cell array with multigrid matrices on all
-%                        levels
-%         - mg_split:    cell array with matrix splittings (for smoothers)
-%         - restrict: cell array with restriction operators
-%         - interp:   cell array with interpolation operators
+%       Output from the function mg_setup: 
+%       - mg_mat:      cell array with multigrid matrices on all
+%                      levels
+%       - mg_split:    cell array with matrix splittings on all levels
+%                      (for the smoothers)
+%       - restrict:    cell array with restriction operators
+%       - interp:      cell array with interpolation operators
 %
 %       x0:              initial guess
 %       b:               right-hand side
@@ -22,7 +23,12 @@ function [x_sol] = Vcycle(mg_mat,mg_split,restrict,interp,x0,b,npre,npos,w,smo,n
 %   Author: Luis Garcia Ramos,          
 %           Institut fur Mathematik, TU Berlin
 %           Version 2.0, Sep 2016
-        
+%
+% Notes:  The option 'liv' (livshits) is there to implement
+%         Kaczmarcz relaxation, but this is not yet finished
+%
+%
+
 %%    
     if length(mg_mat) == 1 %If on coarsest level, solve exactly
         %size(b)

@@ -36,7 +36,7 @@ else
         %black variables
         perm(2*k^2+n*(i-1)+1:2*k^2+n*i,1) = [v1+1;v2-1];       
     end    
-    P = I(perm,:)      
+    P = I(perm,:);      
 end
 
 end

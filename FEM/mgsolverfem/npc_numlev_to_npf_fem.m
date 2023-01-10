@@ -1,6 +1,7 @@
 function [npf]= npc_numlev_to_npf_fem(npc,numlev)
-%% NPC_NUMLEV_TO_NPF Computes the number of points in a fine grid
-% given the number of points in the coarsest grid and number of level
+%% NPC_NUMLEV_TO_NPF Computes the number of points in a 1D fine grid
+%  given the number of points in the coarsest grid and the number 
+%  of levels (intermediate grids)
 % 
 %  Use:
 %  [npf] = npc_numlev_to_npf_fem(npc,numlev)

@@ -1,8 +1,8 @@
-%% Script for testing the functions /helmholtz2var.m and shift_laplace2var.m
+%% Script for testing the function helmholtz2var.m
 
 kmax  = 20; kmin = 30;    %For problem with random wavenumbers
 kref  = 40;               %For wedge problem
-np    = ceil(15*kref/pi); % number of grid points
+np    = ceil(30*kref/pi); % number of grid points
 npx   = np;
 npy   = np;
 hx    = 1/(npx+1); hy = 1/(npy+1); %gridsizes
@@ -11,10 +11,11 @@ flag  = 1;
 
 %% Test of the function klay.m
 [x,y] = meshgrid(hx:hx:(1-hx),hy:hy:(1-hy));
- k    = klay(x,y,kref);   
+k     = klay(x,y,kref);   
 figure(1);
-surf(x,y,k);
-%return
+contourf(x,y,k);
+%colormap(white)
+
 
 %% Test of the function helmholtz2var.m 
 
@@ -47,17 +48,21 @@ else if strcmp(bc,'som')
     
     %right hand side: point source
     b = zeros(length(A),1);
-    index = ceil((npx+1)*(npy/2+1)+npy/2);
+    index = ceil(npx+2)*(npy+1) + (npx/2);
+    %index = ceil((npx+1)*(npy/2+1)+npy/2);
+    
     b(index)= 1/(hx*hy);
-     
+   
     sol = A\b ;
-    u = reshape(sol,[npy+2,npx+2]);
+    u = reshape(sol,[npx+2,npy+2]);
     
     end    
 end
     
-Reu  = real(u);
+Reu  = real(u);  
 Imu  = imag(u);
 
-figure(2)
-surf(x,y,Reu)
+h = figure(2);
+surf(y,x,Imu,'Edgecolor','none')
+colormap()
+set(h, 'linestyle', 'none');

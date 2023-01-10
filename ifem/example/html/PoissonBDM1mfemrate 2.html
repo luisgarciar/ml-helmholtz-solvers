@@ -1,0 +1,208 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RATE OF CONVERGENCE OF MIXED FINITE ELEMENT METHOD (BDM1-P0) FOR POISSON EQUATION</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-01-04"><meta name="DC.source" content="PoissonBDM1mfemrate.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>RATE OF CONVERGENCE OF MIXED FINITE ELEMENT METHOD (BDM1-P0) FOR POISSON EQUATION</h1><!--introduction--><p>This example is to show the rate of convergence of mixed finite element (RT0-P0) approximation of the Poisson equation on the unit square:</p><p><img src="PoissonBDM1mfemrate_eq02169493830555044887.png" alt="$$- \Delta u = f \; \hbox{in } (0,1)^2$$"></p><p>for the following boundary conditions:</p><div><ol><li>Pure Dirichlet boundary condition. <img src="PoissonBDM1mfemrate_eq06380083531797535387.png" alt="$\Gamma _D = \partial \Omega$">.</li><li>Pure Neumann boundary condition. <img src="PoissonBDM1mfemrate_eq16035248025353962479.png" alt="$\Gamma _N = \partial \Omega$">.</li><li>Mix Dirichlet and Neumann boundary condition. <img src="PoissonBDM1mfemrate_eq00615094833172967975.png" alt="$u=g_D \hbox{ on }\Gamma_D, \quad \nabla u\cdot n=g_N \hbox{ on }\Gamma_N.$"></li></ol></div><p>Written by Ming Wang and improved by Long Chen.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Setting</a></li><li><a href="#2">Non-empty Dirichlet boundary condition.</a></li><li><a href="#3">Pure Neumann boundary condition.</a></li><li><a href="#4">Mix Dirichlet and Neumann boundary condition.</a></li><li><a href="#5">Conclusion</a></li></ul></div><h2>Setting<a name="1"></a></h2><pre class="codeinput">[node,elem] = squaremesh([0,1,0,1],0.25);
+pde = sincosNeumanndata;
+option.L0 = 2;
+option.maxIt = 4;
+option.printlevel = 1;
+option.elemType = <span class="string">'BDM1'</span>;
+</pre><h2>Non-empty Dirichlet boundary condition.<a name="2"></a></h2><pre class="codeinput">option.plotflag = 1;
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+mfemPoisson(node,elem,pde,bdFlag,option);
+</pre><pre class="codeoutput">Uzawa-type MultiGrid Preconditioned PCG 
+#dof:     2112,  #nnz:    14016, V-cycle:  1, iter: 15,   err = 8.94e-09,   time = 0.05 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:     8320,  #nnz:    55680, V-cycle:  1, iter: 16,   err = 3.57e-09,   time = 0.32 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:    33024,  #nnz:   221952, V-cycle:  1, iter: 16,   err = 6.16e-09,   time =  1.5 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:   131584,  #nnz:   886272, V-cycle:  1, iter: 17,   err = 3.09e-09,   time =  5.3 s
+Table: Error
+ #Dof        h       ||u-u_h||    ||u_I-u_h||  ||sigma-sigma_h||||sigma-sigma_h||_{div}
+  2112   6.25e-02   6.56418e-02   1.19213e-02   8.96176e-02   5.14701e+00
+  8320   3.12e-02   3.27516e-02   3.03293e-03   2.27048e-02   2.58126e+00
+ 33024   1.56e-02   1.63659e-02   7.61595e-04   5.69906e-03   1.29160e+00
+131584   7.81e-03   8.18166e-03   1.90611e-04   1.42668e-03   6.45924e-01
+
+Table: CPU time
+ #Dof    Assemble     Solve      Error      Mesh    
+  2112   6.38e-03   5.00e-02   2.00e-02   0.00e+00
+  8320   2.14e-02   3.20e-01   2.00e-02   0.00e+00
+ 33024   9.15e-02   1.50e+00   1.40e-01   1.00e-02
+131584   3.90e-01   5.27e+00   3.70e-01   0.00e+00
+
+</pre><img vspace="5" hspace="5" src="PoissonBDM1mfemrate_01.png" alt=""> <h2>Pure Neumann boundary condition.<a name="3"></a></h2><pre class="codeinput">option.solver = <span class="string">'tripremixpoisson'</span>;
+bdFlag = setboundary(node,elem,<span class="string">'Neumann'</span>);
+mfemPoisson(node,elem,pde,bdFlag,option);
+</pre><pre class="codeoutput">Triangular Preconditioner Preconditioned GMRES 
+#dof:     2112,  #nnz:    12999, V-cycle:  1, iter: 26,   err = 6.74e-09,   time = 0.05 s
+Triangular Preconditioner Preconditioned GMRES 
+#dof:     8320,  #nnz:    53639, V-cycle:  1, iter: 26,   err = 6.36e-09,   time = 0.19 s
+Triangular Preconditioner Preconditioned GMRES 
+#dof:    33024,  #nnz:   217863, V-cycle:  1, iter: 25,   err = 7.62e-09,   time = 0.45 s
+Triangular Preconditioner Preconditioned GMRES 
+#dof:   131584,  #nnz:   878087, V-cycle:  1, iter: 25,   err = 8.89e-09,   time =  1.7 s
+Table: Error
+ #Dof        h       ||u-u_h||    ||u_I-u_h||  ||sigma-sigma_h||||sigma-sigma_h||_{div}
+  2112   6.25e-02   6.59919e-02   1.46218e-02   1.01998e-01   5.14701e+00
+  8320   3.12e-02   3.27830e-02   3.60835e-03   2.57227e-02   2.58126e+00
+ 33024   1.56e-02   1.63694e-02   8.99012e-04   6.44488e-03   1.29160e+00
+131584   7.81e-03   8.18209e-03   2.24561e-04   1.61214e-03   6.45924e-01
+
+Table: CPU time
+ #Dof    Assemble     Solve      Error      Mesh    
+  2112   9.63e-03   5.00e-02   1.00e-02   0.00e+00
+  8320   2.94e-02   1.90e-01   3.00e-02   0.00e+00
+ 33024   1.06e-01   4.50e-01   9.00e-02   1.00e-02
+131584   4.34e-01   1.69e+00   3.70e-01   0.00e+00
+
+</pre><img vspace="5" hspace="5" src="PoissonBDM1mfemrate_02.png" alt=""> <h2>Mix Dirichlet and Neumann boundary condition.<a name="4"></a></h2><pre class="codeinput">option.solver = <span class="string">'uzawapcg'</span>;
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>,<span class="string">'~(x==0)'</span>,<span class="string">'Neumann'</span>,<span class="string">'x==0'</span>);
+mfemPoisson(node,elem,pde,bdFlag,option);
+</pre><pre class="codeoutput">Uzawa-type MultiGrid Preconditioned PCG 
+#dof:     2112,  #nnz:    13760, V-cycle:  1, iter: 15,   err = 9.27e-09,   time = 0.07 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:     8320,  #nnz:    55168, V-cycle:  1, iter: 16,   err = 3.40e-09,   time = 0.38 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:    33024,  #nnz:   220928, V-cycle:  1, iter: 16,   err = 6.30e-09,   time =  1.2 s
+Uzawa-type MultiGrid Preconditioned PCG 
+#dof:   131584,  #nnz:   884224, V-cycle:  1, iter: 17,   err = 3.05e-09,   time =  4.6 s
+Table: Error
+ #Dof        h       ||u-u_h||    ||u_I-u_h||  ||sigma-sigma_h||||sigma-sigma_h||_{div}
+  2112   6.25e-02   6.57963e-02   1.29671e-02   9.19791e-02   5.14701e+00
+  8320   3.12e-02   3.27711e-02   3.29173e-03   2.32963e-02   2.58126e+00
+ 33024   1.56e-02   1.63683e-02   8.26130e-04   5.84697e-03   1.29160e+00
+131584   7.81e-03   8.18197e-03   2.06734e-04   1.46363e-03   6.45924e-01
+
+Table: CPU time
+ #Dof    Assemble     Solve      Error      Mesh    
+  2112   8.09e-03   7.00e-02   1.00e-02   0.00e+00
+  8320   3.42e-02   3.80e-01   2.00e-02   0.00e+00
+ 33024   9.10e-02   1.22e+00   1.00e-01   1.00e-02
+131584   4.30e-01   4.61e+00   3.70e-01   0.00e+00
+
+</pre><img vspace="5" hspace="5" src="PoissonBDM1mfemrate_03.png" alt=""> <h2>Conclusion<a name="5"></a></h2><p>The optimal rates of convergence for u and sigma are observed, namely, 1st order for L2 norm of u, H(div) norm of sigma, and 2nd order for L2 norm of sigma.</p><p>The 2nd order convergent rates between two discrete functions <tt>|uI-uh</tt>| is known as superconvergence.</p><p>The 3rd order convergent rates between two discrete functions <tt>|sigmaI-sigmah</tt>| for the Pure Neumman boundary condition is known as superconvergence. The 2nd accurate numerical quadrature is required for the integral of rhs to observe such superconvergence.</p><p>Triangular preconditioned GMRES and Uzawa preconditioned CG converges uniformly in all cases. Traingular preconditioner is two times faster than PCG although GMRES is used.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% RATE OF CONVERGENCE OF MIXED FINITE ELEMENT METHOD (BDM1-P0) FOR POISSON EQUATION
+%
+% This example is to show the rate of convergence of mixed finite element
+% (RT0-P0) approximation of the Poisson equation on the unit square:
+%
+% $$- \Delta u = f \; \hbox{in } (0,1)^2$$
+%
+% for the following boundary conditions:
+%
+% # Pure Dirichlet boundary condition. $\Gamma _D = \partial \Omega$. 
+% # Pure Neumann boundary condition. $\Gamma _N = \partial \Omega$.
+% # Mix Dirichlet and Neumann boundary condition. $u=g_D \hbox{ on }\Gamma_D, \quad \nabla u\cdot n=g_N \hbox{ on }\Gamma_N.$
+%
+% Written by Ming Wang and improved by Long Chen.
+
+%% Setting
+[node,elem] = squaremesh([0,1,0,1],0.25); 
+pde = sincosNeumanndata;
+option.L0 = 2;
+option.maxIt = 4;
+option.printlevel = 1;
+option.elemType = 'BDM1';
+
+%% Non-empty Dirichlet boundary condition.
+option.plotflag = 1;
+bdFlag = setboundary(node,elem,'Dirichlet');
+mfemPoisson(node,elem,pde,bdFlag,option);
+
+%% Pure Neumann boundary condition.
+option.solver = 'tripremixpoisson';
+bdFlag = setboundary(node,elem,'Neumann');
+mfemPoisson(node,elem,pde,bdFlag,option);
+
+%% Mix Dirichlet and Neumann boundary condition.
+option.solver = 'uzawapcg';
+bdFlag = setboundary(node,elem,'Dirichlet','~(x==0)','Neumann','x==0');
+mfemPoisson(node,elem,pde,bdFlag,option);
+
+%% Conclusion
+%
+% The optimal rates of convergence for u and sigma are observed, namely,
+% 1st order for L2 norm of u, H(div) norm of sigma, and 2nd order for 
+% L2 norm of sigma. 
+%
+% The 2nd order convergent rates between two discrete functions ||uI-uh|| 
+% is known as superconvergence.
+%
+% The 3rd order convergent rates between two discrete functions 
+% ||sigmaI-sigmah|| for the Pure Neumman boundary condition 
+% is known as superconvergence. The 2nd accurate numerical quadrature
+% is required for the integral of rhs to observe such superconvergence.
+%
+% Triangular preconditioned GMRES and Uzawa preconditioned CG converges
+% uniformly in all cases. Traingular preconditioner is two times faster than
+% PCG although GMRES is used.
+##### SOURCE END #####
+--></body></html>

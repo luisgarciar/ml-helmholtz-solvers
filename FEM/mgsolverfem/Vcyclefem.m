@@ -2,9 +2,9 @@ function [x_sol] = Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp
 %% VCYCLEFEM Solves the Helmholtz equation using a multigrid V-cycle.
 %
 %   Use: Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp_op,x0,b,npre,npos,w,smo,numcycles)
-% hallo hallo
+%
 %   Input:
-%       Output from the function mgsmsetup: 
+%       Output from the function mg_setupfem or mg_setupfem_2D: 
 %         - galerkin_matrices:  cell array with matrices on all
 %                               levels
 %         - galerkin_split:     cell array with matrix splittings for smoothers
@@ -28,7 +28,6 @@ function [x_sol] = Vcyclefem(galerkin_matrices,galerkin_split,restrict_op,interp
 %
 %%    
 
-
 if numcycles==1
 
     if length(galerkin_matrices) == 1 %If on coarse level, solve exactly
@@ -36,8 +35,7 @@ if numcycles==1
         return;
     else
         x_sol = x0;
-        
-            
+                    
             %Presmoothing and computation of the residual
             %fprintf('Presmoothing with matrix of size %d\n',length(grid_matrices{1,1}));
             x_sol = smoother(galerkin_split{1}.U, galerkin_split{1}.L,...
