@@ -1,0 +1,427 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RATE OF CONVERGENCE OF AFEM: P1 Linear Element for Poisson</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-01-04"><meta name="DC.source" content="Poissonafemrate.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>RATE OF CONVERGENCE OF AFEM: P1 Linear Element for Poisson</h1><!--introduction--><p>This example is to show the rate of convergence of the lowest order finite element approximation of the second order elliptic equation.</p><div><ol><li>Lshape problem.</li><li>Kellogg problem.</li></ol></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Lshape problem</a></li><li><a href="#2">Kellogg problem</a></li></ul></div><h2>Lshape problem<a name="1"></a></h2><pre class="codeinput">[node,elem] = squaremesh([-1,1,-1,1],1);
+[node,elem] = delmesh(node,elem,<span class="string">'x&gt;0 &amp; y&lt;0'</span>);
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+pde = Lshapedata;
+format <span class="string">shorte</span>
+option.L0 = 1;
+option.maxIt = 25;
+option.printlevel = 1;
+option.plotflag = 1;
+err = afemPoisson(node,elem,pde,bdFlag,option);
+figure;
+showrate2(err.N,err.H1,10,<span class="string">'k-*'</span>,<span class="string">'||Du-Du_h||'</span>,err.N,err.eta,10,<span class="string">'-+'</span>,<span class="string">'eta'</span>);
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2226,  #nnz:    10736, smoothing: (1,1), iter:  6,   err = 3.77e-09,   time = 0.034 s
+Warning: Polynomial is not unique; degree &gt;= number of data points. 
+Warning: Polynomial is not unique; degree &gt;= number of data points. 
+Table: Error
+ #Dof    ||u-u_h||    ||Du-Du_h||   ||DuI-Du_h|| ||uI-u_h||_{max}     eta      
+  21   4.85397e-02   2.68743e-01   9.32185e-02   3.62008e-02   1.14048e+00
+  22   3.71205e-02   2.39656e-01   8.06277e-02   4.43737e-02   1.04258e+00
+  24   3.04020e-02   2.28007e-01   8.21043e-02   3.87603e-02   9.83591e-01
+  26   1.93497e-02   1.97508e-01   6.63676e-02   2.80168e-02   9.03000e-01
+  29   1.47373e-02   1.82417e-01   5.57603e-02   2.91195e-02   8.52078e-01
+  33   1.07667e-02   1.66931e-01   4.60478e-02   1.92130e-02   8.03108e-01
+  40   8.45648e-03   1.46800e-01   3.82374e-02   2.07078e-02   7.07810e-01
+  52   5.94453e-03   1.28622e-01   3.29583e-02   1.24904e-02   6.17279e-01
+  62   5.13839e-03   1.14651e-01   2.86926e-02   1.31243e-02   5.47295e-01
+  79   4.01819e-03   1.01274e-01   2.39066e-02   7.87523e-03   4.83391e-01
+  97   3.20330e-03   9.05243e-02   2.11740e-02   8.46417e-03   4.34814e-01
+ 123   2.67334e-03   8.13939e-02   1.87919e-02   4.98112e-03   3.90042e-01
+ 155   2.11150e-03   7.23214e-02   1.44451e-02   5.55572e-03   3.51236e-01
+ 197   1.77642e-03   6.35329e-02   1.31874e-02   3.23517e-03   3.07910e-01
+ 241   1.23104e-03   5.64336e-02   1.01244e-02   3.52551e-03   2.75589e-01
+ 302   9.72823e-04   5.04059e-02   8.78994e-03   2.05321e-03   2.44843e-01
+ 369   7.50534e-04   4.48658e-02   7.54398e-03   2.20685e-03   2.18839e-01
+ 465   6.70466e-04   4.02713e-02   6.83887e-03   1.29351e-03   1.96158e-01
+ 588   5.17474e-04   3.56962e-02   5.64312e-03   1.39818e-03   1.74217e-01
+ 749   4.11768e-04   3.15559e-02   4.42643e-03   8.25495e-04   1.54020e-01
+ 929   3.28443e-04   2.82149e-02   3.82570e-03   8.77107e-04   1.37934e-01
+1168   2.30965e-04   2.49959e-02   3.08206e-03   5.23927e-04   1.22227e-01
+1445   1.89195e-04   2.23441e-02   2.84711e-03   5.55331e-04   1.09242e-01
+1794   1.68266e-04   2.00774e-02   2.55510e-03   3.30009e-04   9.82042e-02
+2226   1.38257e-04   1.80039e-02   2.21893e-03   3.48764e-04   8.80866e-02
+
+Table: CPU time
+ #Dof   Assemble     Solve      Error      Mesh    
+  21   1.84e-03   3.49e-05   1.03e-03   1.06e-03
+  22   1.64e-03   3.85e-05   9.78e-04   1.08e-03
+  24   2.32e-03   6.53e-05   9.10e-04   7.03e-04
+  26   2.58e-03   7.15e-05   6.82e-04   1.15e-03
+  29   1.69e-03   8.08e-05   7.90e-04   9.39e-04
+  33   1.92e-03   1.05e-04   9.22e-04   6.76e-04
+  40   3.81e-03   1.51e-04   1.31e-03   1.06e-03
+  52   1.56e-03   8.88e-05   1.06e-03   7.65e-04
+  62   1.75e-03   9.55e-05   8.96e-04   1.11e-03
+  79   2.42e-03   3.10e-04   1.33e-03   8.48e-04
+  97   1.77e-03   1.47e-04   1.19e-03   1.36e-03
+ 123   3.10e-03   2.33e-04   1.96e-03   1.24e-03
+ 155   2.91e-03   3.57e-04   1.71e-03   1.14e-03
+ 197   3.28e-03   3.56e-04   2.68e-03   1.68e-03
+ 241   3.78e-03   2.92e-04   2.56e-03   1.53e-03
+ 302   2.90e-03   3.04e-04   2.84e-03   1.71e-03
+ 369   2.87e-03   4.88e-04   4.08e-03   2.49e-03
+ 465   3.57e-03   5.37e-04   2.83e-03   1.87e-03
+ 588   4.14e-03   8.30e-04   4.61e-03   1.85e-03
+ 749   4.17e-03   1.22e-03   4.87e-03   2.95e-03
+ 929   5.58e-03   1.09e-03   6.18e-03   2.81e-03
+1168   4.75e-03   1.79e-03   6.85e-03   4.01e-03
+1445   5.73e-03   2.10e-03   8.15e-03   4.75e-03
+1794   8.45e-03   2.58e-03   1.51e-02   5.13e-03
+2226   9.18e-03   3.36e-02   9.01e-03   0.00e+00
+
+</pre><img vspace="5" hspace="5" src="Poissonafemrate_01.png" alt=""> <img vspace="5" hspace="5" src="Poissonafemrate_02.png" alt=""> <img vspace="5" hspace="5" src="Poissonafemrate_03.png" alt=""> <h2>Kellogg problem<a name="2"></a></h2><pre class="codeinput">[node,elem] = squaremesh([-1 1 -1 1], 0.5);
+bdFlag = setboundary(node,elem,<span class="string">'Dirichlet'</span>);
+pde = Kelloggdata;
+option.L0 = 1;
+option.maxIt = 100;
+option.maxN = 1e4;
+option.theta = 0.2;
+option.plotflag = 1;
+err = afemPoisson(node,elem,pde,bdFlag,option);
+figure;
+showrate2(err.N,err.H1,20,<span class="string">'k-*'</span>,<span class="string">'||Du-Du_h||'</span>,err.N,err.eta,40,<span class="string">'-+'</span>,<span class="string">'eta'</span>);
+<span class="comment">% latexerrtable(err.N,[err.H1 err.eta])</span>
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2152,  #nnz:    12460, smoothing: (1,1), iter:  8,   err = 8.59e-09,   time = 0.057 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2261,  #nnz:    13103, smoothing: (1,1), iter:  8,   err = 9.56e-09,   time = 0.053 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2423,  #nnz:    13995, smoothing: (1,1), iter:  8,   err = 9.15e-09,   time = 0.047 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2545,  #nnz:    14685, smoothing: (1,1), iter:  9,   err = 1.96e-10,   time = 0.053 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2740,  #nnz:    15760, smoothing: (1,1), iter:  9,   err = 2.17e-10,   time = 0.05 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     2890,  #nnz:    16574, smoothing: (1,1), iter:  9,   err = 2.49e-10,   time = 0.053 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3113,  #nnz:    17745, smoothing: (1,1), iter:  9,   err = 2.55e-10,   time = 0.06 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3273,  #nnz:    18629, smoothing: (1,1), iter:  9,   err = 2.61e-10,   time = 0.061 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3535,  #nnz:    20039, smoothing: (1,1), iter:  9,   err = 2.98e-10,   time = 0.055 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3716,  #nnz:    21022, smoothing: (1,1), iter:  9,   err = 2.78e-10,   time = 0.064 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     3999,  #nnz:    22567, smoothing: (1,1), iter:  9,   err = 2.89e-10,   time = 0.06 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4212,  #nnz:    23696, smoothing: (1,1), iter:  9,   err = 3.05e-10,   time = 0.061 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4535,  #nnz:    25475, smoothing: (1,1), iter:  9,   err = 3.26e-10,   time = 0.064 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4776,  #nnz:    26768, smoothing: (1,1), iter:  9,   err = 3.56e-10,   time = 0.068 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     5139,  #nnz:    28759, smoothing: (1,1), iter:  9,   err = 3.56e-10,   time = 0.071 s
+Table: Error
+ #Dof    ||u-u_h||    ||Du-Du_h||   ||DuI-Du_h|| ||uI-u_h||_{max}     eta      
+  81   2.05717e-02   7.77013e-01   7.29456e-01   2.82117e-02   2.40722e+01
+  82   1.90198e-02   7.45913e-01   7.34183e-01   3.19077e-02   2.18488e+01
+  83   1.75961e-02   7.16776e-01   7.35747e-01   2.98826e-02   1.97869e+01
+  87   1.65842e-02   6.95384e-01   7.35735e-01   3.26346e-02   2.03921e+01
+  88   1.55445e-02   6.70211e-01   7.35316e-01   3.52681e-02   1.86816e+01
+  90   1.45563e-02   6.48464e-01   7.30946e-01   3.32454e-02   1.92407e+01
+  91   1.36760e-02   6.25986e-01   7.26686e-01   3.13735e-02   1.77337e+01
+  95   1.29599e-02   6.10062e-01   7.22305e-01   3.32965e-02   1.81959e+01
+  96   1.22631e-02   5.90040e-01   7.17960e-01   3.51904e-02   1.68790e+01
+  98   1.16098e-02   5.72808e-01   7.10734e-01   3.33345e-02   1.73101e+01
+  99   1.10093e-02   5.54674e-01   7.03832e-01   3.16143e-02   1.61310e+01
+ 103   1.04806e-02   5.42597e-01   6.97231e-01   3.29812e-02   1.65121e+01
+ 104   9.97906e-03   5.26191e-01   6.90942e-01   3.43892e-02   1.54556e+01
+ 106   9.50813e-03   5.12270e-01   6.82298e-01   3.27014e-02   1.58123e+01
+ 107   9.06953e-03   4.97260e-01   6.74141e-01   3.11268e-02   1.48549e+01
+ 112   8.50899e-03   4.83159e-01   6.61335e-01   3.14856e-02   1.52231e+01
+ 113   8.14119e-03   4.69689e-01   6.53758e-01   3.25406e-02   1.43702e+01
+ 116   7.79591e-03   4.59961e-01   6.45425e-01   3.32132e-02   1.46508e+01
+ 117   7.47036e-03   4.47575e-01   6.36424e-01   3.17037e-02   1.38699e+01
+ 120   7.16686e-03   4.38894e-01   6.27969e-01   3.03564e-02   1.41274e+01
+ 121   6.88171e-03   4.27445e-01   6.20044e-01   3.11733e-02   1.34124e+01
+ 124   6.61243e-03   4.19495e-01   6.11499e-01   3.16526e-02   1.36521e+01
+ 125   6.35797e-03   4.08914e-01   6.02409e-01   3.02791e-02   1.29930e+01
+ 129   5.98478e-03   3.96643e-01   5.90076e-01   2.83152e-02   1.33736e+01
+ 130   5.76691e-03   3.87018e-01   5.81818e-01   2.89458e-02   1.27789e+01
+ 131   5.56033e-03   3.77714e-01   5.73076e-01   2.77378e-02   1.22080e+01
+ 137   5.18110e-03   3.65953e-01   5.56247e-01   2.69730e-02   1.25764e+01
+ 138   5.00685e-03   3.57605e-01   5.48156e-01   2.74738e-02   1.20655e+01
+ 139   4.84126e-03   3.49526e-01   5.39648e-01   2.63648e-02   1.15744e+01
+ 145   4.53628e-03   3.39702e-01   5.23320e-01   2.55890e-02   1.18914e+01
+ 146   4.39579e-03   3.32420e-01   5.15492e-01   2.59906e-02   1.14492e+01
+ 147   4.26208e-03   3.25364e-01   5.07299e-01   2.49707e-02   1.10237e+01
+ 171   3.96690e-03   3.12689e-01   4.93371e-01   2.49364e-02   1.08392e+01
+ 172   3.85402e-03   3.06291e-01   4.85845e-01   2.52320e-02   1.04457e+01
+ 173   3.74736e-03   3.00146e-01   4.77958e-01   2.42902e-02   1.00775e+01
+ 181   3.54600e-03   2.93003e-01   4.63012e-01   2.35857e-02   1.03133e+01
+ 182   3.45433e-03   2.87376e-01   4.55837e-01   2.38227e-02   9.96904e+00
+ 185   3.33332e-03   2.81564e-01   4.44515e-01   2.34993e-02   9.67728e+00
+ 212   3.08922e-03   2.66307e-01   4.28965e-01   2.31689e-02   9.13497e+00
+ 215   2.99262e-03   2.61326e-01   4.18204e-01   2.28231e-02   8.88361e+00
+ 224   2.82629e-03   2.51859e-01   4.01947e-01   2.18789e-02   8.75815e+00
+ 229   2.71692e-03   2.46571e-01   3.88876e-01   2.11378e-02   8.61669e+00
+ 232   2.61794e-03   2.39780e-01   3.76201e-01   2.05424e-02   8.47683e+00
+ 241   2.52422e-03   2.34724e-01   3.64100e-01   1.99446e-02   8.29979e+00
+ 272   2.40863e-03   2.23822e-01   3.53587e-01   1.87613e-02   7.68643e+00
+ 279   2.33615e-03   2.19707e-01   3.42051e-01   1.81507e-02   7.55760e+00
+ 284   2.27090e-03   2.14306e-01   3.30862e-01   1.75953e-02   7.43689e+00
+ 301   2.20405e-03   2.09704e-01   3.20451e-01   1.72192e-02   7.22859e+00
+ 338   2.12010e-03   1.99557e-01   3.11405e-01   1.60355e-02   6.65178e+00
+ 345   2.07445e-03   1.96562e-01   3.01166e-01   1.54798e-02   6.56010e+00
+ 352   2.03252e-03   1.92306e-01   2.91301e-01   1.49712e-02   6.46329e+00
+ 363   1.99351e-03   1.89379e-01   2.81856e-01   1.45174e-02   6.34809e+00
+ 370   1.95954e-03   1.85625e-01   2.72623e-01   1.40504e-02   6.25850e+00
+ 380   1.92873e-03   1.83206e-01   2.63704e-01   1.35765e-02   6.16947e+00
+ 388   1.90103e-03   1.79874e-01   2.55071e-01   1.31644e-02   6.08615e+00
+ 398   1.87530e-03   1.77554e-01   2.46723e-01   1.27196e-02   5.98189e+00
+ 407   1.85014e-03   1.74191e-01   2.38643e-01   1.23379e-02   5.85672e+00
+ 420   1.82690e-03   1.71876e-01   2.30852e-01   1.18850e-02   5.72307e+00
+ 438   1.69493e-03   1.68086e-01   2.23415e-01   1.15060e-02   5.56213e+00
+ 461   1.43332e-03   1.64178e-01   2.16102e-01   1.11103e-02   5.39335e+00
+ 495   1.20504e-03   1.56122e-01   2.09007e-01   1.07586e-02   5.20100e+00
+ 531   1.14489e-03   1.49849e-01   2.01942e-01   1.03854e-02   5.02676e+00
+ 570   1.11362e-03   1.42585e-01   1.95130e-01   1.00691e-02   4.85438e+00
+ 609   1.09689e-03   1.37967e-01   1.88564e-01   9.70291e-03   4.69024e+00
+ 627   1.09449e-03   1.35342e-01   1.82378e-01   9.41657e-03   4.56365e+00
+ 685   1.07491e-03   1.29033e-01   1.76075e-01   9.06853e-03   4.37892e+00
+ 722   1.06431e-03   1.24822e-01   1.70123e-01   8.79021e-03   4.24471e+00
+ 763   1.05538e-03   1.21584e-01   1.64361e-01   8.47396e-03   4.12053e+00
+ 801   1.04813e-03   1.18006e-01   1.58790e-01   8.20972e-03   4.00508e+00
+ 845   1.04330e-03   1.15298e-01   1.53412e-01   7.91339e-03   3.89939e+00
+ 888   1.03896e-03   1.12216e-01   1.48213e-01   7.66196e-03   3.79687e+00
+ 937   1.03555e-03   1.09807e-01   1.43201e-01   7.38040e-03   3.69111e+00
+ 988   1.03341e-03   1.07016e-01   1.38360e-01   7.15340e-03   3.58189e+00
+1049   1.03055e-03   1.04815e-01   1.33698e-01   6.89026e-03   3.46685e+00
+1110   1.03032e-03   1.02266e-01   1.29202e-01   6.68186e-03   3.35337e+00
+1170   1.02831e-03   1.00471e-01   1.24841e-01   6.43236e-03   3.26398e+00
+1234   1.02720e-03   9.83042e-02   1.20637e-01   6.23273e-03   3.16773e+00
+1311   8.62353e-04   9.58742e-02   1.16547e-01   6.00391e-03   3.06247e+00
+1432   8.15100e-04   9.32034e-02   1.12017e-01   5.79759e-03   2.98078e+00
+1545   7.98662e-04   9.01703e-02   1.05859e-01   5.39371e-03   2.91769e+00
+1604   7.96445e-04   8.89533e-02   1.02326e-01   5.23550e-03   2.79569e+00
+1716   7.90619e-04   8.69231e-02   9.89515e-02   5.04188e-03   2.73284e+00
+1792   7.87869e-04   8.53730e-02   9.55949e-02   4.89263e-03   2.61614e+00
+1916   7.85886e-04   8.35899e-02   9.24125e-02   4.70956e-03   2.55759e+00
+2000   7.84069e-04   8.22681e-02   8.92748e-02   4.56373e-03   2.45204e+00
+2152   7.82638e-04   8.06707e-02   8.63221e-02   4.40041e-03   2.39217e+00
+2261   7.81372e-04   7.94929e-02   8.34274e-02   4.26666e-03   2.28962e+00
+2423   7.80088e-04   7.81187e-02   8.06456e-02   4.11145e-03   2.23570e+00
+2545   7.30636e-04   7.68136e-02   7.78967e-02   3.98503e-03   2.14048e+00
+2740   7.23467e-04   7.51457e-02   7.53526e-02   3.83996e-03   2.09486e+00
+2890   7.26754e-04   7.37145e-02   7.28664e-02   3.72277e-03   1.99745e+00
+3113   7.28318e-04   7.22714e-02   7.05042e-02   3.58720e-03   1.95355e+00
+3273   7.27173e-04   7.11110e-02   6.81612e-02   3.47620e-03   1.86822e+00
+3535   7.26113e-04   6.97837e-02   6.59232e-02   3.34928e-03   1.82580e+00
+3716   7.24922e-04   6.87822e-02   6.37412e-02   3.24645e-03   1.74312e+00
+3999   7.24109e-04   6.77555e-02   6.16780e-02   3.12752e-03   1.70517e+00
+4212   7.23776e-04   6.67945e-02   5.96356e-02   3.03180e-03   1.62818e+00
+4535   6.03614e-04   6.48576e-02   5.76494e-02   2.92021e-03   1.59364e+00
+4776   5.73335e-04   6.31541e-02   5.56833e-02   2.82953e-03   1.52189e+00
+5139   5.65893e-04   6.14961e-02   5.38349e-02   2.72625e-03   1.48828e+00
+
+Table: CPU time
+ #Dof   Assemble     Solve      Error      Mesh    
+  81   1.79e-02   3.02e-04   1.95e-02   2.22e-03
+  82   6.22e-03   3.33e-04   5.30e-03   1.97e-03
+  83   3.21e-03   1.78e-04   2.39e-03   1.19e-03
+  87   3.17e-03   2.39e-04   2.69e-03   3.36e-03
+  88   2.67e-03   3.60e-04   2.59e-03   1.11e-03
+  90   2.49e-03   2.64e-04   2.78e-03   1.65e-03
+  91   2.68e-03   2.37e-04   2.27e-03   1.44e-03
+  95   2.44e-03   2.10e-04   2.09e-03   1.75e-03
+  96   2.51e-03   2.09e-04   2.23e-03   8.83e-04
+  98   1.92e-03   1.87e-04   2.99e-03   1.35e-03
+  99   2.09e-03   1.99e-04   2.17e-03   7.75e-04
+ 103   1.48e-03   1.58e-04   2.30e-03   1.46e-03
+ 104   2.11e-03   2.29e-04   2.31e-03   7.35e-04
+ 106   2.67e-03   3.04e-04   2.59e-03   1.34e-03
+ 107   2.62e-03   1.82e-04   2.46e-03   1.01e-03
+ 112   1.64e-03   2.26e-04   2.81e-03   1.50e-03
+ 113   1.81e-03   1.90e-04   2.58e-03   1.20e-03
+ 116   2.50e-03   3.25e-04   2.51e-03   1.63e-03
+ 117   2.39e-03   1.97e-04   2.87e-03   1.54e-03
+ 120   2.02e-03   1.90e-04   2.42e-03   1.30e-03
+ 121   1.84e-03   2.06e-04   2.55e-03   1.18e-03
+ 124   1.46e-03   1.48e-04   2.82e-03   1.25e-03
+ 125   2.78e-03   3.06e-04   2.84e-03   1.34e-03
+ 129   1.86e-03   1.95e-04   2.42e-03   7.47e-03
+ 130   1.62e-03   1.57e-04   3.78e-03   1.74e-03
+ 131   2.83e-03   1.77e-04   3.02e-03   2.06e-03
+ 137   2.32e-03   2.08e-04   2.89e-03   1.98e-03
+ 138   2.28e-03   2.19e-04   2.78e-03   1.94e-03
+ 139   1.69e-03   1.71e-04   2.78e-03   1.36e-03
+ 145   2.15e-03   2.46e-04   2.51e-03   1.37e-03
+ 146   1.47e-03   1.62e-04   2.72e-03   1.77e-03
+ 147   2.26e-03   3.04e-04   3.55e-03   3.30e-03
+ 171   1.61e-03   2.79e-04   2.58e-03   2.10e-03
+ 172   2.08e-03   4.73e-04   3.78e-03   1.39e-03
+ 173   1.59e-03   3.41e-04   3.69e-03   9.36e-04
+ 181   1.89e-03   2.97e-04   3.45e-03   1.88e-03
+ 182   1.82e-03   2.84e-04   3.66e-03   1.45e-03
+ 185   1.55e-03   2.33e-04   2.70e-03   1.50e-03
+ 212   2.74e-03   4.24e-04   3.65e-03   1.63e-03
+ 215   2.33e-03   3.51e-04   4.90e-03   1.22e-03
+ 224   3.07e-03   3.18e-04   4.02e-03   1.92e-03
+ 229   2.33e-03   4.15e-04   3.75e-03   1.45e-03
+ 232   2.47e-03   3.95e-04   3.88e-03   1.44e-03
+ 241   2.73e-03   5.79e-04   4.23e-03   2.11e-03
+ 272   2.48e-03   4.89e-04   4.18e-03   1.78e-03
+ 279   2.63e-03   4.20e-04   3.94e-03   2.26e-03
+ 284   2.46e-03   5.89e-04   3.82e-03   1.66e-03
+ 301   3.04e-03   7.55e-04   4.37e-03   1.36e-03
+ 338   1.92e-03   4.81e-04   4.75e-03   1.63e-03
+ 345   2.10e-03   5.46e-04   5.04e-03   1.27e-03
+ 352   2.15e-03   4.09e-04   5.23e-03   1.56e-03
+ 363   2.17e-03   4.70e-04   5.48e-03   1.41e-03
+ 370   2.11e-03   4.96e-04   5.47e-03   2.04e-03
+ 380   2.52e-03   5.50e-04   5.03e-03   1.95e-03
+ 388   2.79e-03   4.83e-04   6.27e-03   1.34e-03
+ 398   2.06e-03   4.63e-04   5.72e-03   2.10e-03
+ 407   2.42e-03   4.88e-04   4.62e-03   2.38e-03
+ 420   3.64e-03   6.13e-04   5.23e-03   1.54e-03
+ 438   2.10e-03   6.83e-04   6.43e-03   2.19e-03
+ 461   2.47e-03   8.53e-04   5.05e-03   2.07e-03
+ 495   2.82e-03   9.94e-04   7.10e-03   1.66e-03
+ 531   2.55e-03   9.10e-04   5.40e-03   1.81e-03
+ 570   2.89e-03   1.06e-03   6.11e-03   1.71e-03
+ 609   2.86e-03   1.12e-03   7.23e-03   6.45e-03
+ 627   2.85e-03   8.10e-04   7.18e-03   3.16e-03
+ 685   4.10e-03   9.99e-04   1.01e-02   2.24e-03
+ 722   5.11e-03   8.54e-04   8.80e-03   2.33e-03
+ 763   4.50e-03   1.02e-03   9.50e-03   2.28e-03
+ 801   4.30e-03   1.18e-03   9.37e-03   2.84e-03
+ 845   3.86e-03   1.52e-03   9.58e-03   2.42e-03
+ 888   4.82e-03   1.10e-03   1.10e-02   2.59e-03
+ 937   3.64e-03   1.24e-03   1.04e-02   2.84e-03
+ 988   3.67e-03   1.67e-03   1.19e-02   2.85e-03
+1049   4.42e-03   1.69e-03   1.13e-02   2.92e-03
+1110   4.76e-03   1.50e-03   1.23e-02   3.87e-03
+1170   4.28e-03   1.60e-03   1.26e-02   3.56e-03
+1234   4.61e-03   1.76e-03   1.58e-02   4.83e-03
+1311   6.02e-03   1.78e-03   1.62e-02   3.96e-03
+1432   5.47e-03   2.09e-03   1.89e-02   4.40e-03
+1545   6.64e-03   2.20e-03   2.06e-02   4.42e-03
+1604   7.53e-03   2.95e-03   2.23e-02   5.42e-03
+1716   7.46e-03   3.13e-03   2.20e-02   4.67e-03
+1792   7.22e-03   2.68e-03   2.20e-02   4.95e-03
+1916   7.64e-03   3.36e-03   2.28e-02   5.15e-03
+2000   7.80e-03   5.04e-03   2.65e-02   4.71e-03
+2152   6.72e-03   5.72e-02   1.55e-02   4.72e-03
+2261   7.21e-03   5.34e-02   1.86e-02   5.88e-03
+2423   8.22e-03   4.70e-02   1.75e-02   4.80e-03
+2545   7.86e-03   5.34e-02   1.84e-02   4.91e-03
+2740   8.06e-03   5.01e-02   1.98e-02   4.88e-03
+2890   8.39e-03   5.26e-02   2.01e-02   5.16e-03
+3113   9.20e-03   6.03e-02   2.15e-02   5.44e-03
+3273   9.63e-03   6.12e-02   2.28e-02   6.39e-03
+3535   1.05e-02   5.52e-02   2.44e-02   6.32e-03
+3716   1.13e-02   6.36e-02   2.68e-02   6.41e-03
+3999   1.14e-02   6.03e-02   2.77e-02   7.11e-03
+4212   1.22e-02   6.09e-02   2.95e-02   7.37e-03
+4535   1.35e-02   6.39e-02   3.14e-02   8.33e-03
+4776   1.41e-02   6.84e-02   3.41e-02   8.64e-03
+5139   1.56e-02   7.14e-02   3.53e-02   0.00e+00
+
+</pre><img vspace="5" hspace="5" src="Poissonafemrate_04.png" alt=""> <img vspace="5" hspace="5" src="Poissonafemrate_05.png" alt=""> <img vspace="5" hspace="5" src="Poissonafemrate_06.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% RATE OF CONVERGENCE OF AFEM: P1 Linear Element for Poisson 
+%
+% This example is to show the rate of convergence of the lowest order
+% finite element approximation of the second order elliptic equation.
+%
+% # Lshape problem.
+% # Kellogg problem.
+
+%% Lshape problem
+[node,elem] = squaremesh([-1,1,-1,1],1);
+[node,elem] = delmesh(node,elem,'x>0 & y<0');
+bdFlag = setboundary(node,elem,'Dirichlet');
+pde = Lshapedata;
+format shorte
+option.L0 = 1;
+option.maxIt = 25;
+option.printlevel = 1;
+option.plotflag = 1;
+err = afemPoisson(node,elem,pde,bdFlag,option);
+figure;
+showrate2(err.N,err.H1,10,'k-*','||Du-Du_h||',err.N,err.eta,10,'-+','eta');
+
+%% Kellogg problem
+[node,elem] = squaremesh([-1 1 -1 1], 0.5);
+bdFlag = setboundary(node,elem,'Dirichlet');
+pde = Kelloggdata;
+option.L0 = 1;
+option.maxIt = 100;
+option.maxN = 1e4;
+option.theta = 0.2;
+option.plotflag = 1;
+err = afemPoisson(node,elem,pde,bdFlag,option);
+figure;
+showrate2(err.N,err.H1,20,'k-*','||Du-Du_h||',err.N,err.eta,40,'-+','eta');
+% latexerrtable(err.N,[err.H1 err.eta])
+##### SOURCE END #####
+--></body></html>

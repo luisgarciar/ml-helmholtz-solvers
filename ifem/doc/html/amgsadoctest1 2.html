@@ -1,0 +1,241 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>AMG TEST I: DIFFERENT MESHES</title><meta name="generator" content="MATLAB 7.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-03-07"><meta name="DC.source" content="amgsadoctest1.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>AMG TEST I: DIFFERENT MESHES</h1><!--introduction--><p>We consider linear finite element discretization of the Poisson equation with homongenous Dirichlet boundary condition on different meshes.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Uniform mesh</a></li><li><a href="#5">Circle mesh</a></li><li><a href="#8">Unstructured mesh</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>;
+option.coarsen = <span class="string">'a'</span>;
+option.interpolation = <span class="string">'sa'</span>;
+</pre><h2>Uniform mesh<a name="2"></a></h2><pre class="codeinput">[node,elem] = squaremesh([0,1,0,1],0.1);
+[node,elem] = uniformrefine(node,elem);
+[node,elem] = uniformrefine(node,elem);
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err,errHist] = amgtest(node,elem,[],option);
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_01.png" alt=""> <pre class="codeoutput">Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 4.90,   level:  2,   coarse grid 215,   nnz/Nc 17.53
+#dof:    1521,    iter:  9,   err = 7.2886e-09,   time = 0.0964 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 4.95,   level:  3,   coarse grid 50,   nnz/Nc 16.72
+#dof:    6241,    iter: 12,   err = 5.3129e-09,   time = 0.133 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 4.97,   level:  4,   coarse grid  8,   nnz/Nc 7.25
+#dof:   25281,    iter: 13,   err = 1.7045e-09,   time = 0.556 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 4.99,   level:  5,   coarse grid  7,   nnz/Nc 3.29
+#dof:  101761,    iter: 14,   err = 1.7500e-09,   time = 2.71 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 4.99,   level:  5,   coarse grid 18,   nnz/Nc 7.44
+#dof:  408321,    iter: 15,   err = 4.5314e-09,   time = 13.5 s
+ 
+</pre><pre class="codeinput">colname = {<span class="string">'Size'</span>,<span class="string">'Step'</span>,<span class="string">'Time'</span>,<span class="string">'Error'</span>};
+disptable(colname, N,[],itStep,[],time,<span class="string">'%4.2f'</span>,err,<span class="string">'%0.5e'</span>);
+</pre><pre class="codeoutput"> Size   Step   Time      Error     
+  1521    9    0.10   7.28858e-09
+  6241   12    0.13   5.31291e-09
+ 25281   13    0.56   1.70448e-09
+101761   14    2.71   1.74999e-09
+408321   15   13.53   4.53145e-09
+
+</pre><pre class="codeinput">r = showrate(N,time,2);
+xlabel(<span class="string">'N'</span>); ylabel(<span class="string">'Time'</span>);
+title([<span class="string">'Complexity is N^{'</span> num2str(r) <span class="string">'}'</span>] ,<span class="string">'Fontsize'</span>, 14);
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_02.png" alt=""> <h2>Circle mesh<a name="5"></a></h2><pre class="codeinput">close <span class="string">all</span>;
+[node,elem] = circlemesh(0,0,1,0.2);
+[node,elem] = uniformrefine(node,elem);
+[node,elem] = uniformrefine(node,elem);
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err] = amgtest(node,elem,[],option);
+</pre><pre class="codeoutput"> - Min quality 0.7571 - Mean quality 0.9696 - Uniformity 4.34% 
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_03.png" alt=""> <pre class="codeoutput">Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.78,   level:  2,   coarse grid 115,   nnz/Nc 16.95
+#dof:    1083,    iter: 10,   err = 2.7182e-09,   time = 0.0348 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.89,   level:  3,   coarse grid 12,   nnz/Nc 8.83
+#dof:    4453,    iter: 13,   err = 4.9849e-09,   time = 0.0823 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.95,   level:  4,   coarse grid  4,   nnz/Nc 4.00
+#dof:   18057,    iter: 13,   err = 3.4994e-09,   time = 0.427 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.97,   level:  4,   coarse grid 20,   nnz/Nc 12.10
+#dof:   72721,    iter: 15,   err = 9.2974e-09,   time = 2.26 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.99,   level:  5,   coarse grid 26,   nnz/Nc 12.38
+#dof:  291873,    iter: 15,   err = 7.5443e-09,   time = 9.42 s
+ 
+</pre><pre class="codeinput">colname = {<span class="string">'Size'</span>,<span class="string">'Step'</span>,<span class="string">'Time'</span>,<span class="string">'Error'</span>};
+disptable(colname, N,[],itStep,[],time,<span class="string">'%4.2f'</span>,err,<span class="string">'%0.5e'</span>);
+</pre><pre class="codeoutput"> Size   Step  Time      Error     
+  1083   10   0.03   2.71822e-09
+  4453   13   0.08   4.98492e-09
+ 18057   13   0.43   3.49937e-09
+ 72721   15   2.26   9.29743e-09
+291873   15   9.42   7.54432e-09
+
+</pre><pre class="codeinput">r = showrate(N,time,2);
+xlabel(<span class="string">'N'</span>); ylabel(<span class="string">'Time'</span>);
+title([<span class="string">'Complexity is N^{'</span> num2str(r) <span class="string">'}'</span>] ,<span class="string">'Fontsize'</span>, 14);
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_04.png" alt=""> <h2>Unstructured mesh<a name="8"></a></h2><pre class="codeinput">close <span class="string">all</span>;
+load <span class="string">lakemesh</span>
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err] = amgtest(node,elem,[],option);
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_05.png" alt=""> <pre class="codeoutput">Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.08,   level:  2,   coarse grid 192,   nnz/Nc 13.41
+#dof:    1770,    iter: 10,   err = 3.3536e-09,   time = 0.0483 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.59,   level:  3,   coarse grid 96,   nnz/Nc 15.98
+#dof:    7876,    iter: 11,   err = 2.9552e-09,   time = 0.155 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.81,   level:  4,   coarse grid 63,   nnz/Nc 7.44
+#dof:   33081,    iter: 13,   err = 1.7819e-09,   time = 0.791 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.91,   level:  5,   coarse grid 102,   nnz/Nc 9.76
+#dof:  135463,    iter: 14,   err = 2.0720e-09,   time = 4.05 s
+ 
+Algebraic Multigrid W-cycle Preconditioner with Conjugate Gradient Method
+  nnz/N: 6.95,   level:  6,   coarse grid 166,   nnz/Nc 11.59
+#dof:  548115,    iter: 15,   err = 3.0009e-09,   time = 19.7 s
+ 
+</pre><pre class="codeinput">colname = {<span class="string">'Size'</span>,<span class="string">'Step'</span>,<span class="string">'Time'</span>,<span class="string">'Error'</span>};
+disptable(colname, N,[],itStep,[],time,<span class="string">'%4.2f'</span>,err,<span class="string">'%0.5e'</span>);
+</pre><pre class="codeoutput"> Size   Step   Time      Error     
+  1770   10    0.05   3.35360e-09
+  7876   11    0.15   2.95518e-09
+ 33081   13    0.79   1.78190e-09
+135463   14    4.05   2.07201e-09
+548115   15   19.72   3.00091e-09
+
+</pre><pre class="codeinput">r = showrate(N,time,2);
+xlabel(<span class="string">'N'</span>); ylabel(<span class="string">'Time'</span>);
+title([<span class="string">'Complexity is N^{'</span> num2str(r) <span class="string">'}'</span>],<span class="string">'Fontsize'</span>, 14);
+</pre><img vspace="5" hspace="5" src="amgsadoctest1_06.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.12<br></p></div><!--
+##### SOURCE BEGIN #####
+%% AMG TEST I: DIFFERENT MESHES
+% 
+% We consider linear finite element discretization of the Poisson equation
+% with homongenous Dirichlet boundary condition on different meshes. 
+
+%%
+clear all; close all;
+option.coarsen = 'a';
+option.interpolation = 'sa';
+
+%% Uniform mesh
+[node,elem] = squaremesh([0,1,0,1],0.1);
+[node,elem] = uniformrefine(node,elem);
+[node,elem] = uniformrefine(node,elem);
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err,errHist] = amgtest(node,elem,[],option);
+%% 
+colname = {'Size','Step','Time','Error'}; 
+disptable(colname, N,[],itStep,[],time,'%4.2f',err,'%0.5e');
+%%
+r = showrate(N,time,2);
+xlabel('N'); ylabel('Time');
+title(['Complexity is N^{' num2str(r) '}'] ,'Fontsize', 14);
+
+%% Circle mesh
+close all;
+[node,elem] = circlemesh(0,0,1,0.2);
+[node,elem] = uniformrefine(node,elem);
+[node,elem] = uniformrefine(node,elem);
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err] = amgtest(node,elem,[],option);
+%% 
+colname = {'Size','Step','Time','Error'}; 
+disptable(colname, N,[],itStep,[],time,'%4.2f',err,'%0.5e');
+%%
+r = showrate(N,time,2);
+xlabel('N'); ylabel('Time');
+title(['Complexity is N^{' num2str(r) '}'] ,'Fontsize', 14);
+
+%% Unstructured mesh
+close all;
+load lakemesh
+showmesh(node,elem);
+snapnow;
+[N,itStep,time,err] = amgtest(node,elem,[],option);
+%% 
+colname = {'Size','Step','Time','Error'}; 
+disptable(colname, N,[],itStep,[],time,'%4.2f',err,'%0.5e');
+%%
+r = showrate(N,time,2);
+xlabel('N'); ylabel('Time');
+title(['Complexity is N^{' num2str(r) '}'],'Fontsize', 14);
+##### SOURCE END #####
+--></body></html>

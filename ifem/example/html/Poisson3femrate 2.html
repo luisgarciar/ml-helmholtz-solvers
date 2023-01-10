@@ -1,0 +1,184 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RATE OF CONVERGENCE OF LINEAR ELEMENT FOR POISSON EQUATION</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-01-04"><meta name="DC.source" content="Poisson3femrate.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>RATE OF CONVERGENCE OF LINEAR ELEMENT FOR POISSON EQUATION</h1><!--introduction--><p>This example is to show the rate of convergence of linear finite element approximation of the Poisson equation on the unit square:</p><p><img src="Poisson3femrate_eq02169493830555044887.png" alt="$$- \Delta u = f \; \hbox{in } (0,1)^2$$"></p><p>for the following boundary condition:</p><div><ol><li>Non-empty Dirichlet boundary condition. <img src="Poisson3femrate_eq00615094833172967975.png" alt="$u=g_D \hbox{ on }\Gamma_D, \quad \nabla u\cdot n=g_N \hbox{ on }\Gamma_N.$"></li><li>Pure Neumann boundary condition. <img src="Poisson3femrate_eq05965973527204233417.png" alt="$\nabla u\cdot n=g_N \hbox{ on } \partial \Omega$">.</li><li>Robin boundary condition. <img src="Poisson3femrate_eq14985004923304284435.png" alt="$g_R u + \nabla u\cdot n=g_N \hbox{ on }\partial \Omega$"></li></ol></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Setting</a></li><li><a href="#2">Non-empty Dirichlet boundary condition.</a></li><li><a href="#3">Pure Neumann boundary condition.</a></li><li><a href="#4">Pure Robin boundary condition.</a></li><li><a href="#5">Conclusion</a></li></ul></div><h2>Setting<a name="1"></a></h2><pre class="codeinput">[node,elem] = cubemesh([0,1,0,1,0,1],0.5);
+pde = sincosdata3;
+option.L0 = 1;
+option.maxIt = 4;
+option.elemType = <span class="string">'P1'</span>;
+option.printlevel = 1;
+option.plotflag = 1;
+</pre><h2>Non-empty Dirichlet boundary condition.<a name="2"></a></h2><pre class="codeinput">bdFlag = setboundary3(node,elem,<span class="string">'Dirichlet'</span>,<span class="string">'~(x==0)'</span>,<span class="string">'Neumann'</span>,<span class="string">'x==0'</span>);
+<span class="comment">% bdFlag = setboundary3(node,elem,'Dirichlet');</span>
+femPoisson3(node,elem,pde,bdFlag,option);
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4913,  #nnz:    23790, smoothing: (1,1), iter: 11,   err = 3.72e-09,   time = 0.017 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:    35937,  #nnz:   209374, smoothing: (1,1), iter: 11,   err = 5.13e-09,   time = 0.11 s
+Table: Error
+ #Dof    ||u-u_h||    ||Du-Du_h||   ||DuI-Du_h|| ||uI-u_h||_{max}
+  125   6.46061e-02   9.23927e-01   1.17911e-01   6.04325e-02
+  729   1.86268e-02   4.80477e-01   3.91991e-02   1.95770e-02
+ 4913   4.86895e-03   2.42898e-01   1.06348e-02   5.17072e-03
+35937   1.23196e-03   1.21798e-01   2.72075e-03   1.31609e-03
+
+Table: CPU time
+ #Dof   Assemble     Solve      Error      Mesh    
+  125   3.02e-03   1.36e-04   1.68e-03   1.82e-03
+  729   1.44e-02   1.03e-03   6.74e-03   1.25e-02
+ 4913   1.52e-01   1.69e-02   3.83e-02   6.24e-02
+35937   1.07e+00   1.05e-01   4.91e-01   6.07e-01
+
+</pre><img vspace="5" hspace="5" src="Poisson3femrate_01.png" alt=""> <img vspace="5" hspace="5" src="Poisson3femrate_02.png" alt=""> <h2>Pure Neumann boundary condition.<a name="3"></a></h2><pre class="codeinput">bdFlag = setboundary3(node,elem,<span class="string">'Neumann'</span>);
+femPoisson3(node,elem,pde,bdFlag,option);
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4913,  #nnz:    32650, smoothing: (1,1), iter: 13,   err = 2.43e-09,   time = 0.023 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:    35937,  #nnz:   245018, smoothing: (1,1), iter: 14,   err = 4.76e-09,   time = 0.14 s
+Table: Error
+ #Dof    ||u-u_h||    ||Du-Du_h||   ||DuI-Du_h|| ||uI-u_h||_{max}
+  125   7.70680e-02   8.69504e-01   3.38890e-01   1.33687e-01
+  729   2.35461e-02   4.70688e-01   1.05354e-01   4.13393e-02
+ 4913   6.27721e-03   2.41377e-01   3.23192e-02   1.41357e-02
+35937   1.59840e-03   1.21576e-01   9.72436e-03   5.74640e-03
+
+Table: CPU time
+ #Dof   Assemble     Solve      Error      Mesh    
+  125   3.85e-03   3.02e-04   1.51e-03   2.45e-03
+  729   1.59e-02   2.63e-03   8.20e-03   1.13e-02
+ 4913   1.19e-01   2.34e-02   3.67e-02   5.64e-02
+35937   1.09e+00   1.43e-01   5.25e-01   5.96e-01
+
+</pre><img vspace="5" hspace="5" src="Poisson3femrate_03.png" alt=""> <img vspace="5" hspace="5" src="Poisson3femrate_04.png" alt=""> <h2>Pure Robin boundary condition.<a name="4"></a></h2><pre class="codeinput">pdeRobin = sincosRobindata3;
+bdFlag = setboundary3(node,elem,<span class="string">'Robin'</span>);
+femPoisson3(node,elem,pdeRobin,bdFlag,option);
+</pre><pre class="codeoutput">Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:     4913,  #nnz:    35729, smoothing: (1,1), iter: 11,   err = 2.75e-09,   time = 0.024 s
+Multigrid V-cycle Preconditioner with Conjugate Gradient Method
+#dof:    35937,  #nnz:   257313, smoothing: (1,1), iter: 11,   err = 8.49e-09,   time = 0.13 s
+Table: Error
+ #Dof    ||u-u_h||    ||Du-Du_h||   ||DuI-Du_h|| ||uI-u_h||_{max}
+  125   6.40633e-02   8.75746e-01   2.90399e-01   1.03297e-01
+  729   1.93507e-02   4.71714e-01   9.10331e-02   4.09455e-02
+ 4913   5.14258e-03   2.41519e-01   2.57055e-02   1.83236e-02
+35937   1.30834e-03   1.21594e-01   6.98457e-03   6.58871e-03
+
+Table: CPU time
+ #Dof   Assemble     Solve      Error      Mesh    
+  125   5.38e-03   2.74e-04   1.35e-03   4.41e-03
+  729   3.01e-02   3.61e-03   2.03e-02   7.46e-03
+ 4913   1.32e-01   2.45e-02   4.42e-02   6.84e-02
+35937   1.08e+00   1.32e-01   5.11e-01   6.07e-01
+
+</pre><img vspace="5" hspace="5" src="Poisson3femrate_05.png" alt=""> <img vspace="5" hspace="5" src="Poisson3femrate_06.png" alt=""> <h2>Conclusion<a name="5"></a></h2><p>The optimal rate of convergence of the H1-norm (1st order) and L2-norm (2nd order) is observed. The 2nd order convergent rate between two discrete functions <tt>|DuI-Duh</tt>| is known as superconvergence.</p><p>MGCG converges uniformly in all cases.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% RATE OF CONVERGENCE OF LINEAR ELEMENT FOR POISSON EQUATION
+%
+% This example is to show the rate of convergence of linear finite element
+% approximation of the Poisson equation on the unit square:
+%
+% $$- \Delta u = f \; \hbox{in } (0,1)^2$$
+%
+% for the following boundary condition:
+%
+% # Non-empty Dirichlet boundary condition. $u=g_D \hbox{ on }\Gamma_D, \quad \nabla u\cdot n=g_N \hbox{ on }\Gamma_N.$
+% # Pure Neumann boundary condition. $\nabla u\cdot n=g_N \hbox{ on } \partial \Omega$.
+% # Robin boundary condition. $g_R u + \nabla u\cdot n=g_N \hbox{ on }\partial \Omega$
+
+%% Setting
+[node,elem] = cubemesh([0,1,0,1,0,1],0.5); 
+pde = sincosdata3;
+option.L0 = 1;
+option.maxIt = 4;
+option.elemType = 'P1';
+option.printlevel = 1;
+option.plotflag = 1;
+
+%% Non-empty Dirichlet boundary condition.
+bdFlag = setboundary3(node,elem,'Dirichlet','~(x==0)','Neumann','x==0');
+% bdFlag = setboundary3(node,elem,'Dirichlet');
+femPoisson3(node,elem,pde,bdFlag,option);
+
+%% Pure Neumann boundary condition.
+bdFlag = setboundary3(node,elem,'Neumann');
+femPoisson3(node,elem,pde,bdFlag,option);
+
+%% Pure Robin boundary condition.
+pdeRobin = sincosRobindata3;
+bdFlag = setboundary3(node,elem,'Robin');
+femPoisson3(node,elem,pdeRobin,bdFlag,option);
+
+%% Conclusion
+%
+% The optimal rate of convergence of the H1-norm (1st order) and L2-norm
+% (2nd order) is observed. The 2nd order convergent rate between two
+% discrete functions ||DuI-Duh|| is known as superconvergence.
+%
+% MGCG converges uniformly in all cases.
+##### SOURCE END #####
+--></body></html>
