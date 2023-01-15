@@ -17,7 +17,7 @@ The folders `FD` and `FEM` contain the implementations of the solver for finite 
 
 [GR22] L. García Ramos, [Polynomial and multilevel preconditioners for the Helmholtz equation based on the shifted Laplacian](https://depositonce.tu-berlin.de/handle/11303/17048). PhD Thesis, Technische Universität Berlin, 2022.
 
-[GRN20 ]L. García Ramos and R. Nabben, [A two-level shifted Laplace preconditioner for Helmholtz problems: Field-of-values analysis and wavenumber-independent convergence](https://arxiv.org/abs/2006.08750). arXiv: 2006.08750.
+[GRN20 ] L. García Ramos and R. Nabben, [A two-level shifted Laplace preconditioner for Helmholtz problems: Field-of-values analysis and wavenumber-independent convergence](https://arxiv.org/abs/2006.08750). arXiv: 2006.08750.
 
 [EOV06] Y. A. Erlangga, CW Oosterlee, C Vuik
 [A novel multigrid based preconditioner for heterogeneous Helmholtz problems](https://epubs.siam.org/doi/10.1137/040615195). SIAM Journal on Scientific Computing 27 (4), 1471-1492.
