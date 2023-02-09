@@ -1,4 +1,4 @@
-﻿# Multilevel solvers for the Helmholtz equation
+﻿# Multilevel Solvers for the Helmholtz Equation
 
 This repository contains an implementation of the multilevel methods for the solution of linear systems resulting from the discretization of Helmholtz problems described in the paper [GRN20] and the PhD dissertation [GR22]. It is based on a custom version of the [iFEM](https://github.com/lyc102/ifem) library [C09], and also contains standalone implementations of the multigrid method and the shifted Laplace preconditioner [EOV06] for Helmholtz problems discretized with finite differences and finite elements. In addition to solving the problems presented in the paper and the dissertation, the code in the repository can be adapted to solve other Helmholtz problems in 2D.  
 
